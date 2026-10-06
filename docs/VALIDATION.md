@@ -38,3 +38,11 @@ The iMac tunnel supports HTTP translation tests but rejects shell execution thro
 The candidate now has exact local terminology for nine reviewed interface strings that previously produced ambiguous or misleading model output: Sign in, Resume generation, the Resume job-control button, Create a new post, Roll back changes, the payment failure notice, the character-limit pause notice, Character limit, and Translation job. `php tests/libretranslate_quality_gate.php` verifies 45 expected outputs (nine strings across five supported targets) through `MyUnaTranslatorLibreProvider::translate`. All use the terminology path; a transport stub confirms the test does not call LibreTranslate, and unreviewed text remains eligible for provider translation. PHP lint and `git diff --check` pass.
 
 This closes the known-string regression, not the broad model-quality gate. Direct raw-service requests from the server returned HTTP 400 because the local endpoint requires an API key; no new raw model output was reviewed in this run. The candidate still needs native UNA 0.1.9 install/update validation and wider human review before any stable release or provider-default certification.
+
+## 2026-10-06 public language-menu recovery
+
+The live footer language menu showed English only even though five non-English UNA localization records remained enabled. The custom menu hook depended on my_una_translator_languages, which is tied to translation jobs and can be deleted when those jobs are removed. The hook now reads enabled sys_localization_languages records directly, excludes English, and retains the native language-module visibility check.
+
+Validation: the enabled-language query returned de, es, fr, pt-br, and zh-cn; PHP syntax validation passed; the live My UNA World footer menu displayed English plus those five languages after deployment. This was a direct code deployment with a dated backup, not a native installer or updater test. Arabic is not an enabled UNA locale on the site and is not included in the public menu by this fix.
+
+The stable-release blockers recorded above remain: native 0.1.9 install/update validation and broader provider-quality review.

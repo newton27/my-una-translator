@@ -1,9 +1,9 @@
 {
   "module": "my_una_translator",
   "version": "0.1.9",
-  "source_commit": "6edc91e930ed231ff8be90fd68f797c7afdfc117",
+  "source_commit": "1ff643f6fd4af930e24bc5f2b0d52d4dc6d0f2b8",
   "base_source_commit": "698b9837935e31ce5c2fc961487d81e234c97fde",
   "base_archive_sha256": "2056a739a598c5799c00246572f76b5c00dae11910aee34b94f0ac736cce9542",
   "popup_source_commit": "7efad239f3df2bbb3f4a4f70238d039ae04f20bc",
-  "status": "optional-provider wording corrections; broader quality gate withheld; native 0.1.9 validation pending"
+  "status": "0.1.9 RC2 candidate includes the public language-menu recovery fix. PHP, language target, curated quality-gate, and Python unit checks pass. Stable release remains blocked pending native UNA install/update validation and broader LibreTranslate quality review."
 }
