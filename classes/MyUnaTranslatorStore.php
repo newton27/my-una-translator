@@ -67,6 +67,12 @@ final class MyUnaTranslatorStore
     }
     public function language($code) { return $this->row('SELECT * FROM sys_localization_languages WHERE Name=?', $code); }
     public function categories() { return $this->all('SELECT ID AS id,Name AS name FROM sys_localization_categories ORDER BY Name'); }
+    public function siteLanguages()
+    {
+        $rows=$this->all('SELECT Name AS code,Title AS native,Enabled AS enabled FROM sys_localization_languages ORDER BY ID');
+        foreach ($rows as &$row) $row['enabled']=(bool)$row['enabled'];
+        return $rows;
+    }
     public function sources($destinationId, $category)
     {
         return $this->all('SELECT k.ID AS key_id,k.`Key` AS key_name,e.String AS source,t.String AS before_value FROM sys_localization_keys k JOIN sys_localization_strings e ON e.IDKey=k.ID AND e.IDLanguage=? LEFT JOIN sys_localization_strings t ON t.IDKey=k.ID AND t.IDLanguage=? WHERE (?=0 OR k.IDCategory=?) ORDER BY k.ID', $this->englishId(),$destinationId,$category,$category);
@@ -116,7 +122,6 @@ final class MyUnaTranslatorStore
         $this->q('START TRANSACTION');
         try {
             $this->q('DELETE FROM my_una_translator_items WHERE job_id=?',$id);
-            $this->q('DELETE FROM my_una_translator_languages WHERE job_id=?',$id);
             $this->q('DELETE FROM my_una_translator_jobs WHERE id=?',$id);
             $this->q('COMMIT');
         } catch (Throwable $e) {

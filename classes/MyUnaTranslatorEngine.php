@@ -46,7 +46,7 @@ final class MyUnaTranslatorEngine
         $error='';
         try { $presets=$this->availablePresets(); }
         catch (RuntimeException $e) { $presets=[]; $error=$e->getMessage(); }
-        return ['settings'=>$this->store->publicSettings(),'languages'=>$this->store->coverage($presets),'language_error'=>$error,
+        return ['settings'=>$this->store->publicSettings(),'languages'=>$this->store->coverage($presets),'language_error'=>$error,'site_languages'=>$this->store->siteLanguages(),
             'categories'=>$this->store->categories(),'jobs'=>$this->store->jobs()];
     }
     public function dispatch($action,array $data)

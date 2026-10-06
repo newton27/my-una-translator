@@ -10,7 +10,7 @@
   const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const number = value => Number(value || 0).toLocaleString();
   let activeJob = null, busy = false, stopRequested = false, offset = 0, operation = '';
-  let notice = '', noticeError = false, requestStarted = 0, activity = '', seenJobError = '';
+  let notice = '', noticeError = false, requestStarted = 0, activity = '';
   let snapshot = cfg.snapshot;
   const dialog = find('mut-status-dialog');
   function showStatus() {
@@ -40,10 +40,11 @@
     find('mut-status-pause').disabled = stopRequested;
     find('mut-show-status').textContent = busy && operation ? label('show_progress') : label('show_status');
   }
-  const message = (text, error = false) => {
+  const message = (text, error = false, popup = error || Boolean(busy && operation)) => {
     const box = find('mut-message'); box.hidden = false; box.textContent = text;
     box.classList.toggle('mut-error', error);
-    notice = text; noticeError = error; showStatus();
+    notice = text; noticeError = error;
+    if (popup) showStatus(); else renderStatus();
   };
   async function request(action, data = {}) {
     const body = data instanceof FormData ? data : new FormData();
@@ -66,15 +67,34 @@
   function setButtons() {
     root.querySelectorAll('button, input, select').forEach(control => { if (!control.classList.contains('mut-status-control')) control.disabled = busy; });
     const action = name => root.querySelector('[data-mut-action="' + name + '"]');
+    const workflow=MyUnaTranslatorWorkflow(activeJob);
+    const generating=busy && operation==='batch';
+    action('batch').hidden=!workflow.generate && !generating;
+    action('resume').hidden=!workflow.resume || generating;
     root.querySelectorAll('[data-mut-action="pause"]').forEach(control => { control.disabled = !(busy && operation === 'batch') || stopRequested; });
+    root.querySelector('#mut-step-2 [data-mut-action="pause"]').hidden=!generating;
+    find('mut-preview-pages').hidden=!workflow.hasPreview;
+    find('mut-apply-hint').textContent=label(activeJob?.status==='applied'?'apply_done':workflow.apply?'next_review':'apply_wait');
+    find('mut-next-step').textContent=label(workflow.hint);
+    root.querySelectorAll('[data-mut-step-nav]').forEach(link=>{
+      const step=Number(link.dataset.mutStepNav);
+      link.classList.toggle('mut-current',step===workflow.step);
+      link.classList.toggle('mut-complete',step<workflow.step);
+      if(step===workflow.step)link.setAttribute('aria-current','step');else link.removeAttribute('aria-current');
+    });
+    const selected=Array.from(find('mut-targets').querySelectorAll('input:checked')).map(input=>snapshot.languages.find(l=>l.code===input.value)?.name || input.value);
+    find('mut-selection-note').textContent=selected.length?label('selected_languages')+': '+selected.join(', '):'';
+    find('mut-create').querySelector('button[type="submit"]').disabled=busy || selected.length<1 || selected.length>5 || Boolean(snapshot.language_error);
+    find('mut-targets').querySelectorAll('input:not(:checked)').forEach(input=>{input.disabled=busy || selected.length>=5;});
     if (busy) return;
     const state = activeJob?.status || '';
     const ready = snapshot.settings.provider_ready ?? snapshot.settings.has_key;
-    action('batch').disabled = !activeJob || !ready || !['planned','running'].includes(state);
-    action('resume').disabled = !activeJob || !ready || !['paused','planned','running'].includes(state);
+    action('batch').disabled = !ready || !workflow.generate;
+    action('resume').disabled = !ready || !workflow.resume;
     root.querySelectorAll('[data-mut-action="pause"]').forEach(control => { control.disabled = !activeJob || !['planned','running'].includes(state); });
-    action('apply').disabled = !activeJob || !['ready','applying','applied','apply_cache_error'].includes(state);
-    action('rollback').disabled = !activeJob || !['applied','apply_cache_error','rolling_back','rolled_back','rollback_cache_error'].includes(state);
+    action('apply').disabled = !workflow.apply;
+    action('rollback').disabled = !workflow.rollback;
+    find('mut-enable-languages').disabled=!workflow.apply;
     find('mut-prev').disabled = !activeJob || offset === 0;
     find('mut-next').disabled = !activeJob || offset + 50 >= Number(activeJob.total);
     renderStatus();
@@ -88,6 +108,10 @@
     languageError.textContent = snapshot.language_error || '';
     languageError.hidden = !snapshot.language_error;
     find('mut-coverage').innerHTML = snapshot.languages.map(l => '<tr><th>' + esc(l.native) + '<small>' + esc(l.name) + '</small></th><td>' + number(l.translated) + '</td><td>' + number(l.missing) + '</td><td>' + number(l.english_copies) + '</td><td><span class="mut-pill">' + esc(label(l.enabled ? 'active' : l.installed ? 'disabled' : 'not_created')) + '</span></td></tr>').join('');
+    find('mut-site-languages').innerHTML=(snapshot.site_languages || []).map(l=>{
+      const contents='<bdi>'+esc(l.native)+'</bdi><small>'+esc(label(l.enabled?'available_visitors':'unavailable_visitors'))+(l.code===cfg.default_language?' · '+esc(label('site_default')):'')+'</small>';
+      return l.enabled?'<a class="mut-site-language" href="'+esc(cfg.site_url+'?lang='+encodeURIComponent(l.code))+'">'+contents+'</a>':'<div class="mut-site-language mut-unavailable">'+contents+'</div>';
+    }).join('');
     const select = find('mut-job-select');
     const wanted = selected ?? select.value;
     const jobs = snapshot.jobs.slice();
@@ -104,7 +128,8 @@
     find('mut-resume-budget').value = job.budget;
     const estimate = number(job.estimated) + ' / ' + number(job.budget) + ' ' + label('characters');
     const details = [stateLabel(job.status), number(counts.staged) + ' ' + label('staged'), number(counts.applied) + ' ' + label('applied'), number(Number(counts.conflict || 0) + Number(counts.rollback_conflict || 0)) + ' ' + label('conflicts')];
-    find('mut-job-details').innerHTML = '<div class="mut-stat-row">' + details.map(d => '<span class="mut-pill">' + esc(d) + '</span>').join('') + '</div><p>' + esc(estimate) + '</p><p class="mut-note">' + esc(label('used_reserved')) + ': ' + number(job.spent) + '</p>' + (Number(job.estimated) > Number(job.budget) ? '<p class="mut-warning">' + esc(label('ceiling_warning')) + '</p>' : '') + (job.error ? '<p class="mut-warning">' + esc(job.error) + '</p>' : '');
+    const names=job.targets.map(code=>snapshot.languages.find(l=>l.code===code)?.name || snapshot.site_languages?.find(l=>l.code===code)?.native || code);
+    find('mut-job-details').innerHTML = '<p class="mut-job-targets">'+esc(label('job_languages'))+': <strong>'+esc(names.join(', '))+'</strong></p><div class="mut-stat-row">' + details.map(d => '<span class="mut-pill">' + esc(d) + '</span>').join('') + '</div><p>' + esc(estimate) + '</p><p class="mut-note">' + esc(label('used_reserved')) + ': ' + number(job.spent) + '</p>' + (Number(job.estimated) > Number(job.budget) ? '<p class="mut-warning">' + esc(label('ceiling_warning')) + '</p>' : '') + (job.error ? '<p class="mut-warning">' + esc(job.error) + '</p>' : '');
     if (['paused', 'applied','rolled_back','failed','empty_preview'].includes(String(job.status))) {
         const removeButton = document.createElement('button');
         removeButton.type = 'button';
@@ -119,15 +144,12 @@
     }
     setButtons();
     renderStatus();
-    const errorKey = job.error ? String(job.id) + ':' + job.error : '';
-    if (errorKey && errorKey !== seenJobError) { notice = ''; noticeError = false; showStatus(); }
-    seenJobError = errorKey;
   }
   async function preview() {
     if (!activeJob) return;
     const data = await request('preview', {job_id:activeJob.id, offset});
     renderJob(data.job);
-    find('mut-preview').innerHTML = data.items.length ? '<table class="mut-preview-table"><thead><tr><th>' + esc(label('key')) + '</th><th>' + esc(label('source')) + '</th><th>' + esc(label('translation')) + '</th></tr></thead><tbody>' + data.items.map(i => '<tr><td><strong>' + esc(i.key_name) + '</strong><small>' + esc(i.language) + ' · ' + esc(stateLabel(i.state)) + '</small>' + (i.error ? '<small class="mut-warning">' + esc(i.error) + '</small>' : '') + '</td><td><pre>' + esc(i.source) + '</pre></td><td><pre>' + esc(i.result ?? label('no_translation')) + '</pre></td></tr>').join('') + '</tbody></table>' : '<p class="mut-note">' + esc(label('empty_preview')) + '</p>';
+    find('mut-preview').innerHTML = data.items.some(i=>i.result!==null) ? '<table class="mut-preview-table"><thead><tr><th>' + esc(label('key')) + '</th><th>' + esc(label('source')) + '</th><th>' + esc(label('translation')) + '</th></tr></thead><tbody>' + data.items.map(i => '<tr><td><strong>' + esc(i.key_name) + '</strong><small>' + esc(i.language) + ' · ' + esc(stateLabel(i.state)) + '</small>' + (i.error ? '<small class="mut-warning">' + esc(i.error) + '</small>' : '') + '</td><td><pre>' + esc(i.source) + '</pre></td><td><pre>' + esc(i.result ?? label('no_translation')) + '</pre></td></tr>').join('') + '</tbody></table>' : '<p class="mut-note">' + esc(label('no_preview_yet')) + '</p>';
     find('mut-page-info').textContent = label('preview_page') + ' ' + (Math.floor(offset / 50) + 1);
     setButtons();
   }
@@ -165,11 +187,11 @@
   find('mut-create').addEventListener('submit', async event => {
     event.preventDefault(); if (busy) return;
     const body = new FormData(event.currentTarget);
-    if (body.getAll('targets[]').length < 1 || body.getAll('targets[]').length > 5) { message(label('target_hint'), true); return; }
+    if (body.getAll('targets[]').length < 1 || body.getAll('targets[]').length > 5) { message(label('target_hint'), true, false); return; }
     busy = true; setButtons();
     try { const data = await request('create', body); offset = 0; renderJob(data.job); snapshot = await request('snapshot'); renderSnapshot(data.job.id); await preview(); message(label('job_created')); }
     catch (error) { message(error.message,true); }
-    finally { busy = false; setButtons(); }
+    finally { busy = false; setButtons(); if(activeJob?.status==='planned')find('mut-generate').focus(); }
   });
   find('mut-job-lookup').addEventListener('submit', async event => {
     event.preventDefault(); if (busy) return;
@@ -226,10 +248,11 @@
   function filterLanguages() {
     const search = find('mut-language-search').value.trim().toLocaleLowerCase();
     find('mut-targets').querySelectorAll('label').forEach(row => { row.hidden = search !== '' && !row.textContent.toLocaleLowerCase().includes(search) && !row.querySelector('input').value.includes(search); });
+    find('mut-no-languages').hidden=!search || Boolean(snapshot.language_error) || Array.from(find('mut-targets').querySelectorAll('label')).some(row=>!row.hidden);
   }
   find('mut-language-search').addEventListener('input', filterLanguages);
+  find('mut-targets').addEventListener('change',setButtons);
   // A heartbeat describes waiting time only; saved counts change after server responses.
   setInterval(() => { if (dialog.open && requestStarted) renderStatus(); }, 1000);
   renderSnapshot();
-  if (snapshot.jobs.length) { find('mut-job-select').value = String(snapshot.jobs[0].id); request('status',{job_id:snapshot.jobs[0].id}).then(data => { renderJob(data.job); return preview(); }).catch(error => message(error.message,true)); }
 })();

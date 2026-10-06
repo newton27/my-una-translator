@@ -104,4 +104,19 @@ check('Studio renders all server targets and permits choosing Arabic alone', fun
     $doc=new DOMDocument(); @$doc->loadHTML('<?xml encoding="UTF-8">'.$html); $x=new DOMXPath($doc);
     return $x->query('//input[@name="targets[]"]')->length===49 && $x->query('//input[@name="targets[]" and @value="ar"]')->length===1 && $x->query('//input[@name="targets[]" and @checked]')->length===0 && $x->query('//input[@id="mut-language-search"]')->length===1;
 });
+check('site languages remain visible in Studio when the translation server is offline', function() {
+    $db=new LanguageTestDb(); $db->pdo->exec("INSERT INTO sys_localization_languages VALUES (2,'ar','sa','العربية','RTL','ar_SA',1),(3,'ru','ru','Русский','LTR','ru_RU',0)");
+    $engine=new MyUnaTranslatorEngine(new MyUnaTranslatorStore($db),fn()=>new MyUnaTranslatorLibreProvider('http://127.0.0.1:5001','',fn()=>['status'=>503,'body'=>'']),fn()=>true);
+    $s=$engine->snapshot(); $rows=array_column($s['site_languages']??[],'enabled','code');
+    return $rows===['en'=>true,'ar'=>true,'ru'=>false] && $s['languages']===[];
+});
+check('removing an applied job preserves its native language registration and text', function() use($inventory) {
+    $db=new LanguageTestDb(); $store=new MyUnaTranslatorStore($db);
+    $engine=new MyUnaTranslatorEngine($store,fn()=>new MyUnaTranslatorLibreProvider('http://127.0.0.1:5001','',fn()=>['status'=>200,'body'=>json_encode($inventory)]),fn()=>true);
+    $job=$engine->dispatch('create',['targets'=>['ar'],'category_id'=>1,'character_budget'=>10000])['job'];
+    $language=$store->ensureLanguage('ar',MyUnaTranslatorLanguages::preset('ar'),$job['id']);
+    $store->q('INSERT INTO sys_localization_strings VALUES (1,?,?)',$language,'مرحبا {0}');
+    $store->changeJob($job['id'],['status'=>'applied']); $store->deleteJob($job['id']);
+    return (int)$store->one('SELECT COUNT(*) FROM my_una_translator_languages WHERE language=?','ar')===1 && $store->valueNow(1,$language)==='مرحبا {0}' && !$store->jobs();
+});
 echo "failures=$failed\n"; exit($failed?1:0);
