@@ -1,0 +1,180 @@
+{
+  "service_check": {
+    "used": null,
+    "limit": null,
+    "remaining": null,
+    "provider": "libre",
+    "available": true
+  },
+  "sources": [
+    "Sign in",
+    "Create account",
+    "Save changes",
+    "Send message",
+    "Privacy settings",
+    "Translation paused. Resume generation when the service is available.",
+    "Your changes have been saved.",
+    "Delete this item?",
+    "Hello {title}, you have %1$d new messages.",
+    "Please <a href=\"{0}\" title=\"Contact support\">contact us</a>.",
+    "My UNA World helps you build your community.",
+    "Visit <a href=\"{0}\">UNA.IO</a>.",
+    "{title}",
+    "My UNA World"
+  ],
+  "results": {
+    "ES": {
+      "seconds": 0.813,
+      "translations": [
+        "Iniciar sesión",
+        "Crear cuenta",
+        "Guardar cambios",
+        "Enviar mensaje",
+        "Configuración de privacidad",
+        "Traducción pausada. Reanuda la generación cuando el servicio esté disponible.",
+        "Tus cambios se han salvado.",
+        "Eliminar este tema?",
+        "Hola {title}, usted tiene %1$d nuevos mensajes.",
+        "Por favor <a href=\"{0}\" title=\"Contact support\">contáctenos</a>.",
+        "My UNA World te ayuda a construir tu comunidad.",
+        "Visita <a href=\"{0}\">UNA.IO</a>.",
+        "{title}",
+        "My UNA World"
+      ],
+      "protected_validation": "PASS"
+    },
+    "FR": {
+      "seconds": 1.531,
+      "translations": [
+        "Connexion",
+        "Créer un compte",
+        "Enregistrer les modifications",
+        "Envoyer un message",
+        "Paramètres de confidentialité",
+        "La traduction s'est arrêtée. Reprendre la génération lorsque le service est disponible.",
+        "Vos changements ont été enregistrés.",
+        "Supprimer cet élément ?",
+        "Bonjour {title}, vous avez %1$d nouveaux messages.",
+        "S'il vous plaît <a href=\"{0}\" title=\"Contact support\">contactez-nous</a>.",
+        "My UNA World vous aide à bâtir votre communauté.",
+        "Visite <a href=\"{0}\">UNA.IO</a>.",
+        "{title}",
+        "My UNA World"
+      ],
+      "protected_validation": "PASS"
+    },
+    "DE": {
+      "seconds": 1.762,
+      "translations": [
+        "Zeichen",
+        "Konto erstellen",
+        "Änderungen speichern",
+        "Sendenachricht",
+        "Datenschutzeinstellungen",
+        "Übersetzung angehalten. Generierung fortsetzen, wenn der Dienst verfügbar ist.",
+        "Ihre Änderungen wurden gespeichert.",
+        "Löschen Sie diesen Artikel?",
+        "Hallo {title}sie haben %1$d neue nachrichten.",
+        "Bitte <a href=\"{0}\" title=\"Contact support\">kontaktieren sie uns</a>.",
+        "My UNA World hilft dir, deine community aufzubauen.",
+        "Besuch <a href=\"{0}\">UNA.IO</a>.",
+        "{title}",
+        "My UNA World"
+      ],
+      "protected_validation": "PASS"
+    },
+    "PT-BR": {
+      "seconds": 1.299,
+      "translations": [
+        "Assine",
+        "Criar conta",
+        "Salvar mudanças",
+        "Enviar mensagem",
+        "Configurações de privacidade",
+        "A tradução parou. Retomar a geração quando o serviço estiver disponível.",
+        "Suas mudanças foram salvas.",
+        "Apagar este item?",
+        "Olá {title}você tem %1$d novas mensagens.",
+        "Por favor <a href=\"{0}\" title=\"Contact support\">nos contate</a>.",
+        "My UNA World ajuda a construir sua comunidade.",
+        "Visita <a href=\"{0}\">UNA.IO</a>.",
+        "{title}",
+        "My UNA World"
+      ],
+      "protected_validation": "PASS"
+    },
+    "ZH-HANS": {
+      "seconds": 1.383,
+      "translations": [
+        "签名",
+        "创建账户",
+        "保存更改",
+        "发送消息",
+        "隐私设置",
+        "翻译暂停 。 服务可用时恢复生成 .",
+        "您的更改已被保存 .",
+        "删除此项目 ?",
+        "哈罗 {title},你已经 %1$d 新建消息.",
+        "请 <a href=\"{0}\" title=\"Contact support\">联系我们</a>.",
+        "My UNA World 帮助你建立你的社区.",
+        "访问 <a href=\"{0}\">UNA.IO</a>.",
+        "{title}",
+        "My UNA World"
+      ],
+      "protected_validation": "PASS"
+    }
+  },
+  "libretranslate_version": "1.8.4",
+  "telemetry_disabled": true,
+  "environment": "temporary local CPU pilot; target VPS not benchmarked",
+  "memory_note": "VPS memory and capacity have not been measured. No capacity recommendation is based on this pilot.",
+  "gate": {
+    "mechanical": "PASS",
+    "wording": "FAIL",
+    "default_switch": "WITHHELD",
+    "reason": "Sign in was mistranslated as Zeichen in German and signature in Simplified Chinese; Brazilian Portuguese Assine is also unsuitable for a login button. No glossary overrides were used."
+  },
+  "model_packages": [
+    {
+      "package_version": "1.0",
+      "argos_version": "1.0",
+      "from_code": "en",
+      "from_name": "English",
+      "to_code": "es",
+      "to_name": "Spanish"
+    },
+    {
+      "package_version": "1.3",
+      "argos_version": "1.9.0",
+      "from_code": "en",
+      "from_name": "English",
+      "to_code": "de",
+      "to_name": "German"
+    },
+    {
+      "package_version": "1.9",
+      "argos_version": "1.9.0",
+      "from_code": "en",
+      "from_name": "English",
+      "to_code": "fr",
+      "to_name": "French"
+    },
+    {
+      "package_version": "1.9",
+      "argos_version": "1.9",
+      "from_code": "en",
+      "from_name": "English",
+      "to_code": "pb",
+      "to_name": "Portuguese (Brazil)"
+    },
+    {
+      "package_version": "1.9",
+      "argos_version": "1.9.0",
+      "from_code": "en",
+      "from_name": "English",
+      "to_code": "zh",
+      "to_name": "Chinese"
+    }
+  ],
+  "tested_at_utc": "2026-10-05"
+}

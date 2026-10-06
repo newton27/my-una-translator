@@ -1,0 +1,88 @@
+{
+  "tested_via": "iMac SSH tunnel, localhost:15001 to VPS loopback:5001",
+  "date": "2026-10-05",
+  "sources": [
+    "Sign in",
+    "Resume generation",
+    "Roll back changes",
+    "Create a new post",
+    "Upload file",
+    "Report channel",
+    "Character limit",
+    "Translation job",
+    "Payment failed. Your card was not charged.",
+    "The job is paused because the character limit was reached."
+  ],
+  "results": {
+    "es": {
+      "translatedText": [
+        "Iniciar sesión",
+        "Generación de reagrupación",
+        "Cambios en la espalda",
+        "Crear un nuevo post",
+        "Cargar archivo",
+        "Canal de informes",
+        "Limitación de caracteres",
+        "Trabajo de traducción",
+        "El pago falló. Tu tarjeta no fue cargada.",
+        "El trabajo se detiene porque se alcanzó el límite de caracteres."
+      ]
+    },
+    "fr": {
+      "translatedText": [
+        "Connexion",
+        "Reprendre la génération",
+        "Retourner les changements",
+        "Créer un nouveau post",
+        "Télécharger le fichier",
+        "Chaîne de rapports",
+        "Limite de caractères",
+        "Travail de traduction",
+        "Le paiement a échoué. Votre carte n'a pas été débitée.",
+        "Le travail est interrompu parce que la limite de caractère a été atteinte."
+      ]
+    },
+    "de": {
+      "translatedText": [
+        "Zeichen",
+        "Generierung des Lebenslaufs",
+        "Rollback-Änderungen",
+        "Erstellen Sie einen neuen Post",
+        "Upload-Datei",
+        "Meldekanal",
+        "Zeichenbegrenzung",
+        "Übersetzungsarbeit",
+        "Zahlung fehlgeschlagen. Ihre Karte wurde nicht belastet.",
+        "Der Job wird pausiert, weil das Zeichenlimit erreicht wurde."
+      ]
+    },
+    "pt-BR": {
+      "translatedText": [
+        "Assine",
+        "Retomar geração",
+        "Voltando as mudanças",
+        "Criar um novo post",
+        "Enviar arquivo",
+        "Reportar canal",
+        "Limite de caracteres",
+        "Tradução:",
+        "O pagamento falhou. Seu cartão não foi cobrado.",
+        "O trabalho é pausado porque o limite de caráter foi alcançado."
+      ]
+    },
+    "zh-Hans": {
+      "translatedText": [
+        "签名",
+        "恢复生成",
+        "倒转更改",
+        "创建新职位",
+        "上传文件",
+        "报告频道",
+        "字符限制",
+        "翻译工作",
+        "付款失败。 你的卡没充电.",
+        "任务被暂停是因为字符限制已经达到."
+      ]
+    }
+  }
+}

@@ -1,0 +1,22 @@
+<?php
+/** My UNA Translator — native Polyglot translation manager. */
+$aConfig = [
+    'type' => BX_DOL_MODULE_TYPE_MODULE,
+    'name' => 'my_una_translator',
+    'title' => 'My UNA Translator',
+    'note' => 'Studio translation previews, five language presets, and safe Polyglot apply and rollback.',
+    'version' => '0.1.9',
+    'vendor' => 'My UNA World',
+    'help_url' => '',
+    'compatible_with' => ['15.0.0-A1'],
+    'home_dir' => 'newton/my_una_translator/',
+    'home_uri' => 'my_una_translator',
+    'db_prefix' => 'my_una_translator_',
+    'class_prefix' => 'MyUnaTranslator',
+    'language_category' => 'My UNA Translator',
+    'install' => ['execute_sql'=>1,'update_languages'=>1,'clear_db_cache'=>1],
+    'uninstall' => ['execute_sql'=>1,'update_languages'=>1,'clear_db_cache'=>1],
+    'enable' => ['execute_sql'=>1,'clear_db_cache'=>1,'clear_template_cache'=>1],
+    'disable' => ['execute_sql'=>1,'clear_db_cache'=>1,'clear_template_cache'=>1],
+    'dependencies' => []
+];

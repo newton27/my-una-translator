@@ -1,0 +1,60 @@
+{
+  "service": "LibreTranslate 1.8.4 local auth pilot",
+  "checks": [
+    {
+      "name": "missing_key",
+      "status": 400,
+      "expected": 400,
+      "pass": true,
+      "output": null
+    },
+    {
+      "name": "invalid_key",
+      "status": 403,
+      "expected": 403,
+      "pass": true,
+      "output": null
+    },
+    {
+      "name": "client_a_first",
+      "status": 200,
+      "expected": 200,
+      "pass": true,
+      "output": [
+        "Ajustes de la cuenta"
+      ]
+    },
+    {
+      "name": "client_a_limited",
+      "status": 429,
+      "expected": 429,
+      "pass": true,
+      "output": null
+    },
+    {
+      "name": "client_b_independent",
+      "status": 200,
+      "expected": 200,
+      "pass": true,
+      "output": [
+        "Ajustes de la cuenta"
+      ]
+    },
+    {
+      "name": "client_b_second",
+      "status": 200,
+      "expected": 200,
+      "pass": true,
+      "output": [
+        "Ajustes de la cuenta"
+      ]
+    },
+    {
+      "name": "client_b_character_limit",
+      "status": 400,
+      "expected": 400,
+      "pass": true,
+      "output": null
+    }
+  ]
+}
