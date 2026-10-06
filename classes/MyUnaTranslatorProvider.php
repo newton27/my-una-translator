@@ -18,7 +18,7 @@ final class MyUnaTranslatorProvider
 
     public function translate(array $sources, $target)
     {
-        if (!in_array($target, ['ES', 'FR', 'DE', 'PT-BR', 'ZH-HANS'], true))
+        if (!in_array($target, ['ES', 'FR', 'DE', 'PT-BR', 'ZH-HANS', 'AR'], true))
             throw new RuntimeException('Unsupported target language.');
         if (!$sources || count($sources) > 50) throw new RuntimeException('A provider batch must contain 1 to 50 keys.');
         $packets = array_map(['MyUnaTranslatorText', 'encodeFragments'], array_values($sources));

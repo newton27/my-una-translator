@@ -22,7 +22,7 @@ class MyUnaTranslatorMenuSwitchLanguage extends BxTemplMenuSwitchLanguage
         foreach ($languages as $language) {
             $code=$language['Name'];
             // A separately installed language module retains its native visibility rules.
-            if (!in_array($code,['es','fr','de','pt-br','zh-cn'],true) || in_array($code,$seen,true) || $modules->getModuleByUri($code)) continue;
+            if (!in_array($code,['es','fr','de','pt-br','zh-cn','ar'],true) || in_array($code,$seen,true) || $modules->getModuleByUri($code)) continue;
             $params['lang']=$code;
             $items[]=[
                 'id'=>$code,'name'=>'lang-'.$code,'class'=>'',

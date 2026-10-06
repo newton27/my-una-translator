@@ -8,7 +8,7 @@ final class MyUnaTranslatorLibreProvider
     private $key;
     private $transport;
     private $useTerminology;
-    private const TARGETS=['ES'=>'es','FR'=>'fr','DE'=>'de','PT-BR'=>'pt-BR','ZH-HANS'=>'zh-Hans'];
+    private const TARGETS=['ES'=>'es','FR'=>'fr','DE'=>'de','PT-BR'=>'pt-BR','ZH-HANS'=>'zh-Hans','AR'=>'ar'];
 
     public static function endpoint($url)
     {
@@ -73,7 +73,7 @@ final class MyUnaTranslatorLibreProvider
         $rows=$this->request('GET','/languages'); $targets=[];
         foreach($rows as $row) if (is_array($row) && ($row['code']??'')==='en') $targets=$row['targets']??[];
         if (!is_array($targets) || array_diff(array_values(self::TARGETS),$targets))
-            throw new RuntimeException('LibreTranslate needs English routes to es, fr, de, pt-BR and zh-Hans. Load all five target models with LibreTranslate 1.8.4 or newer.');
+            throw new RuntimeException('LibreTranslate needs English routes to es, fr, de, pt-BR, zh-Hans and ar. Load all six target models with LibreTranslate 1.8.4 or newer.');
         return ['used'=>null,'limit'=>null,'remaining'=>null,'provider'=>'libre','available'=>true];
     }
     private function request($method,$path,$body=null)

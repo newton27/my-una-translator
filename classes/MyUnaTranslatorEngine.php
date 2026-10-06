@@ -13,7 +13,8 @@ final class MyUnaTranslatorEngine
             'fr'=>['name'=>'French','native'=>'Français','target'=>'FR','flag'=>'fr','country'=>'fr_FR'],
             'de'=>['name'=>'German','native'=>'Deutsch','target'=>'DE','flag'=>'de','country'=>'de_DE'],
             'pt-br'=>['name'=>'Portuguese (Brazil)','native'=>'Português (Brasil)','target'=>'PT-BR','flag'=>'br','country'=>'pt_BR'],
-            'zh-cn'=>['name'=>'Chinese (Simplified)','native'=>'简体中文','target'=>'ZH-HANS','flag'=>'cn','country'=>'zh_CN']
+            'zh-cn'=>['name'=>'Chinese (Simplified)','native'=>'简体中文','target'=>'ZH-HANS','flag'=>'cn','country'=>'zh_CN'],
+            'ar'=>['name'=>'Arabic','native'=>'العربية','target'=>'AR','flag'=>'sa','country'=>'ar_SA'],
         ];
     }
     public function __construct(MyUnaTranslatorStore $store, $providerFactory, $compile)
