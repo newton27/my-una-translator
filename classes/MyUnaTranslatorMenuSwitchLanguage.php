@@ -8,9 +8,8 @@ class MyUnaTranslatorMenuSwitchLanguage extends BxTemplMenuSwitchLanguage
     {
         parent::loadData();
         $languages=BxDolDb::getInstance()->getAll("SELECT l.Name,l.Title
-            FROM my_una_translator_languages t
-            INNER JOIN sys_localization_languages l ON l.ID=t.language_id AND BINARY l.Name=BINARY t.language
-            WHERE l.Enabled=1 ORDER BY l.Title");
+            FROM sys_localization_languages l
+            WHERE l.Enabled=1 AND l.Name<>'en' ORDER BY l.Title");
         if (!$languages) return;
 
         $items=$this->_aObject['menu_items']??[];
@@ -22,7 +21,7 @@ class MyUnaTranslatorMenuSwitchLanguage extends BxTemplMenuSwitchLanguage
         foreach ($languages as $language) {
             $code=$language['Name'];
             // A separately installed language module retains its native visibility rules.
-            if (!in_array($code,['es','fr','de','pt-br','zh-cn','ar'],true) || in_array($code,$seen,true) || $modules->getModuleByUri($code)) continue;
+            if (in_array($code,$seen,true) || $modules->getModuleByUri($code)) continue;
             $params['lang']=$code;
             $items[]=[
                 'id'=>$code,'name'=>'lang-'.$code,'class'=>'',
