@@ -70,7 +70,7 @@ class MyUnaTranslatorStudioPage extends BxTemplStudioModule
         foreach (['waiting_libre','libre_languages_available'] as $key) $labels[$key]=self::text($key);
         $labels['target_hint']=self::text('target_hint');
         $config=['endpoint'=>$endpoint,'token'=>$this->token(),'snapshot'=>$snapshot,'labels'=>$labels];
-        $html='<link rel="stylesheet" href="'.self::h($base.'template/css/translator.css?v=0.1.9-languages2').'">';
+        $html='<link rel="stylesheet" href="'.self::h($base.'template/css/translator.css?v=0.1.9-languages3').'">';
         $html.='<section id="my-una-translator" class="mut" aria-label="'.self::label('title').'">';
         $html.='<header class="mut-hero"><div class="mut-mark" aria-hidden="true">A<span>文</span></div><div><div class="mut-brand">My UNA World</div><h2>'.self::label('title').'</h2><p>'.self::label('languages_intro').'</p></div><a class="mut-link" href="'.self::h(BX_DOL_URL_STUDIO.'polyglot.php').'">'.self::label('open_polyglot').'</a></header>';
         $html.='<div id="mut-message" class="mut-message" role="status" aria-live="polite" hidden></div>';
@@ -104,7 +104,7 @@ class MyUnaTranslatorStudioPage extends BxTemplStudioModule
         $html.='<label class="mut-check"><input id="mut-enable-languages" type="checkbox" checked>'.self::label('enable_new_languages').'</label><div class="mut-buttons"><button type="button" data-mut-action="apply">'.self::label('apply_translations').'</button><button type="button" data-mut-action="rollback" class="mut-secondary">'.self::label('rollback').'</button><button type="button" data-mut-action="refresh" class="mut-secondary">'.self::label('refresh').'</button></div>';
         $html.='<p class="mut-note">'.self::label('apply_note').'</p><div id="mut-preview" class="mut-table-wrap"></div><div class="mut-buttons"><button id="mut-prev" class="mut-secondary" type="button">'.self::label('previous').'</button><span id="mut-page-info"></span><button id="mut-next" class="mut-secondary" type="button">'.self::label('next').'</button></div></section>';
         $html.='<footer class="mut-footer">'.self::label('footer_note').'</footer></section>';
-        $html.='<script type="application/json" id="mut-config">'.json_encode($config,JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_UNESCAPED_UNICODE).'</script><script src="'.self::h($base.'template/js/progress.js?v=0.1.8').'"></script><script src="'.self::h($base.'template/js/translator.js?v=0.1.9-languages2').'"></script>';
+        $html.='<script type="application/json" id="mut-config">'.json_encode($config,JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_UNESCAPED_UNICODE).'</script><script src="'.self::h($base.'template/js/progress.js?v=0.1.8').'"></script><script src="'.self::h($base.'template/js/translator.js?v=0.1.9-languages3').'"></script>';
         return $html;
     }
 }
