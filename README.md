@@ -22,6 +22,10 @@ To use the optional provider, load English routes to `es`, `fr`, `de`, `pt-BR` a
 
 Clients can use the same host by entering its public HTTPS base URL and their own API key in Provider settings. The module already supports this arrangement and keeps keys encrypted on each client's UNA site. The shared endpoint is not deployed yet. See `docs/SHARED-SERVICE.md` for the prepared setup and verification gates.
 
+### Curated wording regression update (2026-10-06)
+
+Exact local terminology now covers nine reviewed interface strings that were ambiguous or misleading in LibreTranslate output: **Sign in**, **Resume generation**, **Resume** (the job-control action), **Create a new post**, **Roll back changes**, the payment failure notice, the character-limit pause notice, **Character limit**, and **Translation job**. The regression test verifies all 45 expected outputs across Spanish, French, German, Brazilian Portuguese, and Simplified Chinese through the provider batch path; these exact entries bypass the translation service. Unreviewed text continues to LibreTranslate. This resolves the recorded sample failures for those strings, but it does not certify open-ended model quality or complete native 0.1.9 install/update validation. The general default-switch/release gate remains withheld. Run `php tests/libretranslate_quality_gate.php` to repeat this check.
+
 ## Translate
 
 1. Open **My UNA Translator** from the Studio launcher. Choose your provider in Provider settings. For DeepL, select Free or Pro and enter its API key. For LibreTranslate, enter the service base URL and its optional API key. Save settings. A regular DeepL website subscription is different from an API account.

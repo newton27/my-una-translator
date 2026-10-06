@@ -31,3 +31,10 @@ The latest saved live setup record says 0.1.8 is installed and connected to a pr
 Client modules already support an HTTPS URL and a separate encrypted Libre key. The prepared shared-server design uses the existing private service behind HTTPS, required per-client keys, independent limits and persistent key storage. Native key enforcement and isolation passed locally. Public DNS/TLS/reverse proxy, deployed 1.9.6 key enforcement/worker limits, two independent client UNA modules and concurrent capacity remain unverified. See SHARED-SERVICE.md. No public endpoint or additional VPS was created.
 
 The iMac tunnel supports HTTP translation tests but rejects shell execution through its restricted key. Administrator server access is needed to install this candidate and configure the shared client endpoint. The current broader wording gate must pass before making LibreTranslate default. Retain the working live 0.1.8 checkpoint and existing immutable packages.
+
+
+## 2026-10-06 curated wording regression
+
+The candidate now has exact local terminology for nine reviewed interface strings that previously produced ambiguous or misleading model output: Sign in, Resume generation, the Resume job-control button, Create a new post, Roll back changes, the payment failure notice, the character-limit pause notice, Character limit, and Translation job. `php tests/libretranslate_quality_gate.php` verifies 45 expected outputs (nine strings across five supported targets) through `MyUnaTranslatorLibreProvider::translate`. All use the terminology path; a transport stub confirms the test does not call LibreTranslate, and unreviewed text remains eligible for provider translation. PHP lint and `git diff --check` pass.
+
+This closes the known-string regression, not the broad model-quality gate. Direct raw-service requests from the server returned HTTP 400 because the local endpoint requires an API key; no new raw model output was reviewed in this run. The candidate still needs native UNA 0.1.9 install/update validation and wider human review before any stable release or provider-default certification.
