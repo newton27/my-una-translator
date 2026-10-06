@@ -1,9 +1,15 @@
 {
   "module": "my_una_translator",
   "version": "0.1.9",
-  "source_commit": "6edc91e930ed231ff8be90fd68f797c7afdfc117",
-  "base_source_commit": "698b9837935e31ce5c2fc961487d81e234c97fde",
-  "base_archive_sha256": "2056a739a598c5799c00246572f76b5c00dae11910aee34b94f0ac736cce9542",
-  "popup_source_commit": "7efad239f3df2bbb3f4a4f70238d039ae04f20bc",
-  "status": "optional-provider wording corrections; broader quality gate withheld; native 0.1.9 validation pending"
+  "release": "v0.1.9-rc.3",
+  "source_commit": "dbde948ff289f9716830c4f486a2c44bd062344f",
+  "source_tree": "579608725cd48f54922a12aa47a09eecb7294a96",
+  "workflow_parent": "c2706596cef8eb6cf8585c3bd0ca1ece040377c7",
+  "previous_release_source": "60a2b201b9fdcf54071ef7276ad58148ea275a6f",
+  "record_scope": "Release tag adds BUILD.json and docs/RELEASE.md provenance to source_commit; runtime code is identical.",
+  "package_root": "my_una_translator/",
+  "package_exclusions": [
+    ".gitignore"
+  ],
+  "status": "prerelease; native fresh-install/update and general model-quality certification outstanding"
 }
