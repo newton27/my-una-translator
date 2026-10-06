@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources name="en" flag="gb" title="English">
   <string name="_my_una_translator_title"><![CDATA[My UNA Translator]]></string>
-  <string name="_my_una_translator_intro"><![CDATA[Translate your UNA interface into five languages. Preview each job, then apply it to Polyglot.]]></string>
+  <string name="_my_una_translator_intro"><![CDATA[Translate your UNA interface into your provider’s supported languages. Preview each job, then apply it to Polyglot.]]></string>
   <string name="_my_una_translator_languages_intro"><![CDATA[Translate your UNA interface into your provider’s supported languages. Preview each job, then apply it to Polyglot.]]></string>
   <string name="_my_una_translator_target_languages"><![CDATA[Target languages]]></string>
   <string name="_my_una_translator_find_language"><![CDATA[Find a language]]></string>
@@ -48,7 +48,7 @@
   <string name="_my_una_translator_apply_translations"><![CDATA[Apply translations]]></string>
   <string name="_my_una_translator_rollback"><![CDATA[Roll back this job]]></string>
   <string name="_my_una_translator_refresh"><![CDATA[Refresh]]></string>
-  <string name="_my_una_translator_apply_note"><![CDATA[Apply becomes available after generation finishes. English stays the default. Changes made after the preview are preserved and reported as conflicts. Rollback restores this job's earlier values when its translations are still current.]]></string>
+  <string name="_my_una_translator_apply_note"><![CDATA[Apply becomes available after generation finishes. The site default stays unchanged. Changes made after the preview are preserved and reported as conflicts. Rollback restores this job's earlier values when its translations are still current.]]></string>
   <string name="_my_una_translator_previous"><![CDATA[Previous]]></string>
   <string name="_my_una_translator_next"><![CDATA[Next]]></string>
   <string name="_my_una_translator_footer_note"><![CDATA[My UNA World · Native Polyglot translations · Review machine translations before applying.]]></string>
@@ -112,7 +112,7 @@
   <string name="_my_una_translator_clear_libre_key"><![CDATA[Remove the saved LibreTranslate key. Changing the service URL also clears it unless you enter a replacement.]]></string>
   <string name="_my_una_translator_libre_optional_key"><![CDATA[Optional for a local service]]></string>
   <string name="_my_una_translator_waiting_libre"><![CDATA[Waiting for LibreTranslate]]></string>
-  <string name="_my_una_translator_libre_available"><![CDATA[LibreTranslate is available with all five target models. No provider character allowance applies.]]></string>
+  <string name="_my_una_translator_libre_available"><![CDATA[LibreTranslate is available for the supported languages reported by the service. No DeepL character allowance applies.]]></string>
   <string name="_my_una_translator_libre_languages_available"><![CDATA[LibreTranslate is available for the supported languages shown above.]]></string>
   <string name="_my_una_translator_workflow_intro"><![CDATA[Choose languages, review the translation preview, then apply it to your site.]]></string>
   <string name="_my_una_translator_step_choose"><![CDATA[Choose languages]]></string>

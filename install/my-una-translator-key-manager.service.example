@@ -1,0 +1,24 @@
+[Unit]
+Description=My UNA Translator LibreTranslate customer key manager
+After=network.target
+
+[Service]
+Type=simple
+User=libretranslate-manager
+Group=www-data
+SupplementaryGroups=libretranslate
+WorkingDirectory=/opt/my-una-translator
+ExecStart=/usr/bin/python3 -m services.key_manager.server /run/my-una-translator/key-manager.sock /var/lib/my-una-translator/keys.db /var/lib/libretranslate-keys/api_keys.db /usr/local/bin/ltmanage /etc/my-una-translator/fernet.key REPLACE_WITH_PHP_UID 60 4000
+Restart=on-failure
+RestartSec=3
+RuntimeDirectory=my-una-translator
+RuntimeDirectoryMode=0750
+UMask=0007
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/my-una-translator /run/my-una-translator /var/lib/libretranslate-keys
+
+[Install]
+WantedBy=multi-user.target

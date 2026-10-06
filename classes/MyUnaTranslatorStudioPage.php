@@ -72,6 +72,15 @@ class MyUnaTranslatorStudioPage extends BxTemplStudioModule
             if (!is_string($action)) throw new RuntimeException('Invalid Translator action.');
             $input=$_POST; unset($input['csrf_token'],$input['mt_action']);
             $input['operator_id']=getLoggedId();
+            if (strpos($action, 'key_') === 0) {
+                require_once __DIR__ . '/MyUnaTranslatorKeyClient.php';
+                $operation = substr($action, 4);
+                if (!in_array($operation, ['list', 'create', 'rotate', 'revoke'], true)) throw new RuntimeException('Invalid key manager action.');
+                $fields = ['site_label', 'hostname', 'requests_per_minute', 'characters_per_request', 'request_id', 'key_id'];
+                $payload = ['operation' => $operation, 'actor' => (string)$input['operator_id']];
+                foreach ($fields as $field) if (array_key_exists($field, $input)) $payload[$field] = $input[$field];
+                return ['code'=>0,'data'=>MyUnaTranslatorKeyClient::request($payload)];
+            }
             return ['code'=>0,'data'=>$this->translator->dispatch($action,$input)];
         } catch (Throwable $e) {
             return ['code'=>1,'message'=>get_class($e)==='RuntimeException' ? $e->getMessage() : 'Translator could not complete the request. Check its installation and try again.'];
@@ -139,8 +148,9 @@ class MyUnaTranslatorStudioPage extends BxTemplStudioModule
         $html.='<section id="mut-step-3" class="mut-card mut-step" aria-labelledby="mut-apply-title"><h3 id="mut-apply-title"><span class="mut-step-number">3</span>'.self::label('step_apply').'</h3><p id="mut-apply-hint" class="mut-note">'.self::label('apply_wait').'</p><label class="mut-check"><input id="mut-enable-languages" type="checkbox" checked>'.self::label('apply_publish').'</label><p class="mut-note">'.self::label('apply_help').'</p><div class="mut-buttons"><button type="button" data-mut-action="apply">'.self::label('apply_continue').'</button></div><details class="mut-advanced"><summary>'.self::label('recovery_tools').'</summary><button type="button" data-mut-action="rollback" class="mut-secondary">'.self::label('rollback').'</button><p class="mut-note">'.self::label('apply_note').'</p></details></section>';
         $html.='<section class="mut-card" aria-labelledby="mut-site-title"><h3 id="mut-site-title">'.self::label('site_languages').'</h3><p class="mut-note">'.self::label('site_languages_help').'</p><div id="mut-site-languages" class="mut-site-languages"></div><p class="mut-note">'.self::label('default_note').' <strong><bdi>'.self::h($defaultName).'</bdi></strong>. '.self::label('default_help').'</p><a class="mut-settings-link" href="'.self::h(BX_DOL_URL_STUDIO.'polyglot.php').'">'.self::label('default_settings').'</a></section>';
         $html.='<details class="mut-card"><summary>'.self::label('language_coverage').'</summary><div class="mut-table-wrap mut-coverage-wrap"><table><thead><tr><th>'.self::label('language').'</th><th>'.self::label('translated').'</th><th>'.self::label('missing').'</th><th>'.self::label('english_copies').'</th><th>'.self::label('availability').'</th></tr></thead><tbody id="mut-coverage"></tbody></table></div></details>';
+        $html.='<details class="mut-card" id="mut-key-console"><summary>LibreTranslate customer API keys</summary><p>Issue one key per customer site. The secret is displayed once; rotate before revoking to avoid interrupting service.</p><form id="mut-key-create" class="mut-fields"><label>Site label<input name="site_label" maxlength="120" required></label><label>Customer hostname<input name="hostname" maxlength="253" placeholder="www.customer.example" required></label><label>Requests per minute<input type="number" name="requests_per_minute" min="1" value="60" required></label><label>Characters per request<input type="number" name="characters_per_request" min="1" value="4000" required></label><button type="submit">Issue customer key</button></form><div class="mut-buttons"><button id="mut-key-refresh" type="button" class="mut-secondary">Refresh key list</button></div><p id="mut-key-message" role="status" aria-live="polite"></p><div id="mut-key-secret"></div><div id="mut-key-list" class="mut-table-wrap"></div></details>';
         $html.='<footer class="mut-footer">'.self::label('footer_note').'</footer></section>';
-        $html.='<script type="application/json" id="mut-config">'.json_encode($config,JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_UNESCAPED_UNICODE).'</script><script src="'.self::h($base.'template/js/progress.js?v=0.1.8').'"></script><script src="'.self::h($base.'template/js/workflow.js?v=0.1.9-flow1').'"></script><script src="'.self::h($base.'template/js/translator.js?v=0.1.9-flow2').'"></script>';
+        $html.='<script type="application/json" id="mut-config">'.json_encode($config,JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_UNESCAPED_UNICODE).'</script><script src="'.self::h($base.'template/js/progress.js?v=0.1.8').'"></script><script src="'.self::h($base.'template/js/workflow.js?v=0.1.9-flow1').'"></script><script src="'.self::h($base.'template/js/translator.js?v=0.1.9-flow2').'"></script><script src="'.self::h($base.'template/js/key-console.js?v=0.1.9-rc3').'"></script>';
         return $html;
     }
 }

@@ -81,10 +81,11 @@ check('server outage leaves Studio status available and no targets selectable', 
     $db=new LanguageTestDb(); $engine=new MyUnaTranslatorEngine(new MyUnaTranslatorStore($db),fn()=>new MyUnaTranslatorLibreProvider('http://127.0.0.1:5001','',fn()=>['status'=>503,'body'=>'']),fn()=>true);
     $s=$engine->snapshot(); return $s['languages']===[] && !empty($s['language_error']);
 });
-check('DeepL retains its existing five destinations without probing Libre', function() {
+check('DeepL retains all six RC 2 destinations without probing Libre', function() {
     $db=new LanguageTestDb(); $db->pdo->exec("UPDATE my_una_translator_settings SET provider='deepl',api_key='stored'");
     $engine=new MyUnaTranslatorEngine(new MyUnaTranslatorStore($db),fn()=>throw new RuntimeException('Unexpected network discovery'),fn()=>true);
-    return count($engine->snapshot()['languages'])===5;
+    $languages=$engine->snapshot()['languages'];
+    return count($languages)===6 && in_array('ar',array_column($languages,'code'),true);
 });
 class BxTemplStudioModule {}
 class BxDolSession {
