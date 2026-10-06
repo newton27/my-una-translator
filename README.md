@@ -1,6 +1,6 @@
 # My UNA Translator 0.1.9
 
-Native UNA 15 Studio module by My UNA World. Translates English interface language keys into Spanish, French, German, Brazilian Portuguese and Simplified Chinese using DeepL API Free/Pro or an optional self-hosted LibreTranslate service. DeepL remains the default: the first real LibreTranslate sample failed the wording gate.
+Native UNA 15 Studio module by My UNA World. Translates English interface language keys using DeepL API Free/Pro or a self-hosted LibreTranslate service. This branch discovers LibreTranslate destinations from the server's installed English routes; DeepL retains its five existing destinations. Studio supports searching languages and selecting one to five per job. Existing provider settings are preserved. See [server-language support](docs/SERVER-LANGUAGES.md) for deployment and validation scope.
 
 ## Install
 

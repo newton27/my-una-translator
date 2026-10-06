@@ -50,7 +50,13 @@ class MyUnaTranslatorStudioPage extends BxTemplStudioModule
         }
     }
     private static function h($value) { return htmlspecialchars((string)$value,ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8'); }
-    private static function text($key) { return _t('_my_una_translator_'.$key); }
+    private static function text($key) {
+        $full='_my_una_translator_'.$key; $text=_t($full);
+        $fallback=['languages_intro'=>'Translate your UNA interface into your provider’s supported languages. Preview each job, then apply it to Polyglot.',
+            'target_languages'=>'Target languages','find_language'=>'Find a language','target_hint'=>'Choose 1–5 languages for this job. English is the source language.',
+            'libre_languages_available'=>'LibreTranslate is available for the supported languages shown above.'];
+        return $text===$full ? ($fallback[$key]??$text) : $text;
+    }
     private static function label($key) { return self::h(self::text($key)); }
 
     protected function getTranslator()
@@ -61,11 +67,12 @@ class MyUnaTranslatorStudioPage extends BxTemplStudioModule
         $endpoint=BX_DOL_URL_STUDIO.'module.php?name=my_una_translator&page=translator';
         $labels=[];
         foreach (['job','working','saved','quota_used','select_job','job_created','ready','paused','applied','rolled_back','empty_preview','key','language','source','translation','state','no_translation','finish_batch','connection_error','session_error','generating','applying','rolling_back','ceiling_warning','characters','conflicts','used_reserved','staged','total_keys','provider_needed','preview_page','not_started','created','active','disabled','not_created','planned','running','apply_cache_error','rollback_cache_error','pending','processing','conflict','rollback_conflict','show_status','show_progress','translation_status','hide_status','no_job_selected','preview_progress','apply_progress','rollback_progress','seconds','slow_request','waiting_deepl','waiting_apply','waiting_rollback','waiting_server','keep_page_open'] as $key) $labels[$key]=self::text($key);
-        foreach (['waiting_libre','libre_available'] as $key) $labels[$key]=self::text($key);
+        foreach (['waiting_libre','libre_languages_available'] as $key) $labels[$key]=self::text($key);
+        $labels['target_hint']=self::text('target_hint');
         $config=['endpoint'=>$endpoint,'token'=>$this->token(),'snapshot'=>$snapshot,'labels'=>$labels];
-        $html='<link rel="stylesheet" href="'.self::h($base.'template/css/translator.css?v=0.1.8').'">';
+        $html='<link rel="stylesheet" href="'.self::h($base.'template/css/translator.css?v=0.1.9-languages2').'">';
         $html.='<section id="my-una-translator" class="mut" aria-label="'.self::label('title').'">';
-        $html.='<header class="mut-hero"><div class="mut-mark" aria-hidden="true">A<span>文</span></div><div><div class="mut-brand">My UNA World</div><h2>'.self::label('title').'</h2><p>'.self::label('intro').'</p></div><a class="mut-link" href="'.self::h(BX_DOL_URL_STUDIO.'polyglot.php').'">'.self::label('open_polyglot').'</a></header>';
+        $html.='<header class="mut-hero"><div class="mut-mark" aria-hidden="true">A<span>文</span></div><div><div class="mut-brand">My UNA World</div><h2>'.self::label('title').'</h2><p>'.self::label('languages_intro').'</p></div><a class="mut-link" href="'.self::h(BX_DOL_URL_STUDIO.'polyglot.php').'">'.self::label('open_polyglot').'</a></header>';
         $html.='<div id="mut-message" class="mut-message" role="status" aria-live="polite" hidden></div>';
         $html.='<div class="mut-status-launch"><button id="mut-show-status" type="button" class="mut-status-control">'.self::label('show_status').'</button></div>';
         $html.='<dialog id="mut-status-dialog" class="mut-status-dialog" aria-labelledby="mut-status-title"><div class="mut-status-heading"><div><div class="mut-brand">My UNA World</div><h3 id="mut-status-title">'.self::label('translation_status').'</h3></div><button id="mut-hide-status" type="button" class="mut-secondary mut-status-control" autofocus>'.self::label('hide_status').'</button></div>';
@@ -81,10 +88,10 @@ class MyUnaTranslatorStudioPage extends BxTemplStudioModule
         $html.='<label>'.self::label('batch_size').'<input type="number" name="batch_size" min="1" max="20" value="'.(int)$snapshot['settings']['batch_size'].'" required></label>';
         $html.='<label>'.self::label('default_ceiling').'<input type="number" name="character_budget" min="1" max="100000000" value="'.(int)$snapshot['settings']['character_budget'].'" required></label>';
         $html.='<div class="mut-buttons"><button type="submit">'.self::label('save_settings').'</button><button type="button" data-mut-action="usage" class="mut-secondary">'.self::label('check_usage').'</button></div><p class="mut-note">'.self::label('provider_note').'</p></form></details>';
-        $html.='<section class="mut-card"><h3>'.self::label('language_coverage').'</h3><div class="mut-table-wrap"><table><thead><tr><th>'.self::label('language').'</th><th>'.self::label('translated').'</th><th>'.self::label('missing').'</th><th>'.self::label('english_copies').'</th><th>'.self::label('availability').'</th></tr></thead><tbody id="mut-coverage"></tbody></table></div></section>';
-        $html.='<section class="mut-card"><h3>'.self::label('plan_job').'</h3><form id="mut-create"><div class="mut-targets">';
-        foreach (MyUnaTranslatorEngine::presets() as $code=>$p)
-            $html.='<label><input type="checkbox" name="targets[]" value="'.self::h($code).'" checked><span>'.self::h($p['native']).'<small>'.self::h($p['name']).'</small></span></label>';
+        $html.='<section class="mut-card"><h3>'.self::label('language_coverage').'</h3><div class="mut-table-wrap mut-coverage-wrap"><table><thead><tr><th>'.self::label('language').'</th><th>'.self::label('translated').'</th><th>'.self::label('missing').'</th><th>'.self::label('english_copies').'</th><th>'.self::label('availability').'</th></tr></thead><tbody id="mut-coverage"></tbody></table></div></section>';
+        $html.='<section class="mut-card"><h3>'.self::label('plan_job').'</h3><form id="mut-create"><p class="mut-note">'.self::label('target_hint').'</p><div class="mut-fields"><label>'.self::label('find_language').'<input id="mut-language-search" type="search" autocomplete="off"></label></div><p id="mut-language-error" class="mut-warning"'.(empty($snapshot['language_error'])?' hidden':'').'>'.self::h($snapshot['language_error']??'').'</p><div id="mut-targets" class="mut-targets" role="group" aria-label="'.self::label('target_languages').'">';
+        foreach ($snapshot['languages'] as $p)
+            $html.='<label><input type="checkbox" name="targets[]" value="'.self::h($p['code']).'"><span><bdi>'.self::h($p['native']).'</bdi><small>'.self::h($p['name']).'</small></span></label>';
         $html.='</div><div class="mut-fields"><label>'.self::label('category').'<select name="category_id"><option value="0">'.self::label('all_categories').'</option>';
         foreach ($snapshot['categories'] as $c) $html.='<option value="'.(int)$c['id'].'">'.self::h($c['name']).'</option>';
         $html.='</select></label><label>'.self::label('job_ceiling').'<input id="mut-create-budget" type="number" name="character_budget" min="1" max="100000000" value="'.(int)$snapshot['settings']['character_budget'].'" required></label></div>';
@@ -97,7 +104,7 @@ class MyUnaTranslatorStudioPage extends BxTemplStudioModule
         $html.='<label class="mut-check"><input id="mut-enable-languages" type="checkbox" checked>'.self::label('enable_new_languages').'</label><div class="mut-buttons"><button type="button" data-mut-action="apply">'.self::label('apply_translations').'</button><button type="button" data-mut-action="rollback" class="mut-secondary">'.self::label('rollback').'</button><button type="button" data-mut-action="refresh" class="mut-secondary">'.self::label('refresh').'</button></div>';
         $html.='<p class="mut-note">'.self::label('apply_note').'</p><div id="mut-preview" class="mut-table-wrap"></div><div class="mut-buttons"><button id="mut-prev" class="mut-secondary" type="button">'.self::label('previous').'</button><span id="mut-page-info"></span><button id="mut-next" class="mut-secondary" type="button">'.self::label('next').'</button></div></section>';
         $html.='<footer class="mut-footer">'.self::label('footer_note').'</footer></section>';
-        $html.='<script type="application/json" id="mut-config">'.json_encode($config,JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_UNESCAPED_UNICODE).'</script><script src="'.self::h($base.'template/js/progress.js?v=0.1.8').'"></script><script src="'.self::h($base.'template/js/translator.js?v=0.1.8-rmjob3').'"></script>';
+        $html.='<script type="application/json" id="mut-config">'.json_encode($config,JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_UNESCAPED_UNICODE).'</script><script src="'.self::h($base.'template/js/progress.js?v=0.1.8').'"></script><script src="'.self::h($base.'template/js/translator.js?v=0.1.9-languages2').'"></script>';
         return $html;
     }
 }

@@ -2,6 +2,10 @@
 <resources name="en" flag="gb" title="English">
   <string name="_my_una_translator_title"><![CDATA[My UNA Translator]]></string>
   <string name="_my_una_translator_intro"><![CDATA[Translate your UNA interface into five languages. Preview each job, then apply it to Polyglot.]]></string>
+  <string name="_my_una_translator_languages_intro"><![CDATA[Translate your UNA interface into your provider’s supported languages. Preview each job, then apply it to Polyglot.]]></string>
+  <string name="_my_una_translator_target_languages"><![CDATA[Target languages]]></string>
+  <string name="_my_una_translator_find_language"><![CDATA[Find a language]]></string>
+  <string name="_my_una_translator_target_hint"><![CDATA[Choose 1–5 languages for this job. English is the source language.]]></string>
   <string name="_my_una_translator_open_polyglot"><![CDATA[Open Polyglot]]></string>
   <string name="_my_una_translator_admin_required"><![CDATA[Studio administrator access is required.]]></string>
   <string name="_my_una_translator_provider_settings"><![CDATA[Provider settings]]></string>
@@ -109,4 +113,5 @@
   <string name="_my_una_translator_libre_optional_key"><![CDATA[Optional for a local service]]></string>
   <string name="_my_una_translator_waiting_libre"><![CDATA[Waiting for LibreTranslate]]></string>
   <string name="_my_una_translator_libre_available"><![CDATA[LibreTranslate is available with all five target models. No provider character allowance applies.]]></string>
+  <string name="_my_una_translator_libre_languages_available"><![CDATA[LibreTranslate is available for the supported languages shown above.]]></string>
 </resources>

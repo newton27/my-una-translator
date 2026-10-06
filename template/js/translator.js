@@ -80,6 +80,13 @@
     renderStatus();
   }
   function renderSnapshot(selected = null) {
+    const targets = find('mut-targets');
+    const chosen = new Set(Array.from(targets.querySelectorAll('input:checked')).map(input => input.value));
+    targets.innerHTML = snapshot.languages.map(l => '<label><input type="checkbox" name="targets[]" value="' + esc(l.code) + '"' + (chosen.has(l.code) ? ' checked' : '') + '><span><bdi>' + esc(l.native) + '</bdi><small>' + esc(l.name) + '</small></span></label>').join('');
+    filterLanguages();
+    const languageError = find('mut-language-error');
+    languageError.textContent = snapshot.language_error || '';
+    languageError.hidden = !snapshot.language_error;
     find('mut-coverage').innerHTML = snapshot.languages.map(l => '<tr><th>' + esc(l.native) + '<small>' + esc(l.name) + '</small></th><td>' + number(l.translated) + '</td><td>' + number(l.missing) + '</td><td>' + number(l.english_copies) + '</td><td><span class="mut-pill">' + esc(label(l.enabled ? 'active' : l.installed ? 'disabled' : 'not_created')) + '</span></td></tr>').join('');
     const select = find('mut-job-select');
     const wanted = selected ?? select.value;
@@ -157,7 +164,9 @@
   });
   find('mut-create').addEventListener('submit', async event => {
     event.preventDefault(); if (busy) return;
-    const body = new FormData(event.currentTarget); busy = true; setButtons();
+    const body = new FormData(event.currentTarget);
+    if (body.getAll('targets[]').length < 1 || body.getAll('targets[]').length > 5) { message(label('target_hint'), true); return; }
+    busy = true; setButtons();
     try { const data = await request('create', body); offset = 0; renderJob(data.job); snapshot = await request('snapshot'); renderSnapshot(data.job.id); await preview(); message(label('job_created')); }
     catch (error) { message(error.message,true); }
     finally { busy = false; setButtons(); }
@@ -196,7 +205,7 @@
     if (busy) return;
     try {
       if (action === 'refresh') await refresh();
-      else if (action === 'usage') { busy = true; setButtons(); const data = await request('usage'); message(data.usage.provider === 'libre' ? label('libre_available') : label('quota_used') + ': ' + number(data.usage.used) + ' / ' + number(data.usage.limit)); }
+      else if (action === 'usage') { busy = true; setButtons(); const data = await request('usage'); message(data.usage.provider === 'libre' ? label('libre_languages_available') : label('quota_used') + ': ' + number(data.usage.used) + ' / ' + number(data.usage.limit)); }
       else if (action === 'pause') { const data = await request('pause', {job_id:activeJob.id}); renderJob(data.job); message(stateLabel(data.job.status)); }
       else await run(action);
     } catch (error) { message(error.message,true); }
@@ -214,6 +223,11 @@
   function providerFields() { if (providerSelect) root.querySelectorAll('[data-mut-provider]').forEach(field => { field.hidden = field.dataset.mutProvider !== providerSelect.value; }); }
   if (providerSelect) providerSelect.addEventListener('change', providerFields);
   providerFields();
+  function filterLanguages() {
+    const search = find('mut-language-search').value.trim().toLocaleLowerCase();
+    find('mut-targets').querySelectorAll('label').forEach(row => { row.hidden = search !== '' && !row.textContent.toLocaleLowerCase().includes(search) && !row.querySelector('input').value.includes(search); });
+  }
+  find('mut-language-search').addEventListener('input', filterLanguages);
   // A heartbeat describes waiting time only; saved counts change after server responses.
   setInterval(() => { if (dialog.open && requestStarted) renderStatus(); }, 1000);
   renderSnapshot();

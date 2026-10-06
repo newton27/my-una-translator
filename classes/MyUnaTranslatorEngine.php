@@ -1,13 +1,16 @@
 <?php defined('BX_DOL') or die('hack attempt');
+require_once __DIR__.'/MyUnaTranslatorLanguages.php';
 
 final class MyUnaTranslatorEngine
 {
     private $store;
     private $providerFactory;
     private $compile;
+    private $languagePresets;
 
-    public static function presets()
+    public static function presets($libreLanguages=null)
     {
+        if ($libreLanguages!==null) return MyUnaTranslatorLanguages::fromLibre($libreLanguages);
         return [
             'es'=>['name'=>'Spanish','native'=>'Español','target'=>'ES','flag'=>'es','country'=>'es_ES'],
             'fr'=>['name'=>'French','native'=>'Français','target'=>'FR','flag'=>'fr','country'=>'fr_FR'],
@@ -32,9 +35,18 @@ final class MyUnaTranslatorEngine
         if (!$id || $id<1) throw new RuntimeException('Select a valid translation job.');
         return (int)$id;
     }
+    private function availablePresets()
+    {
+        if ($this->languagePresets!==null) return $this->languagePresets;
+        $settings=$this->store->settings();
+        return $this->languagePresets=($settings['provider']??'deepl')==='libre' ? self::presets($this->provider()->languages()) : self::presets();
+    }
     public function snapshot()
     {
-        return ['settings'=>$this->store->publicSettings(),'languages'=>$this->store->coverage(self::presets()),
+        $error='';
+        try { $presets=$this->availablePresets(); }
+        catch (RuntimeException $e) { $presets=[]; $error=$e->getMessage(); }
+        return ['settings'=>$this->store->publicSettings(),'languages'=>$this->store->coverage($presets),'language_error'=>$error,
             'categories'=>$this->store->categories(),'jobs'=>$this->store->jobs()];
     }
     public function dispatch($action,array $data)
@@ -48,7 +60,7 @@ final class MyUnaTranslatorEngine
         try {
             switch ($action) {
                 case 'delete_job': $id=$this->id($data); $this->store->deleteJob($id); return ['deleted'=>true,'job_id'=>$id];
-            case 'settings': return ['settings'=>$this->store->saveSettings($data)];
+            case 'settings': $this->languagePresets=null; return ['settings'=>$this->store->saveSettings($data)];
                 case 'usage': return ['usage'=>$this->provider()->usage()];
                 case 'create': return $this->create($data);
                 case 'batch': return $this->batch($this->id($data));
@@ -67,7 +79,7 @@ final class MyUnaTranslatorEngine
     {
         $targets=$data['targets']??[];
         if (!is_array($targets) || !$targets || count($targets)>5) throw new RuntimeException('Select one to five target languages.');
-        $presets=self::presets();
+        $presets=$this->availablePresets();
         foreach ($targets as $target) if (!is_string($target) || !isset($presets[$target])) throw new RuntimeException('Select supported target languages.');
         $targets=array_values(array_unique($targets));
         $category=filter_var($data['category_id']??0,FILTER_VALIDATE_INT);
@@ -124,6 +136,8 @@ final class MyUnaTranslatorEngine
         }
         try {
             $provider=$this->provider();
+            $target=$this->availablePresets()[$code]['target']??null;
+            if (!$target) throw new RuntimeException('This job language is not available from the selected provider. Restore its provider or load the required language model.');
             if ($estimated) {
                 $usage=$provider->usage();
                 if ($usage['remaining']!==null && $usage['remaining']<$estimated) throw new RuntimeException('The remaining DeepL character allowance is below the next batch estimate.');
@@ -132,7 +146,7 @@ final class MyUnaTranslatorEngine
             foreach ($rows as $row) $this->store->changeItem($row['id'],['state'=>'processing']);
             $reserved=(int)$job['spent']+$estimated;
             $this->store->changeJob($id,['status'=>'running','spent'=>$reserved,'error'=>'']); $this->store->q('COMMIT');
-            $translations=$provider->translate(array_column($rows,'source'),self::presets()[$code]['target']);
+            $translations=$provider->translate(array_column($rows,'source'),$target);
             $billed=0; $this->store->q('START TRANSACTION');
             foreach ($rows as $i=>$row) {
                 $this->store->changeItem($row['id'],['state'=>'staged','result'=>$translations[$i]['text'],'error'=>'']);
@@ -195,7 +209,7 @@ final class MyUnaTranslatorEngine
             if (!$source || $source['source']!==$item['source'] || $source['key_name']!==$item['key_name']) { $this->store->changeItem($item['id'],['state'=>'conflict','error'=>'English source changed after the preview.']); continue; }
             try { MyUnaTranslatorText::validate($item['source'],$item['result']); }
             catch(RuntimeException $e) { $this->store->changeItem($item['id'],['state'=>'conflict','error'=>'This preview changed protected content and was not applied.']); continue; }
-            $langId=$this->store->ensureLanguage($item['language'],self::presets()[$item['language']],$id);
+            $langId=$this->store->ensureLanguage($item['language'],MyUnaTranslatorLanguages::preset($item['language']),$id);
             $now=$this->store->valueNow($item['key_id'],$langId);
             if ($item['state']==='applying' && $now===$item['result']) { $this->store->changeItem($item['id'],['state'=>'applied']); continue; }
             if ($now!==$item['before_value']) { $this->store->changeItem($item['id'],['state'=>'conflict','error'=>'Destination text changed after the preview.']); continue; }

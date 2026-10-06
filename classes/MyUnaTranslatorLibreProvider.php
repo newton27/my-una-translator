@@ -1,5 +1,6 @@
 <?php defined('BX_DOL') or die('hack attempt');
 require_once __DIR__.'/MyUnaTranslatorLibreTerms.php';
+require_once __DIR__.'/MyUnaTranslatorLanguages.php';
 
 /** Plain-text fragment transport: UNA's protected content stays on the site. */
 final class MyUnaTranslatorLibreProvider
@@ -8,7 +9,6 @@ final class MyUnaTranslatorLibreProvider
     private $key;
     private $transport;
     private $useTerminology;
-    private const TARGETS=['ES'=>'es','FR'=>'fr','DE'=>'de','PT-BR'=>'pt-BR','ZH-HANS'=>'zh-Hans'];
 
     public static function endpoint($url)
     {
@@ -31,7 +31,7 @@ final class MyUnaTranslatorLibreProvider
     }
     public function translate(array $sources,$target)
     {
-        if (!isset(self::TARGETS[$target])) throw new RuntimeException('Unsupported LibreTranslate target language.');
+        $libreTarget=MyUnaTranslatorLanguages::libreTarget($target);
         if (!$sources || count($sources)>20) throw new RuntimeException('Use 1–20 keys per LibreTranslate batch.');
         $packets=[]; $texts=[]; $positions=[]; $result=[]; $segments=[]; $termCounts=[];
         foreach(array_values($sources) as $i=>$source) {
@@ -46,7 +46,7 @@ final class MyUnaTranslatorLibreProvider
         }
         $translated=[];
         foreach(array_chunk($texts,20) as $chunk) {
-            $body=['q'=>$chunk,'source'=>'en','target'=>self::TARGETS[$target],'format'=>'text'];
+            $body=['q'=>$chunk,'source'=>'en','target'=>$libreTarget,'format'=>'text'];
             if ($this->key!=='') $body['api_key']=$this->key;
             $json=json_encode($body,JSON_UNESCAPED_UNICODE|JSON_THROW_ON_ERROR);
             if (strlen($json)>120000) throw new RuntimeException('LibreTranslate fragment request is too large.');
@@ -70,12 +70,10 @@ final class MyUnaTranslatorLibreProvider
     }
     public function usage()
     {
-        $rows=$this->request('GET','/languages'); $targets=[];
-        foreach($rows as $row) if (is_array($row) && ($row['code']??'')==='en') $targets=$row['targets']??[];
-        if (!is_array($targets) || array_diff(array_values(self::TARGETS),$targets))
-            throw new RuntimeException('LibreTranslate needs English routes to es, fr, de, pt-BR and zh-Hans. Load all five target models with LibreTranslate 1.8.4 or newer.');
-        return ['used'=>null,'limit'=>null,'remaining'=>null,'provider'=>'libre','available'=>true];
+        $targets=MyUnaTranslatorLanguages::fromLibre($this->languages());
+        return ['used'=>null,'limit'=>null,'remaining'=>null,'provider'=>'libre','available'=>true,'target_count'=>count($targets)];
     }
+    public function languages() { return $this->request('GET','/languages'); }
     private function request($method,$path,$body=null)
     {
         $headers=['Content-Type: application/json'];
@@ -104,7 +102,7 @@ final class MyUnaTranslatorLibreProvider
         }
         $response=''; $tooLarge=false; $ch=curl_init($this->url.$path);
         curl_setopt_array($ch,[CURLOPT_CUSTOMREQUEST=>$method,CURLOPT_HTTPHEADER=>$headers,CURLOPT_RETURNTRANSFER=>false,
-            CURLOPT_CONNECTTIMEOUT=>10,CURLOPT_TIMEOUT=>90,CURLOPT_FOLLOWLOCATION=>false,CURLOPT_SSL_VERIFYPEER=>true,CURLOPT_SSL_VERIFYHOST=>2,
+            CURLOPT_CONNECTTIMEOUT=>$path==='/languages'?3:10,CURLOPT_TIMEOUT=>$path==='/languages'?5:90,CURLOPT_FOLLOWLOCATION=>false,CURLOPT_SSL_VERIFYPEER=>true,CURLOPT_SSL_VERIFYHOST=>2,
             CURLOPT_PROTOCOLS=>CURLPROTO_HTTP|CURLPROTO_HTTPS,CURLOPT_RESOLVE=>$resolve,
             CURLOPT_WRITEFUNCTION=>function($curl,$part)use(&$response,&$tooLarge){if(strlen($response)+strlen($part)>1048576){$tooLarge=true;return 0;}$response.=$part;return strlen($part);}]);
         if ($body!==null) curl_setopt($ch,CURLOPT_POSTFIELDS,$body);

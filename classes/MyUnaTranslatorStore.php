@@ -73,10 +73,13 @@ final class MyUnaTranslatorStore
     }
     public function coverage(array $presets)
     {
-        $result = [];
+        $result = []; $englishId=$presets ? $this->englishId() : 0; $sourceTotal=null;
         foreach ($presets as $code => $preset) {
             $lang = $this->language($code); $id = (int)($lang['ID'] ?? 0);
-            $c = $this->row("SELECT COUNT(*) AS total,COALESCE(SUM(t.IDKey IS NULL OR t.String=''),0) AS missing,COALESCE(SUM(t.IDKey IS NOT NULL AND t.String<>'' AND BINARY t.String=BINARY e.String),0) AS english_copies FROM sys_localization_strings e LEFT JOIN sys_localization_strings t ON t.IDKey=e.IDKey AND t.IDLanguage=? WHERE e.IDLanguage=? AND e.String<>''", $id,$this->englishId());
+            if (!$id) {
+                if ($sourceTotal===null) $sourceTotal=(int)$this->one("SELECT COUNT(*) FROM sys_localization_strings WHERE IDLanguage=? AND String<>''",$englishId);
+                $c=['total'=>$sourceTotal,'missing'=>$sourceTotal,'english_copies'=>0];
+            } else $c = $this->row("SELECT COUNT(*) AS total,COALESCE(SUM(t.IDKey IS NULL OR t.String=''),0) AS missing,COALESCE(SUM(t.IDKey IS NOT NULL AND t.String<>'' AND BINARY t.String=BINARY e.String),0) AS english_copies FROM sys_localization_strings e LEFT JOIN sys_localization_strings t ON t.IDKey=e.IDKey AND t.IDLanguage=? WHERE e.IDLanguage=? AND e.String<>''", $id,$englishId);
             $result[] = array_merge($preset,['code'=>$code,'installed'=>$id>0,'enabled'=>!empty($lang['Enabled']),
                 'total'=>(int)$c['total'],'missing'=>(int)$c['missing'],'english_copies'=>(int)$c['english_copies'],
                 'translated'=>(int)$c['total']-(int)$c['missing']-(int)$c['english_copies']]);
@@ -148,7 +151,8 @@ final class MyUnaTranslatorStore
     public function ensureLanguage($code, array $preset, $jobId)
     {
         $lang=$this->language($code); if ($lang) return (int)$lang['ID'];
-        $this->q("INSERT INTO sys_localization_languages (Name,Flag,Title,Direction,LanguageCountry,Enabled) VALUES (?,?,?,'LTR',?,0)",$code,$preset['flag'],$preset['native'],$preset['country']);
+        $direction=($preset['direction']??'LTR')==='RTL'?'RTL':'LTR';
+        $this->q("INSERT INTO sys_localization_languages (Name,Flag,Title,Direction,LanguageCountry,Enabled) VALUES (?,?,?,?,?,0)",$code,$preset['flag'],$preset['native'],$direction,$preset['country']);
         $id=$this->lastId(); $this->q('INSERT INTO my_una_translator_languages (language,language_id,job_id) VALUES (?,?,?)',$code,$id,(int)$jobId); return $id;
     }
     public function applyValue(array $item,$langId)
