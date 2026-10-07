@@ -6,7 +6,7 @@ The Studio key console lets a Myunaworld administrator issue one LibreTranslate 
 
 - Studio accepts only authenticated administrator POST requests protected by the module CSRF token.
 - PHP sends a bounded JSON request over /run/my-una-translator/key-manager.sock; the manager accepts connections only from the configured PHP worker UID using Unix peer credentials. It does not listen on TCP.
-- The manager validates a fixed operation allowlist and invokes the configured ltmanage command with argument arrays, not a shell.
+- The manager validates a fixed operation allowlist and sends bounded argument JSON through private stdin to the configured management adapter, without a shell or secrets in OS command lines.
 - LibreTranslate stores the active key and limits in its API-key database. The manager stores a Fernet-encrypted copy only so it can revoke the key later. The Fernet key must be readable only by the manager account.
 - The manager list response contains key ID, site label, hostname, limits, state, timestamps, and a short fingerprint only. It never returns the secret.
 
@@ -22,3 +22,7 @@ This repository does not install or configure a LibreTranslate service on Myunaw
 6. Verify in a non-production test site that issue creates a limited key, the list hides secrets, rotation leaves the old key usable, and revocation removes it. Confirm the PHP worker can reach the socket but other users cannot.
 
 The example service unit is a template. It must be adapted to the actual Myunaworld installation and is not a deploy instruction. No service or live API key is changed by this repository work.
+
+## Required private management adapter
+
+Install the root-owned /usr/local/bin/my-una-ltmanage launcher which imports services.key_manager.ltmanage_stdin.main from /opt/my-una-translator and calls it. This manager requires the stdin adapter rather than a direct ltmanage executable. The adapter loads the official management-only LibreTranslate runtime from /opt/my-una-translator/ltmanage-runtime; pin it to the active engine version, use a package initializer which does not import the translation engine, and install requests and expiringdict. Never put customer secrets in OS arguments. See KEY-ISSUER-DEPLOYMENT.md for the deployed topology and revocation delay.

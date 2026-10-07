@@ -108,7 +108,7 @@ class KeyManager:
 
     def _run(self, args):
         try:
-            proc = subprocess.run([self.ltmanage, *args], stdin=subprocess.DEVNULL,
+            proc = subprocess.run([self.ltmanage], input=json.dumps(args),
                 stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, timeout=20,
                 check=False, env={'PATH':'/usr/bin:/bin', 'LANG':'C.UTF-8'})
         except (OSError, subprocess.TimeoutExpired) as exc:
@@ -189,6 +189,7 @@ class KeyManager:
         if current is None or current['status'] != 'active':
             raise ManagerError('Only an active key can be rotated.')
         replacement = {name: value for name, value in payload.items() if name != 'key_id'}
+        replacement['operation'] = 'rotate'
         result = self.create(replacement)
         result['replaces_key_id'] = key_id
         return result
@@ -211,8 +212,8 @@ class KeyManager:
             row = db.execute('SELECT * FROM customer_keys WHERE id=?', (key_id,)).fetchone()
             if row is None:
                 raise ManagerError('Key record was not found.')
-                if row['status'] == 'revoked':
-                    return {'key_id':key_id,'status':'revoked'}
+            if row['status'] == 'revoked':
+                return {'key_id':key_id,'status':'revoked'}
             secret = self._cipher().decrypt(row['secret_ciphertext']).decode()
             self._remove(secret)
             db.execute("UPDATE customer_keys SET status='revoked',revoked_at=? WHERE id=?", (self._now(),key_id))

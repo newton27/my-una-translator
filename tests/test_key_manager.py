@@ -7,7 +7,7 @@ from services.key_manager.manager import KeyManager, ManagerError
 
 FAKE_LTmanage = '''#!/usr/bin/env python3
 import sqlite3, sys, uuid
-args = sys.argv[1:]
+import json\nif len(sys.argv) != 1: sys.exit(22)\nargs = json.loads(sys.stdin.read())
 db = args[args.index('--api-keys-db-path') + 1]
 conn = sqlite3.connect(db)
 conn.execute('CREATE TABLE IF NOT EXISTS api_keys (api_key TEXT PRIMARY KEY, req_limit INTEGER NOT NULL, char_limit INTEGER)')
@@ -96,6 +96,30 @@ class KeyManagerTests(unittest.TestCase):
         self.assertEqual('www.customer.example', self.manager.list_metadata()[0]['hostname'])
         with self.assertRaises(ManagerError):
             self.create(hostname='https://customer.example', request_id='request-0000000002')
+
+    def test_revoke_is_idempotent_without_repeating_cli_or_audit(self):
+        issued = self.create()
+        payload = {'key_id': issued['key_id'], 'actor': 'admin-7'}
+        first = self.manager.revoke(payload)
+        self.cli.unlink()
+        self.assertEqual(first, self.manager.revoke(payload))
+        with sqlite3.connect(self.store_db) as db:
+            self.assertEqual(1, db.execute("SELECT COUNT(*) FROM audit WHERE event='revoked'").fetchone()[0])
+
+    def test_rotate_records_rotation_operation(self):
+        old = self.create()
+        self.manager.rotate({'key_id': old['key_id'], 'site_label': 'Customer UNA', 'hostname': 'customer.example',
+            'requests_per_minute': 60, 'characters_per_request': 4000, 'request_id': 'request-0000000002', 'actor': 'admin-7'})
+        self.assertEqual(['create', 'rotate'], sorted(row['operation'] for row in self.manager.list_metadata()))
+
+    def test_cli_receives_secrets_via_stdin_only(self):
+        self.cli.write_text(FAKE_LTmanage.replace('args = sys.argv[1:]', 'import json\nif len(sys.argv) != 1: sys.exit(22)\nargs = json.loads(sys.stdin.read())'))
+        issued = self.create()
+        with sqlite3.connect(self.lt_db) as db:
+            self.assertEqual((60, 4000), db.execute('SELECT req_limit, char_limit FROM api_keys WHERE api_key=?', (issued['secret'],)).fetchone())
+        self.manager.revoke({'key_id': issued['key_id'], 'actor': 'admin-7'})
+        with sqlite3.connect(self.lt_db) as db:
+            self.assertEqual(0, db.execute('SELECT COUNT(*) FROM api_keys').fetchone()[0])
 
     def test_revoke_does_not_return_secret(self):
         issued = self.create()
