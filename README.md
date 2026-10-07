@@ -1,10 +1,10 @@
-# My UNA Translator 0.1.9 RC 3
+# My UNA Translator 0.1.9 RC 4
 
-Native UNA 15 Studio module by My UNA World. Translates English interface language keys using a configured LibreTranslate service or DeepL API Free/Pro. RC 3 combines the server-language picker and guided workflow with the Arabic target and customer API-key tools from RC 2. UNA's manifest version remains 0.1.9.
+Native UNA 15 Studio module by My UNA World. Translates English interface language keys using a configured LibreTranslate service or DeepL API Free/Pro. RC 4 retains the server-language picker, guided workflow and Arabic support. Server-side key issuance is managed separately by the service operator. UNA's manifest version remains 0.1.9.
 
 ## Install and package scope
 
-Extract `my-una-translator-0.1.9-rc.3.zip` into `modules/newton/`. Its single root folder is `my_una_translator/`; the manifest must be at `modules/newton/my_una_translator/install/config.php`. Open **Studio → App Store → Downloaded**, then install and enable **My UNA Translator**. A hosting ZIP uploader may place the folder for you; Module Doctor's reference upload audits a package and does not deploy its files.
+Extract `my-una-translator-0.1.9-rc.4.zip` into `modules/newton/`. Its single root folder is `my_una_translator/`; the manifest must be at `modules/newton/my_una_translator/install/config.php`. Open **Studio → App Store → Downloaded**, then install and enable **My UNA Translator**. A hosting ZIP uploader may place the folder for you; Module Doctor's reference upload audits a package and does not deploy its files.
 
 Requires PHP 8.1 or newer with cURL, DOM, mbstring and OpenSSL, MySQL/MariaDB advisory locks, writable UNA language caches and connectivity to the selected provider. LibreTranslate accepts an HTTPS base URL or exact loopback HTTP at `127.0.0.1`.
 
@@ -24,9 +24,9 @@ Missing or blank destination text is eligible. Existing English copies are eligi
 
 Placeholders, HTML, links, email addresses and supported product names stay local and are validated after reconstruction. Generation runs in small sequential batches. Pause takes effect after the current request; limits are checked before each request. Apply and rollback use saved data. Later manual edits survive rollback and appear as conflicts. Removing saved job history keeps applied text and native language registration.
 
-## Customer API keys
+## Connecting to the shared service
 
-The preserved **LibreTranslate customer API keys** panel supports issuing, listing, rotating and revoking keys. It needs the separately configured local key-manager service and authenticated administrator access. Secrets are displayed once and encrypted in storage; rotate a key and update the customer site before revoking its predecessor. Module installation alone does not configure that service. See [customer-key setup](docs/libretranslate-customer-keys.md).
+For the My UNA World LibreTranslate service, request a site-specific key from the service operator. Save that key with the HTTPS base URL in Provider settings. Issuing, rotating and revoking service keys is performed in the operator’s separate administrator page; those tools are not part of this customer module.
 
 ## Credentials and data
 
@@ -36,7 +36,7 @@ Disabling retains module data and restores the standard selector. Uninstall remo
 
 ## Validation
 
-See [RELEASE.md](docs/RELEASE.md) for RC 3 provenance and gates, and [server-language support](docs/SERVER-LANGUAGES.md) for discovery, aliases, RTL handling and timeout behavior.
+See [RELEASE.md](docs/RELEASE.md) for RC 4 provenance and gates, and [server-language support](docs/SERVER-LANGUAGES.md) for discovery, aliases, RTL handling and timeout behavior.
 
 ```sh
 php tests/server_languages.php
@@ -44,10 +44,9 @@ php tests/language_targets.php
 php tests/libretranslate_quality_gate.php
 php tests/curl_language_timeout.php
 node --test tests/workflow.cjs
-node --test tests/key_console.cjs
-python3 -m unittest discover -s tests -p 'test_key_manager*.py'
+python3 -m unittest discover -s tests -p test_release_boundary.py
 ```
 
-The server-language suite uses an isolated SQLite fixture. The timeout test uses an ephemeral loopback server and requires cURL and proc_open. Key-manager tests use temporary storage and a fake LibreTranslate management command; they require Python cryptography.
+The server-language suite uses an isolated SQLite fixture. The timeout test uses an ephemeral loopback server and requires cURL and proc_open.
 
-The curated quality test verifies 45 exact local terminology outputs in five languages. It does not certify general model output, all 49 language models, or a stable provider default. Historical model samples and earlier baseline checks remain in [VALIDATION.md](docs/VALIDATION.md); they are separate from the RC 3 checks. Wider human linguistic review and native install/update validation remain outstanding.
+The curated quality test verifies 45 exact local terminology outputs in five languages. It does not certify general model output, all 49 language models, or a stable provider default. Historical model samples and earlier baseline checks remain in [VALIDATION.md](docs/VALIDATION.md); they are separate from the RC 4 checks. Wider human linguistic review and native install/update validation remain outstanding.
