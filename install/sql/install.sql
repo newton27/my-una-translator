@@ -2,11 +2,11 @@ CREATE TABLE `my_una_translator_settings` (
   `id` tinyint unsigned NOT NULL,
   `plan` varchar(8) NOT NULL DEFAULT 'free',
   `api_key` text NOT NULL,
-  `provider` varchar(16) NOT NULL DEFAULT 'deepl',
-  `libre_url` varchar(500) NOT NULL DEFAULT '',
+  `provider` varchar(16) NOT NULL DEFAULT 'libre',
+  `libre_url` varchar(500) NOT NULL DEFAULT 'https://myunaworld.com/translator-api',
   `libre_key` text NOT NULL,
   `batch_size` tinyint unsigned NOT NULL DEFAULT 20,
-  `character_budget` bigint unsigned NOT NULL DEFAULT 500000,
+  `character_budget` bigint unsigned NOT NULL DEFAULT 5000000,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 INSERT INTO `my_una_translator_settings` (`id`,`api_key`,`libre_key`) VALUES (1,'','');

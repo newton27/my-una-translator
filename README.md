@@ -12,7 +12,7 @@ This is a full module prerelease. Native fresh-install and version-update valida
 
 ## Translate
 
-Configure the provider once in **Provider settings**. For LibreTranslate, enter the service base URL and any required API key. For DeepL, choose its API Free or Pro endpoint and enter the API key; a normal DeepL website subscription is separate. Existing saved provider settings are preserved.
+New installations default to LibreTranslate at `https://myunaworld.com/translator-api`, 20 keys per batch, and a 5,000,000-character ceiling for new jobs. These match the My UNA World operating settings; the public HTTPS route works for customer sites. Each site must save its own service API key in **Provider settings**. The key is not included in the package. Existing saved provider settings and existing job ceilings are preserved during file updates. For LibreTranslate, confirm the service base URL and save the site-specific API key. For DeepL, choose its API Free or Pro endpoint and enter the API key; a normal DeepL website subscription is separate. Existing saved provider settings are preserved.
 
 1. **Choose languages.** Search by native name, English name or code. LibreTranslate shows installed destinations reachable from English (49 on the checked server). DeepL retains six presets, including Arabic. Select one to five languages and create a plan. Scope and character limits are available in the expandable controls.
 2. **Generate and review.** Generate the preview, or explicitly open a saved job and resume it. Review English and translated text side by side. Progress opens while work runs; hiding it keeps the work running while the Studio page stays open. Saved pause reasons remain beside the recovery action. Generation does not apply translations.
