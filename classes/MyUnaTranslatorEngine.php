@@ -154,6 +154,12 @@ final class MyUnaTranslatorEngine
                 $billed+=(int)$translations[$i]['billed'];
             }
             $this->store->changeJob($id,['spent'=>(int)$job['spent']+$billed]); $this->store->q('COMMIT');
+        } catch (MyUnaTranslatorRateLimitException $e) {
+            $this->store->q('START TRANSACTION');
+            foreach ($rows as $row) $this->store->changeItem($row['id'],['state'=>'pending','error'=>'']);
+            $this->store->changeJob($id,['status'=>'running','spent'=>(int)$job['spent'],'error'=>'LibreTranslate rate limited; automatic retry scheduled.']);
+            $this->store->q('COMMIT');
+            return ['job'=>$this->store->job($id),'more'=>true,'retry_after'=>$e->retryAfter()];
         } catch (Throwable $e) {
             $this->store->q('ROLLBACK');
             $safe=get_class($e)==='RuntimeException' ? $e->getMessage() : 'The translation batch could not be saved. Check provider usage before retrying.';

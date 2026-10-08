@@ -3,6 +3,13 @@ require_once __DIR__.'/MyUnaTranslatorLibreTerms.php';
 require_once __DIR__.'/MyUnaTranslatorLanguages.php';
 
 /** Plain-text fragment transport: UNA's protected content stays on the site. */
+class MyUnaTranslatorRateLimitException extends RuntimeException
+{
+    private $retryAfterSeconds;
+    public function __construct($message, $retryAfterSeconds) { parent::__construct($message); $this->retryAfterSeconds=max(1,(int)$retryAfterSeconds); }
+    public function retryAfter() { return $this->retryAfterSeconds; }
+}
+
 final class MyUnaTranslatorLibreProvider
 {
     private $url;
@@ -77,17 +84,29 @@ final class MyUnaTranslatorLibreProvider
     private function request($method,$path,$body=null)
     {
         $headers=['Content-Type: application/json'];
+        $response=[]; $status=0;
         $response=$this->transport ? call_user_func($this->transport,$method,$this->url.$path,$headers,$body) : $this->curl($method,$path,$headers,$body);
         $status=(int)($response['status']??0);
+        if ($status===429) {
+            $retryAfter=null;
+            foreach (($response['headers']??[]) as $name=>$value) { if (strcasecmp((string)$name,'Retry-After')===0) { $retryAfter=$value; break; } }
+            $delay=$this->retryDelay($retryAfter);
+            throw new MyUnaTranslatorRateLimitException('LibreTranslate rate limited this batch.', $delay);
+        }
         if ($status!==200) {
-            $errors=[403=>'LibreTranslate rejected access. Check its API key and access settings.',429=>'LibreTranslate is busy or rate limited. The job is paused; resume later.'];
-            throw new RuntimeException($errors[$status]??'LibreTranslate request failed (HTTP '.$status.'). No automatic retry was made.');
+            $errors=[403=>'LibreTranslate rejected access. Check its API key and access settings.',429=>'LibreTranslate remained rate limited after two retries. The job is paused with its saved preview intact; resume later.'];
+            throw new RuntimeException($errors[$status]??'LibreTranslate request failed (HTTP '.$status.').');
         }
         if (!is_string($response['body']??null) || strlen($response['body'])>1048576) throw new RuntimeException('LibreTranslate response exceeded the safe size limit.');
-        try { $data=json_decode($response['body'],true,512,JSON_THROW_ON_ERROR); }
-        catch(Throwable $e) { throw new RuntimeException('LibreTranslate returned invalid JSON.'); }
+        try { $data=json_decode($response['body'],true,512,JSON_THROW_ON_ERROR); } catch (Throwable $e) { throw new RuntimeException('LibreTranslate returned invalid JSON.'); }
         if (!is_array($data)) throw new RuntimeException('LibreTranslate returned an invalid response.');
         return $data;
+    }
+    private function retryDelay($retryAfter)
+    {
+        if (is_string($retryAfter) && preg_match('/^\d{1,4}$/',trim($retryAfter))) return min(300,(int)trim($retryAfter));
+        if (is_string($retryAfter) && trim($retryAfter)!=='') { $when=strtotime($retryAfter); if ($when!==false) return min(300,max(0,$when-time())); }
+        return 60;
     }
     private function curl($method,$path,$headers,$body)
     {
@@ -100,14 +119,14 @@ final class MyUnaTranslatorLibreProvider
                 throw new RuntimeException('Use a public HTTPS LibreTranslate host, or exact local loopback HTTP.');
             $resolve=[$host.':'.$port.':'.$ips[0]];
         }
-        $response=''; $tooLarge=false; $ch=curl_init($this->url.$path);
-        curl_setopt_array($ch,[CURLOPT_CUSTOMREQUEST=>$method,CURLOPT_HTTPHEADER=>$headers,CURLOPT_RETURNTRANSFER=>false,
+        $response=''; $responseHeaders=[]; $tooLarge=false; $ch=curl_init($this->url.$path);
+        curl_setopt_array($ch,[CURLOPT_HEADERFUNCTION=>static function($curl,$line) use (&$responseHeaders) { $length=strlen($line); $parts=explode(':',$line,2); if (count($parts)===2) $responseHeaders[trim($parts[0])]=trim($parts[1]); return $length; },CURLOPT_CUSTOMREQUEST=>$method,CURLOPT_HTTPHEADER=>$headers,CURLOPT_RETURNTRANSFER=>false,
             CURLOPT_CONNECTTIMEOUT=>$path==='/languages'?3:10,CURLOPT_TIMEOUT=>$path==='/languages'?5:90,CURLOPT_FOLLOWLOCATION=>false,CURLOPT_SSL_VERIFYPEER=>true,CURLOPT_SSL_VERIFYHOST=>2,
             CURLOPT_PROTOCOLS=>CURLPROTO_HTTP|CURLPROTO_HTTPS,CURLOPT_RESOLVE=>$resolve,
             CURLOPT_WRITEFUNCTION=>function($curl,$part)use(&$response,&$tooLarge){if(strlen($response)+strlen($part)>1048576){$tooLarge=true;return 0;}$response.=$part;return strlen($part);}]);
         if ($body!==null) curl_setopt($ch,CURLOPT_POSTFIELDS,$body);
         $ok=curl_exec($ch); $status=(int)curl_getinfo($ch,CURLINFO_RESPONSE_CODE); curl_close($ch);
         if ($ok===false) throw new RuntimeException($tooLarge?'LibreTranslate response exceeded the safe size limit.':'LibreTranslate connection failed. Check the service before resuming.');
-        return ['status'=>$status,'body'=>$response];
+        return ['status'=>$status,'headers'=>$responseHeaders,'body'=>$response];
     }
 }
