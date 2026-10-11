@@ -20,7 +20,7 @@
   function renderStatus() {
     const p = activeJob ? MyUnaTranslatorProgress(activeJob, operation) : null;
     find('mut-status-job').textContent = activeJob ? label('job') + ' #' + Number(activeJob.id) + ' · ' + activeJob.targets.map(code => snapshot.languages.find(l => l.code === code)?.native || code).join(', ') : label('no_job_selected');
-    find('mut-status-state').textContent = busy && operation ? label(operation === 'batch' ? 'generating' : operation === 'apply' ? 'applying' : 'rolling_back') : activeJob ? stateLabel(activeJob.status) : label('working');
+    find('mut-status-state').textContent = busy && operation ? label(operation === 'batch' ? 'generating' : operation === 'apply' ? 'applying' : 'rolling_back') : activeJob ? stateLabel(activeJob.status) : label('no_job_selected');
     const bar = find('mut-status-progress');
     bar.hidden = !p;
     if (p) bar.value = p.percent;

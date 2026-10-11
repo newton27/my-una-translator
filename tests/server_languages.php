@@ -141,7 +141,7 @@ check('Studio dashboard renders six read-only cards and keeps translation workfl
         && str_contains($html,'2,206')
         && $x->query('//article[span[@class="mut-summary-label" and normalize-space(.)="Recent jobs"]]/strong[normalize-space(.)="2"]')->length===1
         && str_contains($html,'0 active · 1 paused · 1 ready/applied')
-        && str_contains($html,'translator.css?v=0.1.9-dashboard2')
+        && str_contains($html,'translator.css?v=0.1.10-rc1')
         && $x->query('//*[@id="mut-create"]')->length===1
         && $x->query('//*[@id="mut-job-select"]')->length===1
         && $x->query('//*[@id="mut-status-dialog"]')->length===1

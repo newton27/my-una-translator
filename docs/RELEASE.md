@@ -1,25 +1,37 @@
-# My UNA Translator 0.1.9 RC 4 candidate
+# My UNA Translator 0.1.10 RC 1 - unpublished release candidate
 
-Native manifest: 0.1.9. Proposed tag: v0.1.9-rc.4. This candidate separates service-operator tooling from the customer Translator package.
+Native UNA manifest: 0.1.10. Proposed tag: v0.1.10-rc.1 (NOT CREATED).
+Target: UNA 15.0.0-RC2. Vendor: My UNA World.
 
-The module retains provider URL/key settings, language discovery, Arabic support, the guided Choose → Generate and review → Apply workflow, and native language visibility. The operator's Studio key issuer, PHP socket client, JavaScript, backend manager, deployment unit, tests and operational documentation are not included.
+## Scope and provenance
 
-Source and package-boundary verification are recorded in BUILD.json and the frozen asset checksum. RC 3 remains a historical immutable release; this candidate does not rewrite it.
+- Base: published v0.1.9-rc.4 release and GitHub main at fd378dd8ee995aa65d6e445c85a264ac137aa30a.
+- The separately reconciled six-card graphical dashboard is carried forward from the tested MyUNAWorld UI. The rendered cards use read-only snapshot data.
+- The progress popup now correctly shows No job selected on a fresh site, while saved jobs and active translation work keep their actual status.
+- New native manifest version 0.1.10 permits a real native update from 0.1.9. The updater stages ONLY classes/MyUnaTranslatorStudioPage.php, template/css/translator.css, template/js/translator.js, and install/config.php, with no SQL or language migration.
+- Unchanged RC4 provider, translation engine, Arabic support, rate-limit behavior, job persistence, language records, operator-issuer exclusion and protected-markup validation are preserved.
+- No production provider keys, live translation jobs, or server-operator issuer scripts are distributed.
 
-Validation includes PHP syntax, workflow JavaScript, isolated language/provider fixtures and explicit package-boundary checks. The separate operator deployment is tested independently. Native fresh install/update and broader human linguistic review remain NOT TESTED; no updater package or stable-quality certification is claimed.
+## Candidate packages
 
-Publication of this prerelease was explicitly approved on 2026-10-07.
+- my-una-translator-0.1.10-rc.1.zip - full native Studio install rooted at my_una_translator/.
+- my-una-translator-update-0.1.9-to-0.1.10-rc.1.zip - updater directory rooted at my_una_translator/updates/update_0.1.9_0.1.10/.
+- Candidate source and assets are LOCAL ONLY. GitHub tag, release, and asset publishing are NOT AUTHORIZED by the current approval.
+- Package output, exact hashes, and frozen source commit must be recorded outside the ZIP after the final builds.
 
-## Frozen source and checks
+## Verification checkpoint
 
-Authoritative runtime source: 723e0d9ce05a8ef91e32cb6831a66f8355ffb86f, tree 68bf37ed6a4c4efe9e4316e483028130b0d330a1. The following provenance commit updates only BUILD.json and this release record. Native manifest and vendor remain 0.1.9 / My UNA World.
+- Native full install of the prior dashboard prototype (manifest 0.1.9) passed on manofteal.com through authenticated UNA Studio.
+- 38 prototype files matched exactly after install; 18 PHP files and runtime JavaScript lint passed. The Studio launcher, graphical cards, workflow controls, and Downloaded Info popup displayed correctly.
+- Man of Teal's empty Translator instance preserved unconfigured provider settings, empty keys and zero translation jobs. Preinstall database + UNA core/config backup was verified; unrelated large media were not backed up.
+- The 0.1.10 status-popup regression suite verifies empty, ready, and active progress states without provider requests.
+- The native 0.1.9 to 0.1.10 upgrade must be tested independently, including checksum preflight and preservation of existing settings and data.
+- Fresh native installation of 0.1.10 itself is NOT TESTED at this checkpoint.
+- General LibreTranslate linguistic quality still requires broader review. The 45 curated-string fixtures are NOT certification of all model outputs.
+- Mobile, alternate theme, Marketplace media and info screens for final RC1: further acceptance required where applicable.
 
-- PHP syntax: 22 files pass.
-- Customer language, timeout, protected-content and terminology fixtures: zero failures; 45 curated outputs verified.
-- Workflow JavaScript: 8 tests pass.
-- Operator exclusion: 3 explicit release-boundary tests pass.
-- Separate issuer: 16 Python tests, the asynchronous form test and controller security checks pass. Native Studio rendering and the independent live lifecycle passed; this is operator validation, not customer native-install certification.
-- Native fresh install/update: NOT TESTED.
-- General linguistic quality and Marketplace native Info/media: NOT TESTED.
+## Release protections
 
-No updater is supplied. This archive is a new prerelease candidate and does not replace historical RC3 bytes. Publication is approved; native validation remains outstanding.
+Do not present an existing 0.1.9 manual copy as a verified updater. No automatic checksum re-baselining or force-update setting is permitted to bypass drift. Do not overwrite frozen RC4 tag or ZIP. New GitHub publication requires separate explicit approval.
+
+Historical RC4 release documents and files are preserved in git history. The Studio app store Marketplace listing is not changed by these source preparations.

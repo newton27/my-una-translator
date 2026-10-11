@@ -1,14 +1,20 @@
-# My UNA Translator 0.1.9 RC 4
+# My UNA Translator 0.1.10 RC 1
 
-Native UNA 15 Studio module by My UNA World. Translates English interface language keys using a configured LibreTranslate service or DeepL API Free/Pro. RC 4 retains the server-language picker, guided workflow and Arabic support. Server-side key issuance is managed separately by the service operator. UNA's manifest version remains 0.1.9.
+Native UNA 15 Studio module by My UNA World. Translates English interface language keys using a configured LibreTranslate service or DeepL API Free/Pro. Version 0.1.10 retains the server-language picker, guided workflow and Arabic support. Server-side key issuance is managed separately by the service operator. The native manifest is 0.1.10; this is an unpublished release candidate.
 
 ## Install and package scope
 
-Extract `my-una-translator-0.1.9-rc.4.zip` into `modules/newton/`. Its single root folder is `my_una_translator/`; the manifest must be at `modules/newton/my_una_translator/install/config.php`. Open **Studio → App Store → Downloaded**, then install and enable **My UNA Translator**. A hosting ZIP uploader may place the folder for you; Module Doctor's reference upload audits a package and does not deploy its files.
+Extract `my-una-translator-0.1.10-rc.1.zip` into `modules/newton/`. Its single root folder is `my_una_translator/`; the manifest must be at `modules/newton/my_una_translator/install/config.php`. Open **Studio → App Store → Downloaded**, then install and enable **My UNA Translator**. A hosting ZIP uploader may place the folder for you; Module Doctor's reference upload audits a package and does not deploy its files.
 
 Requires PHP 8.1 or newer with cURL, DOM, mbstring and OpenSSL, MySQL/MariaDB advisory locks, writable UNA language caches and connectivity to the selected provider. LibreTranslate accepts an HTTPS base URL or exact loopback HTTP at `127.0.0.1`.
 
-This is a full module prerelease. Native fresh-install and version-update validation is incomplete. No 0.1.8-to-0.1.9 updater is included. The same-version workflow files were verified on an existing 0.1.9 site while preserving settings, saved jobs, native language records and translations; that file repair is not native update certification. Retain a normal site backup before testing.
+This is an unpublished full installer candidate and a separate native 0.1.9-to-0.1.10 updater candidate. A native Studio fresh install of the 0.1.9 dashboard prototype passed on Man of Teal; a native update to 0.1.10 must pass independently before publishing either package. The update replaces only the Studio dashboard, its stylesheet, the popup JavaScript and the version manifest; it deliberately leaves provider settings, saved jobs, translations and the other module source files intact. Do not uninstall an existing Translator to apply the update. Retain a normal site backup before testing.
+
+## Native update from 0.1.9
+
+Use the separately versioned `my-una-translator-update-0.1.9-to-0.1.10-rc.1.zip` to stage `my_una_translator/updates/update_0.1.9_0.1.10/` under the already installed module. In UNA Studio, open **Apps → Updates** and run the native updater. The installed 0.1.9 package should match the RC4 runtime or be reviewed for tracked checksum drift first. This updater is NOT a complete reinstall and has no database schema or job-data migration.
+
+The status popup shows **No job selected** on an empty installation rather than incorrectly reporting **Working...**. Actual running, ready and paused jobs retain their status display. The six-card dashboard remains read-only.
 
 ## Translate
 
@@ -36,17 +42,17 @@ Disabling retains module data and restores the standard selector. Uninstall remo
 
 ## Validation
 
-See [RELEASE.md](docs/RELEASE.md) for RC 4 provenance and gates, and [server-language support](docs/SERVER-LANGUAGES.md) for discovery, aliases, RTL handling and timeout behavior.
+See [RELEASE.md](docs/RELEASE.md) for 0.1.10 RC 1 provenance and gates, and [server-language support](docs/SERVER-LANGUAGES.md) for discovery, aliases, RTL handling and timeout behavior.
 
 ```sh
 php tests/server_languages.php
 php tests/language_targets.php
 php tests/libretranslate_quality_gate.php
 php tests/curl_language_timeout.php
-node --test tests/workflow.cjs
+node --test tests/workflow.cjs tests/status_popup.cjs
 python3 -m unittest discover -s tests -p test_release_boundary.py
 ```
 
 The server-language suite uses an isolated SQLite fixture. The timeout test uses an ephemeral loopback server and requires cURL and proc_open.
 
-The curated quality test verifies 45 exact local terminology outputs in five languages. It does not certify general model output, all 49 language models, or a stable provider default. Historical model samples and earlier baseline checks remain in [VALIDATION.md](docs/VALIDATION.md); they are separate from the RC 4 checks. Wider human linguistic review and native install/update validation remain outstanding.
+The curated quality test verifies 45 exact local terminology outputs in five languages. It does not certify general model output, all 49 language models, or a stable provider default. Historical model samples and earlier baseline checks remain in [VALIDATION.md](docs/VALIDATION.md); they are separate from the RC 4 checks. Wider human linguistic review and a native 0.1.9-to-0.1.10 update test remain outstanding at candidate preparation.
