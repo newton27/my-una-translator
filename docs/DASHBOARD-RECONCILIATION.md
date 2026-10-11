@@ -35,3 +35,13 @@ Six read-only graphical tiles summarize configured provider, installed and enabl
 - NOT TESTED: customer Downloaded info popup, cross-theme/mobile screen, broad native-speaker translation-quality acceptance.
 - RC4 BUILD.json and docs/RELEASE.md are historical records, not provenance for a new release. Update only after a future release build and frozen hashes.
 - GitHub push, tag, release and asset publication require separate explicit approval.
+
+## Smoke-package boundary verification (not for distribution)
+
+- Smoke installer candidate on the server: /root/my-una-translator-dashboard-smoke-20261011/my-una-translator-dashboard-smoke-20261011.zip
+- SHA-256: b42ae3a33f744796f95287417e0e86dd206aec1dd4dfd5a5dfc089394712ebbd
+- Installer ZIP contains exactly 38 files under a single my_una_translator root, including its UNA manifest, installer and Studio icon.
+- The originally published RC4 ZIP had 45 files, including seven fixture/test scripts. The isolated smoke test ZIP excludes that entire tests folder because installed runtime has no dependency on it. The tests remain in the source Git branch.
+- Smoke ZIP integrity and the matching .sha256 check PASS. No issuer/operator files, Git files, backup files, or tests are included.
+- The old RC4 BUILD.json and RELEASE.md remain inside the smoke package as historical metadata: THIS IS NOT A PUBLISHABLE RELEASE OR A VALIDATED UPDATER.
+- A future released package requires version/release metadata, independent native Studio installation and updater validation as applicable, and verified final asset hashes.
