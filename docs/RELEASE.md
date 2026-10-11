@@ -25,7 +25,10 @@ Target: UNA 15.0.0-RC2. Vendor: My UNA World.
 - 38 prototype files matched exactly after install; 18 PHP files and runtime JavaScript lint passed. The Studio launcher, graphical cards, workflow controls, and Downloaded Info popup displayed correctly.
 - Man of Teal's empty Translator instance preserved unconfigured provider settings, empty keys and zero translation jobs. Preinstall database + UNA core/config backup was verified; unrelated large media were not backed up.
 - The 0.1.10 status-popup regression suite verifies empty, ready, and active progress states without provider requests.
-- The native 0.1.9 to 0.1.10 upgrade must be tested independently, including checksum preflight and preservation of existing settings and data.
+- PASS: native authenticated UNA Studio 0.1.9 to 0.1.10 upgrade on manofteal.com. The native installer returned code 0, module version advanced, and the four updater source files matched the installed runtime byte-for-byte.
+- PASS: pre-upgrade 31 tracked module files had zero drift; post-upgrade 31 tracked files again had zero drift. One paused job (#3) with 14,763 items existed before upgrading; complete row-by-row SHA-256 data fingerprints for settings, jobs, items and module language registrations matched exactly afterward.
+- PASS: 0.1.10 dashboard appeared in authenticated Chrome and the status popup read No job selected rather than Working. Native Studio JS asset and page both returned HTTP 200.
+- The Man of Teal Apps > Updates screen was empty because it lists Marketplace updates, not locally staged update files. UNA's internal getUpdates recognized the exact 0.1.9 to 0.1.10 package. A browser administrator invoked the existing native Studio update action; no manual SQL or direct PHP file copying was used. Client one-click update activation still needs validation.
 - Fresh native installation of 0.1.10 itself is NOT TESTED at this checkpoint.
 - General LibreTranslate linguistic quality still requires broader review. The 45 curated-string fixtures are NOT certification of all model outputs.
 - Mobile, alternate theme, Marketplace media and info screens for final RC1: further acceptance required where applicable.

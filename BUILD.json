@@ -17,5 +17,5 @@
   "updater_version_from": "0.1.9",
   "updater_version_to": "0.1.10",
   "record_scope": "Source_commit is the complete 0.1.10 candidate runtime + native updater code checkpoint. Later provenance-only commits may update BUILD.json or test reports; immutable ZIP hashes are recorded after packaging.",
-  "status": "LOCAL UNPUBLISHED release candidate; native update testing pending; not authorized for GitHub publication"
+  "status": "LOCAL UNPUBLISHED RC1; native 0.1.9 to 0.1.10 upgrade PASS (Man of Teal); native fresh install of 0.1.10 and Marketplace click-update NOT TESTED"
 }

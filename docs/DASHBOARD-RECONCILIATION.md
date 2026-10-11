@@ -68,3 +68,20 @@ Six read-only graphical tiles summarize configured provider, installed and enabl
 - Website root, authenticated Studio page, CSS, and runtime Studio SVG icon all returned HTTP 200. No fatal screen observed.
 - The module remains installed and enabled for test purposes. User's provider settings and translation jobs were not changed. No production upgrade or customer module release was performed.
 - Release gates remaining: validate the supported prior-to-target native updater before offering upgrades, resolve the empty-job status label, determine version/tag/manifest and refreshed release metadata, and do mobile/theme and broader linguistic review as necessary.
+
+
+## Native UNA 0.1.9 to 0.1.10 upgrade - Man of Teal, 2026-10-11
+
+- Candidate source checkpoint: 45d508b5719848d26385dbacab522356b524c85f; provenance-only checkpoint before native testing: 8e3211f9a1ac5cb14eab6ab04f436149e56b7278.
+- Full candidate originally had 38 module files; native updater was a separate six-file archive, not a full reinstall. The updater's tested SHA-256 was 44835d7cd3f63da5e1271cc337f1c5896746cc52a65413aacd8d7185b49f7df4.
+- Immediately before testing, Translator on Man of Teal was installed and enabled at 0.1.9 with 31 tracked files and zero drift.
+- One user-created saved job (#3) was paused with 14,763 items and 1,677 spent characters. No job was started, resumed, paused, applied or deleted during this upgrade test.
+- Backup checkpoint: /var/backups/manofteal-translator-preupgrade-20261011-1819 (site MariaDB SQL gzip and the installed module code TAR, both checksum-verified, not restore-tested). Prior fresh-install checkpoint is separately recorded above.
+- Before applying the update, SHA-256 fingerprints of each ordered full data table (settings, jobs, items, languages) and the job status were saved in a root-only fixture: /root/my-una-translator-0.1.10-rc1-candidate-20261011/preupgrade-fingerprints.json.
+- The exact six-file updater was staged under modules/newton/my_una_translator/updates/update_0.1.9_0.1.10/. UNA's getUpdates() returned version_from 0.1.9, version_to 0.1.10 and module version 0.1.9.
+- The Studio Apps > Updates screen was empty because the local update was not shown in the Marketplace update listing. An authenticated administrator executed UNA's existing native Studio update AJAX action for the single staged updater, returning code 0. This was not a manual file deployment, force upgrade, checksum rebaseline or direct SQL change.
+- Post-update: sys_modules version 0.1.10, enabled=1; all four updater runtime files byte-matched the candidate source. All 31 UNA tracked files matched their updated expected hashes.
+- SHA-256 of ALL ordered rows in provider settings, saved jobs, 14,763 items, and native language registrations matched exactly before and after. Root-only check output: /root/my-una-translator-0.1.10-rc1-candidate-20261011/postupgrade-fingerprints.json.
+- Authenticated browser displayed the six graphical cards with job #3 paused, and the Show translation status popup displayed No job selected (rather than Working...) when nothing was selected; HTTP 200 for Studio and cache-busted 0.1.10 JS.
+- UNA removed updater contents but left empty directories; verified empty directories were removed. Existing data tables and user settings were not altered.
+- Remaining: fresh install of the final 0.1.10 package NOT TESTED; end-user GUI update discovery/activation not available for the manually staged package; Marketplace 0.1.10 media/listing not updated; broad translation linguistic quality remains outside the scope.
