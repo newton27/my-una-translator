@@ -30,9 +30,9 @@ Six read-only graphical tiles summarize configured provider, installed and enabl
 
 ## Remaining release gates
 
-- NOT TESTED: fresh native UNA Studio installation of this new dashboard candidate.
+- PASS: 2026-10-11 native Studio fresh install on manofteal.com from the exact 38-file smoke-test ZIP; module installed and enabled, dashboard and controls visually accepted.
 - NOT TESTED: native Studio upgrade from installed 0.1.9. The RC4 updater is 0.1.8-to-0.1.9 and is NOT a new same-version updater.
-- NOT TESTED: customer Downloaded info popup, cross-theme/mobile screen, broad native-speaker translation-quality acceptance.
+- PASS: Studio Downloaded info popup title, metadata and screenshot gallery rendered on manofteal.com. NOT TESTED: cross-theme/mobile appearance or broad native-speaker translation quality.
 - RC4 BUILD.json and docs/RELEASE.md are historical records, not provenance for a new release. Update only after a future release build and frozen hashes.
 - GitHub push, tag, release and asset publication require separate explicit approval.
 
@@ -45,3 +45,26 @@ Six read-only graphical tiles summarize configured provider, installed and enabl
 - Smoke ZIP integrity and the matching .sha256 check PASS. No issuer/operator files, Git files, backup files, or tests are included.
 - The old RC4 BUILD.json and RELEASE.md remain inside the smoke package as historical metadata: THIS IS NOT A PUBLISHABLE RELEASE OR A VALIDATED UPDATER.
 - A future released package requires version/release metadata, independent native Studio installation and updater validation as applicable, and verified final asset hashes.
+
+
+## Native Studio fresh installation - Man of Teal, 2026-10-11
+
+- Approved scope: fresh-install only when absent; protect the site with backups; inspect launcher, six cards, status popup and workflow; do not configure providers, issue API keys, start jobs or publish release assets.
+- Preconditions: no directory modules/newton/my_una_translator, no sys_modules entry and no Translator-specific tables on manofteal.com.
+- Storage consideration: public_html is approximately 23 GiB, including 17 GiB of other modules and 4.2 GiB of storage. To avoid exhausting the 35 GiB of remaining disk space, the preinstall checkpoint covers the complete MariaDB site database, UNA inc, studio, template, existing modules/newton, .htaccess and index.php, but deliberately excludes large unrelated media and other module trees. NOT A FULL FILESYSTEM BACKUP.
+- Root-only backup directory: /var/backups/manofteal-translator-preinstall-20261011-1740
+- database.sql.gz SHA-256: 183aa337fafc0470f030d0a088036fdcb75d02f44406c8976f5523a259990de0
+- una-code-config.tar.gz SHA-256: 6720188ad4e8da3c170a5173390f24312a36c0711d0f02d061811c4272fd460f
+- Both files passed checksum checks; the SQL gzip and site code TAR passed format/integrity checks. They were not restore-tested. Existing media were not modified.
+- Tested customer ZIP SHA-256: b42ae3a33f744796f95287417e0e86dd206aec1dd4dfd5a5dfc089394712ebbd. Source paths were preflight-checked and staged in modules/newton/ as manofteal without overwriting another module.
+- The first native backend command attempt without a logged-in admin session correctly returned authorization code 102. It did not register the module. The subsequent authenticated UNA Studio > Apps > Downloaded > My UNA Translator > Install action completed and Studio displayed Installed.
+- Database verified: one enabled sys_modules record, version 0.1.9, vendor My UNA World, module path newton/my_una_translator/; one Studio page and one Studio widget; 155 native language keys; four module tables and one settings row.
+- Untouched settings: provider defaults to DeepL, provider URL and both API keys blank; zero jobs, zero job items, zero native Translator language registrations after UI checks.
+- Package-to-installed file hashes: all 38 files matched exactly; 18 installed PHP files and three JavaScript runtime files passed syntax checks.
+- Authenticated Chrome browser: icon/launcher and Studio dashboard display, six pale-color cards render correctly in a three-column desktop layout. The provider indicates Setup needed; one site language English and no translation jobs are shown.
+- Workflow: step 1 language checkboxes/search/plan present, step 2 job selector and refresh present, step 3 apply control remains disabled until preview. Site-language area shows English and a link to Polyglot. No create/generate/apply/pause/resume actions were submitted.
+- The read-only Show translation status popup opened and the Hide popup action worked. Minor visual issue observed: when no job exists, it displays No job selected while the status body says Working...; this is not evidence of an actual translation job and needs a separate UI fix before stable release.
+- Studio Downloaded info popup opened, displayed title/vendor/version/description and loaded marketplace screenshot gallery after a brief delay.
+- Website root, authenticated Studio page, CSS, and runtime Studio SVG icon all returned HTTP 200. No fatal screen observed.
+- The module remains installed and enabled for test purposes. User's provider settings and translation jobs were not changed. No production upgrade or customer module release was performed.
+- Release gates remaining: validate the supported prior-to-target native updater before offering upgrades, resolve the empty-job status label, determine version/tag/manifest and refreshed release metadata, and do mobile/theme and broader linguistic review as necessary.
