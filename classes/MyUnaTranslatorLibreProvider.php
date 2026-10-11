@@ -81,6 +81,22 @@ final class MyUnaTranslatorLibreProvider
         $status=(int)($response['status']??0);
         if ($status!==200) {
             $errors=[403=>'LibreTranslate rejected access. Check its API key and access settings.',429=>'LibreTranslate is busy or rate limited. The job is paused; resume later.'];
+            if ($status===400) {
+                // Do not display untrusted provider text: it may include submitted content or credentials.
+                $reason='invalid request parameters';
+                $raw=$response['body']??'';
+                if (is_string($raw) && strlen($raw)<=8192) {
+                    $parsed=json_decode($raw,true);
+                    $detail=is_array($parsed) ? ($parsed['error']??$parsed['message']??'') : '';
+                    if (is_string($detail)) {
+                        if (preg_match('/(too (many|large|long)|maximum|limit|characters|length|size)/i',$detail)) $reason='request size or service limit';
+                        elseif (preg_match('/(language|source|target|not supported|unsupported)/i',$detail)) $reason='unsupported source or target language';
+                        elseif (preg_match('/(api.?key|authorization|authentication|unauthorized|access)/i',$detail)) $reason='API key or access configuration';
+                        elseif (preg_match('/(missing|required|invalid|format|parameter|payload|json)/i',$detail)) $reason='missing or invalid request parameter';
+                    }
+                }
+                throw new RuntimeException('LibreTranslate rejected the request (HTTP 400: '.$reason.'). No automatic retry was made. Check service logs for the exact rejection.');
+            }
             throw new RuntimeException($errors[$status]??'LibreTranslate request failed (HTTP '.$status.'). No automatic retry was made.');
         }
         if (!is_string($response['body']??null) || strlen($response['body'])>1048576) throw new RuntimeException('LibreTranslate response exceeded the safe size limit.');
