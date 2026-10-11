@@ -102,9 +102,43 @@ class MyUnaTranslatorStudioPage extends BxTemplStudioModule
         $defaultName=$default;
         foreach($snapshot['site_languages'] as $language) if($language['code']===$default) $defaultName=$language['native'];
         $config=['endpoint'=>$endpoint,'token'=>$this->token(),'snapshot'=>$snapshot,'labels'=>$labels,'site_url'=>BX_DOL_URL_ROOT,'default_language'=>$default];
-        $html='<link rel="stylesheet" href="'.self::h($base.'template/css/translator.css?v=0.1.9-flow1').'">';
+        $html='<link rel="stylesheet" href="'.self::h($base.'template/css/translator.css?v=0.1.9-dashboard2').'">';
         $html.='<section id="my-una-translator" class="mut" aria-label="'.self::label('title').'">';
         $html.='<header class="mut-hero"><div class="mut-mark" aria-hidden="true">A<span>文</span></div><div><div class="mut-brand">My UNA World</div><h2>'.self::label('title').'</h2><p>'.self::label('workflow_intro').'</p></div></header>';
+        // Read-only dashboard: derive everything from the existing snapshot.
+        $jobs=$snapshot['jobs']??[];
+        $siteLanguages=$snapshot['site_languages']??[];
+        $coverage=$snapshot['languages']??[];
+        $active=0; $paused=0; $finished=0;
+        foreach ($jobs as $job) {
+            $state=(string)($job['status']??'');
+            if (in_array($state,['planned','running','applying'],true)) ++$active;
+            elseif ($state==='paused') ++$paused;
+            elseif (in_array($state,['applied','ready'],true)) ++$finished;
+        }
+        $enabledLanguages=0;
+        foreach ($siteLanguages as $language) if (!empty($language['enabled'])) ++$enabledLanguages;
+        $missing=0; $copies=0;
+        foreach ($coverage as $language) {
+            $missing+=(int)($language['missing']??0);
+            $copies+=(int)($language['english_copies']??0);
+        }
+        $latest=$jobs[0]??[];
+        $provider=($snapshot['settings']['provider']??'deepl')==='libre'?'LibreTranslate':'DeepL';
+        $configured=!empty($snapshot['settings']['provider_ready']);
+        $cards=[
+            ['Provider',$provider,$configured?'Configured':'Setup needed','provider','#dceefd','#1d5b9d'],
+            ['Site languages',(string)count($siteLanguages),$enabledLanguages.' enabled','languages','#dff5ed','#176d53'],
+            ['Recent jobs',(string)count($jobs),$active.' active · '.$paused.' paused · '.$finished.' ready/applied','jobs','#eee6fc','#64409d'],
+            ['Latest job',empty($latest)?'None':'#'.(int)($latest['id']??0),empty($latest)?'No saved jobs':(string)($latest['status']??'Unknown'),'jobs','#fff0df','#97501b'],
+            ['Character budget',empty($latest)?'—':number_format((int)($latest['spent']??0)),empty($latest)?'No recent job':'of '.number_format((int)($latest['budget']??0)).' characters used','jobs','#e6f5f3','#15746c'],
+            ['Coverage across languages',number_format($missing).' missing',number_format($copies).' English-copy entries','coverage','#e7edfb','#3e598f'],
+        ];
+        $html.='<section class="mut-summary-dashboard" aria-label="Translation dashboard"><div class="mut-summary-heading"><h3>Translation overview</h3><p>Coverage totals are summed across target languages · recent jobs limited to 20</p></div><div class="mut-summary-grid">';
+        foreach ($cards as $card) {
+            $html.='<article class="mut-summary-tile" style="--mut-tile-bg:'.$card[4].';--mut-tile-accent:'.$card[5].'"><span class="mut-summary-label">'.self::h($card[0]).'</span><strong>'.self::h($card[1]).'</strong><span class="mut-summary-note">'.self::h($card[2]).'</span></article>';
+        }
+        $html.='</div></section>';
         $html.='<nav aria-label="'.self::label('translation_steps').'"><ol class="mut-steps">';
         foreach([1=>'step_choose',2=>'step_review',3=>'step_apply'] as $step=>$key) $html.='<li><a data-mut-step-nav="'.$step.'" href="#mut-step-'.$step.'"><span>'.$step.'</span>'.self::label($key).'</a></li>';
         $html.='</ol></nav><p class="mut-default-summary">'.self::label('default_note').' <strong><bdi>'.self::h($defaultName).'</bdi></strong>. '.self::label('default_help').'</p><div id="mut-next-step" class="mut-next-step" role="status" aria-live="polite">'.self::label('next_choose').'</div>';

@@ -120,4 +120,32 @@ check('removing an applied job preserves its native language registration and te
     $store->changeJob($job['id'],['status'=>'applied']); $store->deleteJob($job['id']);
     return (int)$store->one('SELECT COUNT(*) FROM my_una_translator_languages WHERE language=?','ar')===1 && $store->valueNow(1,$language)==='مرحبا {0}' && !$store->jobs();
 });
+check('Studio dashboard renders six read-only cards and keeps translation workflow intact', function() use($inventory) {
+    $db=new LanguageTestDb();
+    $db->pdo->exec("INSERT INTO my_una_translator_jobs (id,created_at,operator_id,targets,category_id,include_english,budget,status,spent) VALUES
+        (7,1,1,'[\"ar\"]',0,1,1000000,'ready',2206),
+        (6,1,1,'[\"fr\"]',0,1,100000,'paused',100)");
+    $engine=new MyUnaTranslatorEngine(new MyUnaTranslatorStore($db),
+        fn()=>new MyUnaTranslatorLibreProvider('http://127.0.0.1:5001','',fn()=>['status'=>200,'body'=>json_encode($inventory)]),
+        fn()=>true);
+    $page=(new ReflectionClass(MyUnaTranslatorStudioPage::class))->newInstanceWithoutConstructor();
+    (new ReflectionProperty($page,'translator'))->setValue($page,$engine);
+    $html=(new ReflectionMethod($page,'getTranslator'))->invoke($page);
+    $doc=new DOMDocument(); @$doc->loadHTML('<?xml encoding="UTF-8">'.$html);
+    $x=new DOMXPath($doc);
+    $cards=$x->query('//section[contains(concat(" ", normalize-space(@class), " "), " mut-summary-dashboard ")]//article[contains(concat(" ", normalize-space(@class), " "), " mut-summary-tile ")]')->length;
+    return $cards===6
+        && str_contains($html,'Coverage across languages')
+        && str_contains($html,'Coverage totals are summed across target languages')
+        && str_contains($html,'#7')
+        && str_contains($html,'2,206')
+        && $x->query('//article[span[@class="mut-summary-label" and normalize-space(.)="Recent jobs"]]/strong[normalize-space(.)="2"]')->length===1
+        && str_contains($html,'0 active · 1 paused · 1 ready/applied')
+        && str_contains($html,'translator.css?v=0.1.9-dashboard2')
+        && $x->query('//*[@id="mut-create"]')->length===1
+        && $x->query('//*[@id="mut-job-select"]')->length===1
+        && $x->query('//*[@id="mut-status-dialog"]')->length===1
+        && $x->query('//*[@id="mut-step-3"]')->length===1
+        && (int)$db->getOne('SELECT COUNT(*) FROM my_una_translator_jobs')===2;
+});
 echo "failures=$failed\n"; exit($failed?1:0);

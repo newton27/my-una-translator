@@ -15,3 +15,21 @@
 @media(max-width:900px){.mut-targets{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:600px){.mut-hero{padding:22px;gap:14px}.mut-hero h2{font-size:25px}.mut-link{margin-left:0}.mut-mark{width:62px;height:62px;font-size:29px}.mut-card{padding:17px}.mut-fields{grid-template-columns:1fr}.mut-targets{grid-template-columns:repeat(2,minmax(0,1fr))}.mut-preview-table{min-width:680px}}
 .mut-targets{max-height:22rem;overflow-y:auto;padding:2px}.mut-coverage-wrap{max-height:22rem;overflow:auto}.mut-coverage-wrap thead th{position:sticky;top:0;z-index:1}.mut-targets label{min-height:68px}
 .mut-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;padding:0;margin:0 0 16px;list-style:none}.mut-steps a{display:flex;align-items:center;gap:12px;border:1px solid var(--mut-line);border-radius:10px;padding:14px;background:#fff;color:var(--mut-ink);text-decoration:none;font-weight:600}.mut-steps a span,.mut-step-number{display:inline-flex;align-items:center;justify-content:center;background:#e9f3f5;border-radius:50%;height:30px;width:30px;flex-shrink:0;color:#176072}.mut-steps a.mut-current{border:2px solid var(--mut-accent);background:#edf8f7}.mut-steps a.mut-complete span{background:var(--mut-accent);color:white}.mut-next-step{border-left:4px solid var(--mut-accent);background:#edf8f7;border-radius:8px;padding:14px 18px;margin:0 0 20px}.mut-default-summary{font-size:14px;color:#536d7c;margin:0 0 16px}.mut-step{scroll-margin-top:110px}.mut-step h3{display:flex;align-items:center;gap:12px}.mut-advanced{border-top:1px solid var(--mut-line);padding-top:14px;margin:18px 0}.mut-advanced summary{font-size:14px;font-weight:600}.mut-advanced[open] summary{margin-bottom:14px}.mut-targets label:has(input:checked){border-color:var(--mut-accent);background:#e6f5f2}.mut-site-languages{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:18px 0}.mut-site-language{display:block;border:1px solid #b8d9d5;background:#edf8f7;border-radius:10px;padding:14px;color:#17394b;text-decoration:none}.mut-site-language:hover{border-color:var(--mut-accent)}.mut-site-language.mut-unavailable{background:#f4f6f7;border-color:var(--mut-line)}.mut-settings-link{font-size:14px;color:#096978}.mut-job-targets{font-size:16px}@media(max-width:600px){.mut-steps{grid-template-columns:1fr}.mut-site-languages{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+
+/* My UNA native graphical summary; scoped to Translator only. */
+.mut .mut-summary-dashboard{margin:0 0 22px}
+.mut .mut-summary-heading{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.mut .mut-summary-heading h3{font-size:19px;margin:0;color:var(--mut-ink)}
+.mut .mut-summary-heading p{font-size:13px;margin:0;color:#536d7c}
+.mut .mut-summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.mut .mut-summary-tile{min-width:0;display:flex;flex-direction:column;gap:9px;padding:19px 20px;border:1px solid var(--mut-tile-accent);border-top:5px solid var(--mut-tile-accent);border-radius:14px;background:var(--mut-tile-bg);box-shadow:0 3px 14px #102c4512;color:#172b3a}
+.mut .mut-summary-label{font-size:13px;font-weight:700;color:var(--mut-tile-accent)}
+.mut .mut-summary-tile strong{font-size:24px;line-height:1.25;overflow-wrap:anywhere;color:#172b3a}
+.mut .mut-summary-note{font-size:13px;color:#42586c;overflow-wrap:anywhere}
+@media(max-width:900px){.mut .mut-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.mut .mut-summary-grid{grid-template-columns:1fr}}
+
+/* Accessible title contrast on UNA's dark Studio theme. */
+.mut .mut-summary-heading h3{color:#e8f2f9}
+.mut .mut-summary-heading p{color:#b9cdd9}
