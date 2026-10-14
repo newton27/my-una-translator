@@ -55,11 +55,14 @@ final class MyUnaTranslatorEngine
         if ($action==='snapshot') return $this->snapshot();
         if ($action==='status') return ['job'=>$this->store->job($this->id($data))];
         if ($action==='preview') return ['job'=>$this->store->job($this->id($data)),'items'=>$this->store->preview($this->id($data),$data['offset']??0)];
-        $allowed=['settings','usage','create','batch','pause','resume','apply','rollback','delete_job'];
+        $allowed=['settings','usage','create','batch','pause','resume','apply','rollback','delete_job','save_preview','retry_preview','retry_unchanged'];
         if (!in_array($action,$allowed,true)) throw new RuntimeException('Unknown Translator action.');
         $this->store->lock();
         try {
             switch ($action) {
+                case 'save_preview': return $this->savePreview($this->id($data),$data);
+                case 'retry_preview': return $this->retryPreview($this->id($data),$data);
+                case 'retry_unchanged': return $this->retryUnchanged($this->id($data));
                 case 'delete_job': $id=$this->id($data); $this->store->deleteJob($id); return ['deleted'=>true,'job_id'=>$id];
             case 'settings': $this->languagePresets=null; return ['settings'=>$this->store->saveSettings($data)];
                 case 'usage': return ['usage'=>$this->provider()->usage()];
@@ -191,6 +194,47 @@ final class MyUnaTranslatorEngine
         $this->store->q("UPDATE my_una_translator_items SET state='pending' WHERE job_id=? AND state='processing'",$id);
         $this->store->changeJob($id,['status'=>'running','error'=>'','budget'=>(int)$budget]);
         return ['job'=>$this->store->job($id),'more'=>true];
+    }
+
+    private function reviewable($id)
+    {
+        $job=$this->store->job($id);
+        if ($job['status']!=='ready') throw new RuntimeException('Previews can only be edited or retried before applying a ready job.');
+        return $job;
+    }
+    private function savePreview($id,array $data)
+    {
+        $this->reviewable($id);
+        $itemId=filter_var($data['item_id']??null,FILTER_VALIDATE_INT);
+        if (!$itemId || $itemId<1) throw new RuntimeException('Select a valid preview item.');
+        $row=$this->store->previewItem($id,$itemId);
+        if (!$row || $row['state']!=='staged') throw new RuntimeException('Only staged previews can be edited.');
+        $text=$data['text']??null;
+        if (!is_string($text) || trim($text)==='' || strlen($text)>1048576 || !mb_check_encoding($text,'UTF-8'))
+            throw new RuntimeException('Enter a valid non-empty UTF-8 translation.');
+        MyUnaTranslatorText::validate($row['source'],$text);
+        $this->store->changeItem($itemId,['result'=>$text,'error'=>'']);
+        return ['job'=>$this->store->job($id),'saved'=>true];
+    }
+    private function retryPreview($id,array $data)
+    {
+        $job=$this->reviewable($id);
+        $itemId=filter_var($data['item_id']??null,FILTER_VALIDATE_INT);
+        if (!$itemId || $itemId<1) throw new RuntimeException('Select a valid preview item.');
+        $row=$this->store->previewItem($id,$itemId);
+        if (!$row || $row['state']!=='staged') throw new RuntimeException('Only staged previews can be retried.');
+        $this->store->changeItem($itemId,['state'=>'pending','result'=>null,'error'=>'']);
+        $this->store->changeJob($id,['status'=>'planned','error'=>'']);
+        return ['job'=>$this->store->job($id),'more'=>true];
+    }
+    private function retryUnchanged($id)
+    {
+        $this->reviewable($id);
+        $rows=$this->store->unchangedItems($id,200);
+        if (!$rows) return ['job'=>$this->store->job($id),'selected'=>0,'remaining'=>0];
+        foreach ($rows as $row) $this->store->changeItem((int)$row['id'],['state'=>'pending','result'=>null,'error'=>'']);
+        $this->store->changeJob($id,['status'=>'planned','error'=>'']);
+        return ['job'=>$this->store->job($id),'selected'=>count($rows),'remaining'=>$this->store->unchangedCount($id)];
     }
 
     private function apply($id,array $data)
