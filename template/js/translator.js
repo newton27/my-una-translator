@@ -127,7 +127,7 @@
     find('mut-progress').value = progress.percent;
     find('mut-resume-budget').value = job.budget;
     const estimate = number(job.estimated) + ' / ' + number(job.budget) + ' ' + label('characters');
-    const details = [stateLabel(job.status), number(counts.staged) + ' ' + label('staged'), number(counts.applied) + ' ' + label('applied'), number(Number(counts.conflict || 0) + Number(counts.rollback_conflict || 0)) + ' ' + label('conflicts')];
+    const details = [stateLabel(job.status), number(counts.staged) + ' ' + label('staged'), number(counts.translated || 0) + ' translated', number(counts.unchanged || 0) + ' unchanged', number(counts.applied) + ' ' + label('applied'), number(Number(counts.conflict || 0) + Number(counts.rollback_conflict || 0)) + ' ' + label('conflicts')];
     const names=job.targets.map(code=>snapshot.languages.find(l=>l.code===code)?.name || snapshot.site_languages?.find(l=>l.code===code)?.native || code);
     find('mut-job-details').innerHTML = '<p class="mut-job-targets">'+esc(label('job_languages'))+': <strong>'+esc(names.join(', '))+'</strong></p><div class="mut-stat-row">' + details.map(d => '<span class="mut-pill">' + esc(d) + '</span>').join('') + '</div><p>' + esc(estimate) + '</p><p class="mut-note">' + esc(label('used_reserved')) + ': ' + number(job.spent) + '</p>' + (Number(job.estimated) > Number(job.budget) ? '<p class="mut-warning">' + esc(label('ceiling_warning')) + '</p>' : '') + (job.error ? '<p class="mut-warning">' + esc(job.error) + '</p>' : '');
     if (['paused', 'applied','rolled_back','failed','empty_preview'].includes(String(job.status))) {
@@ -233,7 +233,7 @@
         await preview();
         message(action === 'save_preview' ? 'Correction saved.' : action === 'retry_preview' ? 'Translation queued. Click Generate Translation Preview.' : response.selected + ' unchanged translations queued. Click Generate Translation Preview.');
       } catch (error) { message(error.message || label('connection_error'),true); }
-      finally { busy = false; setButtons(); }
+      finally { busy = false; setButtons(); await preview().catch(() => {}); }
       return;
     }
     if (action === 'delete_job') {
