@@ -145,6 +145,18 @@ final class MyUnaTranslatorStore
         foreach ($fields as $key=>$value) { if (!in_array($key,['state','result','error'],true)) throw new RuntimeException('Invalid item update.'); $sets[]='`'.$key.'`=?'; $args[]=$value; }
         $args[]=(int)$id; $this->q('UPDATE my_una_translator_items SET '.implode(',',$sets).' WHERE id=?', ...$args);
     }
+    public function previewItem($jobId,$itemId)
+    {
+        return $this->row('SELECT * FROM my_una_translator_items WHERE job_id=? AND id=?',(int)$jobId,(int)$itemId);
+    }
+    public function unchangedCount($jobId)
+    {
+        return (int)$this->one("SELECT COUNT(*) FROM my_una_translator_items WHERE job_id=? AND state='staged' AND BINARY result=BINARY source",(int)$jobId);
+    }
+    public function unchangedItems($jobId,$limit=200)
+    {
+        return $this->all("SELECT id FROM my_una_translator_items WHERE job_id=? AND state='staged' AND BINARY result=BINARY source ORDER BY id LIMIT ".max(1,min(200,(int)$limit)),(int)$jobId);
+    }
     public function preview($id,$offset=0)
     {
         $this->job($id);
