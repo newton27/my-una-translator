@@ -33,3 +33,8 @@
 /* Accessible title contrast on UNA's dark Studio theme. */
 .mut .mut-summary-heading h3{color:#e8f2f9}
 .mut .mut-summary-heading p{color:#b9cdd9}
+
+/* Translation review controls */
+.mut-preview-edit{box-sizing:border-box;width:100%;min-height:5rem;padding:.65rem;border:1px solid var(--bx-border-color,#b6c5d6);border-radius:8px;background:var(--bx-page-bg,#fff);color:inherit;font:inherit;line-height:1.4;resize:vertical}
+.mut-preview-edit:focus{outline:2px solid #2874ba;outline-offset:2px}
+.mut-preview-table td .mut-secondary{margin:.25rem .3rem .25rem 0}
