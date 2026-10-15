@@ -149,7 +149,7 @@
     if (!activeJob) return;
     const data = await request('preview', {job_id:activeJob.id, offset});
     renderJob(data.job);
-    find('mut-preview').innerHTML = data.items.some(i=>i.result!==null) ? '<table class="mut-preview-table"><thead><tr><th>' + esc(label('key')) + '</th><th>' + esc(label('source')) + '</th><th>' + esc(label('translation')) + '</th></tr></thead><tbody>' + data.items.map(i => '<tr><td><strong>' + esc(i.key_name) + '</strong><small>' + esc(i.language) + ' · ' + esc(stateLabel(i.state)) + '</small>' + (i.error ? '<small class="mut-warning">' + esc(i.error) + '</small>' : '') + '</td><td><pre>' + esc(i.source) + '</pre></td><td><pre>' + esc(i.result ?? label('no_translation')) + '</pre></td></tr>').join('') + '</tbody></table>' : '<p class="mut-note">' + esc(label('no_preview_yet')) + '</p>';
+    find('mut-preview').innerHTML = data.items.some(i=>i.result!==null) ? '<table class="mut-preview-table"><thead><tr><th>' + esc(label('key')) + '</th><th>' + esc(label('source')) + '</th><th>' + esc(label('translation')) + '</th></tr></thead><tbody>' + data.items.map(i => '<tr data-item-id="' + Number(i.id) + '"><td><strong>' + esc(i.key_name) + '</strong><small>' + esc(i.language) + ' · ' + esc(stateLabel(i.state)) + '</small>' + (i.error ? '<small class="mut-warning">' + esc(i.error) + '</small>' : '') + '</td><td><pre>' + esc(i.source) + '</pre></td><td><pre>' + esc(i.result ?? label('no_translation')) + '</pre>' + (i.state === 'staged' && activeJob?.status === 'ready' ? '<button type="button" class="mut-secondary" data-mut-action="edit_preview" data-item-id="' + Number(i.id) + '">Edit</button>' : '') + '</td></tr>').join('') + '</tbody></table>' : '<p class="mut-note">' + esc(label('no_preview_yet')) + '</p>';
     find('mut-page-info').textContent = label('preview_page') + ' ' + (Math.floor(offset / 50) + 1);
     setButtons();
   }
@@ -203,6 +203,36 @@
   root.addEventListener('click', async event => {
     const button = event.target.closest('button[data-mut-action]'); if (!button) return;
     const action = button.dataset.mutAction;
+    if (action === 'edit_preview') {
+      if (busy || activeJob?.status !== 'ready') return;
+      const cell = button.closest('td');
+      const original = cell.querySelector('pre')?.textContent ?? '';
+      cell.dataset.original = original;
+      cell.innerHTML = '<label>Review translation<textarea class="mut-preview-editor" rows="4" maxlength="1048576"></textarea></label><div class="mut-buttons"><button type="button" data-mut-action="save_preview" data-item-id="' + Number(button.dataset.itemId) + '">Save correction</button><button type="button" class="mut-secondary" data-mut-action="cancel_preview">Cancel</button></div>';
+      cell.querySelector('textarea').value = original;
+      cell.querySelector('textarea').focus();
+      return;
+    }
+    if (action === 'cancel_preview') {
+      const cell = button.closest('td');
+      cell.innerHTML = '<pre>' + esc(cell.dataset.original ?? '') + '</pre>';
+      const edit = document.createElement('button'); edit.type='button'; edit.className='mut-secondary'; edit.dataset.mutAction='edit_preview'; edit.dataset.itemId=button.closest('tr')?.dataset.itemId || '';
+      edit.textContent='Edit'; cell.appendChild(edit);
+      return;
+    }
+    if (action === 'save_preview') {
+      if (busy || activeJob?.status !== 'ready') return;
+      const value = button.closest('td')?.querySelector('textarea')?.value;
+      if (typeof value !== 'string') return;
+      busy = true; setButtons();
+      try {
+        await request('save_preview',{job_id:activeJob.id,item_id:button.dataset.itemId,result:value});
+        await preview();
+        message('Reviewed translation saved. Apply will use your correction.');
+      } catch (error) { message(error.message || label('connection_error'),true); }
+      finally { busy=false; setButtons(); }
+      return;
+    }
     if (action === 'delete_job') {
         if (busy || !activeJob) return;
         const jobId = Number(activeJob.id);
