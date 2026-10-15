@@ -142,13 +142,13 @@ final class MyUnaTranslatorStore
     public function changeItem($id, array $fields)
     {
         $sets=[]; $args=[];
-        foreach ($fields as $key=>$value) { if (!in_array($key,['state','result','error'],true)) throw new RuntimeException('Invalid item update.'); $sets[]='`'.$key.'`=?'; $args[]=$value; }
+        foreach ($fields as $key=>$value) { if (!in_array($key,['state','result','original_result','error'],true)) throw new RuntimeException('Invalid item update.'); $sets[]='`'.$key.'`=?'; $args[]=$value; }
         $args[]=(int)$id; $this->q('UPDATE my_una_translator_items SET '.implode(',',$sets).' WHERE id=?', ...$args);
     }
     public function preview($id,$offset=0)
     {
         $this->job($id);
-        return $this->all('SELECT id,key_name,language,source,before_value,result,state,error FROM my_una_translator_items WHERE job_id=? ORDER BY id LIMIT 50 OFFSET '.max(0,(int)$offset), (int)$id);
+        return $this->all('SELECT id,key_name,language,source,before_value,result,original_result,state,error FROM my_una_translator_items WHERE job_id=? ORDER BY id LIMIT 50 OFFSET '.max(0,(int)$offset), (int)$id);
     }
 
     public function sourceNow($keyId) { return $this->row('SELECT k.`Key` AS key_name,e.String AS source FROM sys_localization_keys k JOIN sys_localization_strings e ON e.IDKey=k.ID AND e.IDLanguage=? WHERE k.ID=?',$this->englishId(),(int)$keyId); }
