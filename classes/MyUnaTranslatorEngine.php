@@ -55,7 +55,7 @@ final class MyUnaTranslatorEngine
         if ($action==='snapshot') return $this->snapshot();
         if ($action==='status') return ['job'=>$this->store->job($this->id($data))];
         if ($action==='preview') return ['job'=>$this->store->job($this->id($data)),'items'=>$this->store->preview($this->id($data),$data['offset']??0)];
-        $allowed=['settings','usage','create','batch','pause','resume','apply','rollback','delete_job'];
+        $allowed=['settings','usage','create','batch','pause','resume','apply','rollback','delete_job','save_preview'];
         if (!in_array($action,$allowed,true)) throw new RuntimeException('Unknown Translator action.');
         $this->store->lock();
         try {
@@ -70,6 +70,7 @@ final class MyUnaTranslatorEngine
                     if (!in_array($j['status'],['planned','running','paused'],true)) throw new RuntimeException('This job is not generating translations.');
                     $this->store->changeJob($id,['status'=>'paused']); return ['job'=>$this->store->job($id),'more'=>false];
                 case 'resume': return $this->resume($this->id($data),$data);
+                case 'save_preview': return $this->savePreview($this->id($data),$data);
                 case 'apply': return $this->apply($this->id($data),$data);
                 case 'rollback': return $this->rollback($this->id($data));
             }
@@ -191,6 +192,26 @@ final class MyUnaTranslatorEngine
         $this->store->q("UPDATE my_una_translator_items SET state='pending' WHERE job_id=? AND state='processing'",$id);
         $this->store->changeJob($id,['status'=>'running','error'=>'','budget'=>(int)$budget]);
         return ['job'=>$this->store->job($id),'more'=>true];
+    }
+
+    /** Save a reviewed translation without changing live UNA language strings. */
+    private function savePreview($id,array $data)
+    {
+        $job=$this->store->job($id);
+        if ($job['status']!=='ready') throw new RuntimeException('Finish generating the preview before editing it.');
+        $itemId=filter_var($data['item_id']??0,FILTER_VALIDATE_INT);
+        if (!$itemId || $itemId<1) throw new RuntimeException('Select a valid preview item.');
+        $text=$data['result']??null;
+        if (!is_string($text) || strlen($text)>1048576 || !mb_check_encoding($text,'UTF-8'))
+            throw new RuntimeException('Enter valid UTF-8 translation text under 1 MB.');
+        $item=$this->store->row('SELECT * FROM my_una_translator_items WHERE id=? AND job_id=?',(int)$itemId,$id);
+        if (!$item || $item['state']!=='staged') throw new RuntimeException('This preview can no longer be edited.');
+        $source=$this->store->sourceNow($item['key_id']);
+        if (!$source || $source['source']!==$item['source'] || $source['key_name']!==$item['key_name'])
+            throw new RuntimeException('The English source has changed. Rebuild this preview before editing.');
+        MyUnaTranslatorText::validate($item['source'],$text);
+        $this->store->changeItem((int)$itemId,['result'=>$text,'error'=>'']);
+        return ['job'=>$this->store->job($id),'saved'=>true];
     }
 
     private function apply($id,array $data)
