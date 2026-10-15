@@ -149,7 +149,7 @@
     if (!activeJob) return;
     const data = await request('preview', {job_id:activeJob.id, offset});
     renderJob(data.job);
-    find('mut-preview').innerHTML = data.items.some(i=>i.result!==null) ? '<table class="mut-preview-table"><thead><tr><th>' + esc(label('key')) + '</th><th>' + esc(label('source')) + '</th><th>' + esc(label('translation')) + '</th></tr></thead><tbody>' + data.items.map(i => '<tr data-item-id="' + Number(i.id) + '"><td><strong>' + esc(i.key_name) + '</strong><small>' + esc(i.language) + ' · ' + esc(stateLabel(i.state)) + '</small>' + (i.error ? '<small class="mut-warning">' + esc(i.error) + '</small>' : '') + '</td><td><pre>' + esc(i.source) + '</pre></td><td><pre>' + esc(i.result ?? label('no_translation')) + '</pre>' + (i.state === 'staged' && activeJob?.status === 'ready' ? '<button type="button" class="mut-secondary" data-mut-action="edit_preview" data-item-id="' + Number(i.id) + '">Edit</button>' : '') + '</td></tr>').join('') + '</tbody></table>' : '<p class="mut-note">' + esc(label('no_preview_yet')) + '</p>';
+    find('mut-preview').innerHTML = data.items.some(i=>i.result!==null) ? '<table class="mut-preview-table"><thead><tr><th>' + esc(label('key')) + '</th><th>' + esc(label('source')) + '</th><th>' + esc(label('translation')) + '</th></tr></thead><tbody>' + data.items.map(i => '<tr data-item-id="' + Number(i.id) + '"><td><strong>' + esc(i.key_name) + '</strong><small>' + esc(i.language) + ' · ' + esc(stateLabel(i.state)) + '</small>' + (i.error ? '<small class="mut-warning">' + esc(i.error) + '</small>' : '') + '</td><td><pre>' + esc(i.source) + '</pre></td><td><pre>' + esc(i.result ?? label('no_translation')) + '</pre>' + (i.state === 'staged' && activeJob?.status === 'ready' ? '<button type="button" class="mut-secondary" data-mut-action="edit_preview" data-item-id="' + Number(i.id) + '">Edit</button>' + (i.original_result !== null && i.result !== i.original_result ? '<button type="button" class="mut-secondary" data-mut-action="reset_preview" data-item-id="' + Number(i.id) + '">Reset</button>' : '') : '') + '</td></tr>').join('') + '</tbody></table>' : '<p class="mut-note">' + esc(label('no_preview_yet')) + '</p>';
     find('mut-page-info').textContent = label('preview_page') + ' ' + (Math.floor(offset / 50) + 1);
     setButtons();
   }
@@ -218,6 +218,15 @@
       cell.innerHTML = '<pre>' + esc(cell.dataset.original ?? '') + '</pre>';
       const edit = document.createElement('button'); edit.type='button'; edit.className='mut-secondary'; edit.dataset.mutAction='edit_preview'; edit.dataset.itemId=button.closest('tr')?.dataset.itemId || '';
       edit.textContent='Edit'; cell.appendChild(edit);
+      return;
+    }
+    if (action === 'reset_preview') {
+      if (busy || activeJob?.status !== 'ready') return;
+      if (!window.confirm('Restore the original machine translation for this preview?')) return;
+      busy=true; setButtons();
+      try { await request('reset_preview',{job_id:activeJob.id,item_id:button.dataset.itemId}); await preview(); message('Original machine translation restored.'); }
+      catch(error) { message(error.message || label('connection_error'),true); }
+      finally { busy=false; setButtons(); }
       return;
     }
     if (action === 'save_preview') {
