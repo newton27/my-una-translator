@@ -3,10 +3,13 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-const src = fs.readFileSync(__dirname + '/../template/js/translator.js', 'utf8');
-const m = src.match(/  function renderStatus\(\) \{[\s\S]*?\n  \}\n  const message =/);
-assert.ok(m, 'renderStatus source must be captured unambiguously');
-const renderSrc = m[0].slice(0, m[0].lastIndexOf('  const message ='));
+let renderSrc;
+test.before(() => {
+  const src = fs.readFileSync(__dirname + '/../template/js/translator.js', 'utf8');
+  const m = src.match(/  function renderStatus\(\) \{[\s\S]*?\n  \}\n  const message =/);
+  assert.ok(m, 'renderStatus source must be captured unambiguously');
+  renderSrc = m[0].slice(0, m[0].lastIndexOf('  const message ='));
+});
 function render(job, busy = false, operation = '') {
   const elements = {};
   const find = id => elements[id] ??= {textContent:'', hidden:false, disabled:false, value:0};
