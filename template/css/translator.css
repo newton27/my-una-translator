@@ -33,3 +33,9 @@
 /* Accessible title contrast on UNA's dark Studio theme. */
 .mut .mut-summary-heading h3{color:#e8f2f9}
 .mut .mut-summary-heading p{color:#b9cdd9}
+
+/* Explicit preview corrections, saved independently of Apply. */
+.mut .mut-translation-cell textarea { display:block; width:100%; min-width:12rem; min-height:7rem; box-sizing:border-box; resize:vertical; padding:.65rem; font:inherit; line-height:1.5; }
+.mut .mut-translation-cell label { display:block; margin-bottom:.4rem; font-weight:600; }
+.mut .mut-manual { display:block; color:#23754b; font-weight:600; }
+.mut .mut-translation-cell .mut-buttons { flex-wrap:wrap; }

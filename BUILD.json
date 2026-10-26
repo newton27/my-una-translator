@@ -1,21 +1,24 @@
 {
   "module": "my_una_translator",
-  "version": "0.1.10",
-  "release": "v0.1.10-rc.1",
-  "source_commit": "45d508b5719848d26385dbacab522356b524c85f",
-  "source_tree": "a4f4e444e633eabe68f26354663496075c91cb74",
-  "previous_release": "v0.1.9-rc.4",
-  "previous_release_commit": "fd378dd8ee995aa65d6e445c85a264ac137aa30a",
+  "version": "0.1.11",
+  "release": null,
+  "source_commit": null,
+  "source_tree": null,
+  "previous_release": "v0.1.10-rc.1",
+  "previous_release_commit": "45d508b5719848d26385dbacab522356b524c85f",
   "package_root": "my_una_translator/",
   "package_exclusions": [
     ".gitignore",
     "tests/",
     "updates/",
-    "docs/DASHBOARD-RECONCILIATION.md"
+    "docs/DASHBOARD-RECONCILIATION.md",
+    "package.json",
+    "package-lock.json",
+    "docs/superpowers/"
   ],
-  "updater_root": "my_una_translator/updates/update_0.1.9_0.1.10/",
-  "updater_version_from": "0.1.9",
-  "updater_version_to": "0.1.10",
-  "record_scope": "Source_commit is the complete 0.1.10 candidate runtime + native updater code checkpoint. Later provenance-only commits may update BUILD.json or test reports; immutable ZIP hashes are recorded after packaging.",
-  "status": "LOCAL UNPUBLISHED RC1; native 0.1.9 to 0.1.10 upgrade PASS (Man of Teal); native fresh install of 0.1.10 and Marketplace click-update NOT TESTED"
+  "updater_root": "my_una_translator/updates/update_0.1.10_0.1.11/",
+  "updater_version_from": "0.1.10",
+  "updater_version_to": "0.1.11",
+  "record_scope": "Unpublished development candidate for editable previews; native update and fresh-install validation pending.",
+  "status": "LOCAL DEVELOPMENT CANDIDATE; tests PASS; native fresh install and native 0.1.10-to-0.1.11 update NOT TESTED; live deployment BLOCKED by browser approval review"
 }
