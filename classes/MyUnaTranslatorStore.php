@@ -142,13 +142,28 @@ final class MyUnaTranslatorStore
     public function changeItem($id, array $fields)
     {
         $sets=[]; $args=[];
-        foreach ($fields as $key=>$value) { if (!in_array($key,['state','result','error'],true)) throw new RuntimeException('Invalid item update.'); $sets[]='`'.$key.'`=?'; $args[]=$value; }
+        foreach ($fields as $key=>$value) { if (!in_array($key,['state','result','error','manually_edited'],true)) throw new RuntimeException('Invalid item update.'); $sets[]='`'.$key.'`=?'; $args[]=$value; }
         $args[]=(int)$id; $this->q('UPDATE my_una_translator_items SET '.implode(',',$sets).' WHERE id=?', ...$args);
+    }
+    public function item($jobId,$itemId)
+    {
+        return $this->row('SELECT * FROM my_una_translator_items WHERE job_id=? AND id=?',(int)$jobId,(int)$itemId);
+    }
+    public function previewItem($jobId,$itemId)
+    {
+        $rows=$this->all('SELECT id,key_name,language,source,before_value,result,state,error,manually_edited FROM my_una_translator_items WHERE job_id=? AND id=?',(int)$jobId,(int)$itemId);
+        return $rows ? self::previewFields($rows[0]) : [];
+    }
+    private static function previewFields(array $item)
+    {
+        $item['result_hash']=is_string($item['result']) ? hash('sha256',$item['result']) : null;
+        $item['manually_edited']=!empty($item['manually_edited']);
+        return $item;
     }
     public function preview($id,$offset=0)
     {
         $this->job($id);
-        return $this->all('SELECT id,key_name,language,source,before_value,result,state,error FROM my_una_translator_items WHERE job_id=? ORDER BY id LIMIT 50 OFFSET '.max(0,(int)$offset), (int)$id);
+        return array_map([self::class,'previewFields'],$this->all('SELECT id,key_name,language,source,before_value,result,state,error,manually_edited FROM my_una_translator_items WHERE job_id=? ORDER BY id LIMIT 50 OFFSET '.max(0,(int)$offset), (int)$id));
     }
 
     public function sourceNow($keyId) { return $this->row('SELECT k.`Key` AS key_name,e.String AS source FROM sys_localization_keys k JOIN sys_localization_strings e ON e.IDKey=k.ID AND e.IDLanguage=? WHERE k.ID=?',$this->englishId(),(int)$keyId); }
@@ -185,3 +200,4 @@ final class MyUnaTranslatorStore
         $this->q('UPDATE sys_localization_languages l JOIN my_una_translator_languages m ON m.language_id=l.ID AND BINARY m.language=BINARY l.Name SET l.Enabled=0 WHERE m.job_id=? AND NOT EXISTS (SELECT 1 FROM sys_localization_strings s WHERE s.IDLanguage=l.ID)',(int)$jobId);
     }
 }
+

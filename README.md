@@ -1,4 +1,17 @@
-# My UNA Translator 0.1.10 RC 1
+# My UNA Translator 0.1.11 development candidate
+
+Preview editing is implemented and locally tested. Native fresh-install and 0.1.10-to-0.1.11 update validation remain pending; no release has been published.
+
+## Correct a preview
+
+In Generate and review, choose **Edit translation**, correct the text, then **Save translation** or **Cancel edit**. Saved corrections show **Manually edited** and remain in the job until Apply. Keep placeholders, links and HTML unchanged. Unsaved edits keep Apply and page controls disabled; validation errors retain your draft. Only ready or paused jobs with completed preview rows can be edited. Applied history is read-only. Existing Polyglot corrections remain protected by Apply conflict checks.
+
+The native 0.1.10-to-0.1.11 updater adds only the module-owned `manually_edited` flag before copying runtime files. It preserves saved jobs, provider settings and language strings. A failed later step can retry the column migration safely. Sites on another version need a verified upgrade path before deployment. No UNA core files are changed.
+
+Development tests: `npm ci` then `npm test` (PHP 8.1+ with mbstring, DOM, SQLite and cURL). The new DOM suite uses jsdom; it does not certify visual browser layout.
+
+## Previous candidate reference (0.1.10)
+
 
 Native UNA 15 Studio module by My UNA World. Translates English interface language keys using a configured LibreTranslate service or DeepL API Free/Pro. Version 0.1.10 retains the server-language picker, guided workflow and Arabic support. Server-side key issuance is managed separately by the service operator. The native manifest is 0.1.10; this is an unpublished release candidate.
 
@@ -56,3 +69,4 @@ python3 -m unittest discover -s tests -p test_release_boundary.py
 The server-language suite uses an isolated SQLite fixture. The timeout test uses an ephemeral loopback server and requires cURL and proc_open.
 
 The curated quality test verifies 45 exact local terminology outputs in five languages. It does not certify general model output, all 49 language models, or a stable provider default. Historical model samples and earlier baseline checks remain in [VALIDATION.md](docs/VALIDATION.md); they are separate from the RC 4 checks. A native 0.1.9-to-0.1.10 upgrade passed on Man of Teal without data changes. Wider human linguistic review, a fresh native 0.1.10 install and a client-facing on-screen update path remain unverified.
+
