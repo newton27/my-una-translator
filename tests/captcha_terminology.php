@@ -31,4 +31,16 @@ verify('UNA label with Cyrillic C uses reviewed wording',function() {
     $row=$p->translate([$source],'ZH-HANT')[0];
     return $row['text']==='預設驗證碼' && $row['origin']==='terminology';
 });
+verify('Traditional Chinese language-editor legend uses reviewed wording',function() {
+    $p=new MyUnaTranslatorLibreProvider('http://127.0.0.1:5001','',fn()=>['status'=>200,'body'=>json_encode(['translatedText'=>['   ']])]);
+    $source="\u{2605} - main(original) language, red - outdated or missing translation";
+    $row=$p->translate([$source],'ZH-HANT')[0];
+    return $row['text']==='★ - 主要（原始）語言，紅色 - 翻譯已過時或缺失' && $row['origin']==='terminology';
+});
+verify('unreviewed blank model fragments are still rejected',function() {
+    $p=new MyUnaTranslatorLibreProvider('http://127.0.0.1:5001','',fn()=>['status'=>200,'body'=>json_encode(['translatedText'=>['   ']])]);
+    try { $p->translate(['Unknown interface sentence'],'ZH-HANT'); }
+    catch(RuntimeException $e) { return $e->getMessage()==='LibreTranslate returned an invalid text fragment.'; }
+    return false;
+});
 exit($failed?1:0);
