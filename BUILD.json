@@ -20,6 +20,8 @@
   "updater_version_from": "0.1.10",
   "updater_version_to": "0.1.11",
   "record_scope": "Unpublished development candidate for editable previews; native update and fresh-install validation pending.",
-  "status": "UNPUBLISHED DEVELOPMENT CANDIDATE; complete source tests PASS; native fresh install and native 0.1.10-to-0.1.11 update NOT TESTED; no disposable UNA site/rollback baseline configured for this compatibility audit",
-  "compatibility_declaration": "15.0.x"
+  "status": "UNPUBLISHED; native fresh install and native 0.1.10-to-0.1.11 update PASS on gayjax.life for exact 8f36434 packages; source tests PASS; authenticated preview-editing browser acceptance and final release freeze/approval remain pending",
+  "compatibility_declaration": "15.0.x",
+  "native_acceptance_source_commit": "8f3643467e3e7711bab8488cb3f3d109c2aeca31",
+  "native_acceptance_report": "docs/NATIVE-COMPATIBILITY-ACCEPTANCE-2026-10-29.md"
 }
