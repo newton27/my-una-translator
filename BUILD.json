@@ -20,5 +20,6 @@
   "updater_version_from": "0.1.10",
   "updater_version_to": "0.1.11",
   "record_scope": "Unpublished development candidate for editable previews; native update and fresh-install validation pending.",
-  "status": "LOCAL DEVELOPMENT CANDIDATE; tests PASS; native fresh install and native 0.1.10-to-0.1.11 update NOT TESTED; live deployment BLOCKED by browser approval review"
+  "status": "UNPUBLISHED DEVELOPMENT CANDIDATE; complete source tests PASS; native fresh install and native 0.1.10-to-0.1.11 update NOT TESTED; no disposable UNA site/rollback baseline configured for this compatibility audit",
+  "compatibility_declaration": "15.0.x"
 }
