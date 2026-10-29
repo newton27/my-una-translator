@@ -20,6 +20,13 @@ class PreviewUpdate(unittest.TestCase):
   self.assertEqual(xml.count('<string_add '),6)
   self.assertNotIn('<string_upd ',xml)
   self.assertIn("'version' => '0.1.11'",(ROOT/'install/config.php').read_text())
+ def test_current_candidate_uses_una_15_compatibility(self):
+  import re
+  for path in [ROOT/'install/config.php', UP/'install/config.php', UP/'source/install/config.php']:
+   with self.subTest(path=str(path.relative_to(ROOT))):
+    declaration=re.search(r"'compatible_with'\s*=>\s*\[([^]]+)\]",path.read_text())
+    self.assertIsNotNone(declaration)
+    self.assertEqual(declaration.group(1).strip(), "'15.0.x'")
  def test_editor_cache_version(self):
   s=(ROOT/'classes/MyUnaTranslatorStudioPage.php').read_text()
   self.assertIn('translator.js?v=0.1.11-edit1',s)
