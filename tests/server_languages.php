@@ -141,11 +141,18 @@ check('Studio dashboard renders six read-only cards and keeps translation workfl
         && str_contains($html,'2,206')
         && $x->query('//article[span[@class="mut-summary-label" and normalize-space(.)="Recent jobs"]]/strong[normalize-space(.)="2"]')->length===1
         && str_contains($html,'0 active · 1 paused · 1 ready/applied')
-        && str_contains($html,'translator.css?v=0.1.10-rc1')
+        && str_contains($html,'translator.css?v=0.1.11-edit1')
         && $x->query('//*[@id="mut-create"]')->length===1
         && $x->query('//*[@id="mut-job-select"]')->length===1
         && $x->query('//*[@id="mut-status-dialog"]')->length===1
         && $x->query('//*[@id="mut-step-3"]')->length===1
         && (int)$db->getOne('SELECT COUNT(*) FROM my_una_translator_jobs')===2;
 });
+if (getenv('MUT_RENDER_FIXTURE')) {
+    $db=new LanguageTestDb();
+    $engine=new MyUnaTranslatorEngine(new MyUnaTranslatorStore($db),fn()=>new MyUnaTranslatorLibreProvider('http://127.0.0.1:5001','',fn()=>['status'=>200,'body'=>json_encode($inventory)]),fn()=>true);
+    $page=(new ReflectionClass(MyUnaTranslatorStudioPage::class))->newInstanceWithoutConstructor();
+    (new ReflectionProperty($page,'translator'))->setValue($page,$engine);
+    file_put_contents(getenv('MUT_RENDER_FIXTURE'),(new ReflectionMethod($page,'getTranslator'))->invoke($page));
+}
 echo "failures=$failed\n"; exit($failed?1:0);

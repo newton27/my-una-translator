@@ -37,6 +37,7 @@ CREATE TABLE `my_una_translator_items` (
   `source` mediumtext NOT NULL,
   `before_value` mediumtext NULL,
   `result` mediumtext NULL,
+  `manually_edited` tinyint unsigned NOT NULL DEFAULT 0,
   `state` varchar(24) NOT NULL DEFAULT 'pending',
   `error` varchar(500) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),

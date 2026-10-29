@@ -155,4 +155,10 @@
   <string name="_my_una_translator_site_default"><![CDATA[Site default]]></string>
   <string name="_my_una_translator_job_languages"><![CDATA[This job translates]]></string>
   <string name="_my_una_translator_no_preview_yet"><![CDATA[Your translation preview will appear here after generation starts.]]></string>
+  <string name="_my_una_translator_edit_translation"><![CDATA[Edit translation]]></string>
+  <string name="_my_una_translator_save_translation"><![CDATA[Save translation]]></string>
+  <string name="_my_una_translator_cancel_edit"><![CDATA[Cancel edit]]></string>
+  <string name="_my_una_translator_manually_edited"><![CDATA[Manually edited]]></string>
+  <string name="_my_una_translator_preview_saved"><![CDATA[Preview saved. Apply the reviewed job when you are ready.]]></string>
+  <string name="_my_una_translator_edit_help"><![CDATA[Save this correction to the preview. Keep placeholders, links and HTML unchanged. Your site changes only when you apply the job.]]></string>
 </resources>
