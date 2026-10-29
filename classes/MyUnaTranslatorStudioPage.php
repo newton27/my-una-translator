@@ -102,7 +102,7 @@ class MyUnaTranslatorStudioPage extends BxTemplStudioModule
         $defaultName=$default;
         foreach($snapshot['site_languages'] as $language) if($language['code']===$default) $defaultName=$language['native'];
         $config=['endpoint'=>$endpoint,'token'=>$this->token(),'snapshot'=>$snapshot,'labels'=>$labels,'site_url'=>BX_DOL_URL_ROOT,'default_language'=>$default];
-        $html='<link rel="stylesheet" href="'.self::h($base.'template/css/translator.css?v=0.1.10-rc1').'">';
+        $html='<link rel="stylesheet" href="'.self::h($base.'template/css/translator.css?v=0.1.10-review2').'">';
         $html.='<section id="my-una-translator" class="mut" aria-label="'.self::label('title').'">';
         $html.='<header class="mut-hero"><div class="mut-mark" aria-hidden="true">A<span>文</span></div><div><div class="mut-brand">My UNA World</div><h2>'.self::label('title').'</h2><p>'.self::label('workflow_intro').'</p></div></header>';
         // Read-only dashboard: derive everything from the existing snapshot.
@@ -174,7 +174,7 @@ class MyUnaTranslatorStudioPage extends BxTemplStudioModule
         $html.='<section class="mut-card" aria-labelledby="mut-site-title"><h3 id="mut-site-title">'.self::label('site_languages').'</h3><p class="mut-note">'.self::label('site_languages_help').'</p><div id="mut-site-languages" class="mut-site-languages"></div><p class="mut-note">'.self::label('default_note').' <strong><bdi>'.self::h($defaultName).'</bdi></strong>. '.self::label('default_help').'</p><a class="mut-settings-link" href="'.self::h(BX_DOL_URL_STUDIO.'polyglot.php').'">'.self::label('default_settings').'</a></section>';
         $html.='<details class="mut-card"><summary>'.self::label('language_coverage').'</summary><div class="mut-table-wrap mut-coverage-wrap"><table><thead><tr><th>'.self::label('language').'</th><th>'.self::label('translated').'</th><th>'.self::label('missing').'</th><th>'.self::label('english_copies').'</th><th>'.self::label('availability').'</th></tr></thead><tbody id="mut-coverage"></tbody></table></div></details>';
         $html.='<footer class="mut-footer">'.self::label('footer_note').'</footer></section>';
-        $html.='<script type="application/json" id="mut-config">'.json_encode($config,JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_UNESCAPED_UNICODE).'</script><script src="'.self::h($base.'template/js/progress.js?v=0.1.8').'"></script><script src="'.self::h($base.'template/js/workflow.js?v=0.1.9-flow1').'"></script><script src="'.self::h($base.'template/js/translator.js?v=0.1.10-rc1').'"></script>';
+        $html.='<script type="application/json" id="mut-config">'.json_encode($config,JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_UNESCAPED_UNICODE).'</script><script src="'.self::h($base.'template/js/progress.js?v=0.1.8').'"></script><script src="'.self::h($base.'template/js/workflow.js?v=0.1.9-flow1').'"></script><script src="'.self::h($base.'template/js/translator.js?v=0.1.10-review2').'"></script>';
         return $html;
     }
 }

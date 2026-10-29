@@ -111,6 +111,8 @@ final class MyUnaTranslatorStore
         if (!$r) throw new RuntimeException('Translation job was not found.');
         $r['targets']=json_decode($r['targets'],true); $r['counts']=array_fill_keys(['pending','processing','staged','applying','applied','rolled_back','conflict','rollback_conflict','rolling_back'],0);
         foreach ($this->all('SELECT state,COUNT(*) AS n FROM my_una_translator_items WHERE job_id=? GROUP BY state',(int)$id) as $c) $r['counts'][$c['state']] = (int)$c['n'];
+        $r['counts']['unchanged']=$this->unchangedCount($id);
+        $r['counts']['translated']=max(0,(int)$r['counts']['staged']-(int)$r['counts']['unchanged']);
         return $r;
     }
     public function jobs() { return $this->all('SELECT id,created_at,status,targets,total,estimated,budget,spent,error FROM my_una_translator_jobs ORDER BY id DESC LIMIT 20'); }
@@ -144,6 +146,18 @@ final class MyUnaTranslatorStore
         $sets=[]; $args=[];
         foreach ($fields as $key=>$value) { if (!in_array($key,['state','result','error'],true)) throw new RuntimeException('Invalid item update.'); $sets[]='`'.$key.'`=?'; $args[]=$value; }
         $args[]=(int)$id; $this->q('UPDATE my_una_translator_items SET '.implode(',',$sets).' WHERE id=?', ...$args);
+    }
+    public function previewItem($jobId,$itemId)
+    {
+        return $this->row('SELECT * FROM my_una_translator_items WHERE job_id=? AND id=?',(int)$jobId,(int)$itemId);
+    }
+    public function unchangedCount($jobId)
+    {
+        return (int)$this->one("SELECT COUNT(*) FROM my_una_translator_items WHERE job_id=? AND state='staged' AND BINARY result=BINARY source",(int)$jobId);
+    }
+    public function unchangedItems($jobId,$limit=200)
+    {
+        return $this->all("SELECT id FROM my_una_translator_items WHERE job_id=? AND state='staged' AND BINARY result=BINARY source ORDER BY id LIMIT ".max(1,min(200,(int)$limit)),(int)$jobId);
     }
     public function preview($id,$offset=0)
     {

@@ -127,7 +127,7 @@
     find('mut-progress').value = progress.percent;
     find('mut-resume-budget').value = job.budget;
     const estimate = number(job.estimated) + ' / ' + number(job.budget) + ' ' + label('characters');
-    const details = [stateLabel(job.status), number(counts.staged) + ' ' + label('staged'), number(counts.applied) + ' ' + label('applied'), number(Number(counts.conflict || 0) + Number(counts.rollback_conflict || 0)) + ' ' + label('conflicts')];
+    const details = [stateLabel(job.status), number(counts.staged) + ' ' + label('staged'), number(counts.translated || 0) + ' translated', number(counts.unchanged || 0) + ' unchanged', number(counts.applied) + ' ' + label('applied'), number(Number(counts.conflict || 0) + Number(counts.rollback_conflict || 0)) + ' ' + label('conflicts')];
     const names=job.targets.map(code=>snapshot.languages.find(l=>l.code===code)?.name || snapshot.site_languages?.find(l=>l.code===code)?.native || code);
     find('mut-job-details').innerHTML = '<p class="mut-job-targets">'+esc(label('job_languages'))+': <strong>'+esc(names.join(', '))+'</strong></p><div class="mut-stat-row">' + details.map(d => '<span class="mut-pill">' + esc(d) + '</span>').join('') + '</div><p>' + esc(estimate) + '</p><p class="mut-note">' + esc(label('used_reserved')) + ': ' + number(job.spent) + '</p>' + (Number(job.estimated) > Number(job.budget) ? '<p class="mut-warning">' + esc(label('ceiling_warning')) + '</p>' : '') + (job.error ? '<p class="mut-warning">' + esc(job.error) + '</p>' : '');
     if (['paused', 'applied','rolled_back','failed','empty_preview'].includes(String(job.status))) {
@@ -149,7 +149,22 @@
     if (!activeJob) return;
     const data = await request('preview', {job_id:activeJob.id, offset});
     renderJob(data.job);
-    find('mut-preview').innerHTML = data.items.some(i=>i.result!==null) ? '<table class="mut-preview-table"><thead><tr><th>' + esc(label('key')) + '</th><th>' + esc(label('source')) + '</th><th>' + esc(label('translation')) + '</th></tr></thead><tbody>' + data.items.map(i => '<tr><td><strong>' + esc(i.key_name) + '</strong><small>' + esc(i.language) + ' · ' + esc(stateLabel(i.state)) + '</small>' + (i.error ? '<small class="mut-warning">' + esc(i.error) + '</small>' : '') + '</td><td><pre>' + esc(i.source) + '</pre></td><td><pre>' + esc(i.result ?? label('no_translation')) + '</pre></td></tr>').join('') + '</tbody></table>' : '<p class="mut-note">' + esc(label('no_preview_yet')) + '</p>';
+    const editable = data.job.status === 'ready' && !busy;
+    const reviewCounts = data.items.filter(i => i.state === 'staged' && i.result !== null && i.result === i.source).length;
+    const tools = editable ? '<p class="mut-note">Unchanged on this page: ' + reviewCounts +
+      ' <button type="button" class="mut-secondary" data-mut-action="retry_unchanged">Retry up to 200 unchanged strings</button></p>' : '';
+    find('mut-preview').innerHTML = data.items.some(i=>i.result!==null) ? tools +
+      '<table class="mut-preview-table"><thead><tr><th>' + esc(label('key')) + '</th><th>' + esc(label('source')) + '</th><th>' + esc(label('translation')) + '</th></tr></thead><tbody>' +
+      data.items.map(i => {
+        const canEdit=editable && i.state==='staged';
+        const status=i.state==='staged' && i.result!==null && i.source===i.result ? 'Unchanged — review' : stateLabel(i.state);
+        const actions=canEdit ? '<p><button type="button" class="mut-secondary" data-mut-action="save_preview" data-item-id="' + Number(i.id) + '">Save correction</button> ' +
+          '<button type="button" class="mut-secondary" data-mut-action="retry_preview" data-item-id="' + Number(i.id) + '">Retry translation</button></p>' : '';
+        const text=canEdit ? '<textarea class="mut-preview-edit" data-item-id="' + Number(i.id) + '" rows="3" maxlength="1048576" aria-label="Edit translation for ' + esc(i.key_name) + '">' + esc(i.result ?? '') + '</textarea>' :
+          '<pre>' + esc(i.result ?? label('no_translation')) + '</pre>';
+        return '<tr><td><strong>' + esc(i.key_name) + '</strong><small>' + esc(i.language) + ' · ' + esc(status) + '</small>' +
+          (i.error ? '<small class="mut-warning">' + esc(i.error) + '</small>' : '') + '</td><td><pre>' + esc(i.source) + '</pre></td><td>' + text + actions + '</td></tr>';
+      }).join('') + '</tbody></table>' : '<p class="mut-note">' + esc(label('no_preview_yet')) + '</p>';
     find('mut-page-info').textContent = label('preview_page') + ' ' + (Math.floor(offset / 50) + 1);
     setButtons();
   }
@@ -203,6 +218,24 @@
   root.addEventListener('click', async event => {
     const button = event.target.closest('button[data-mut-action]'); if (!button) return;
     const action = button.dataset.mutAction;
+    if (['save_preview','retry_preview','retry_unchanged'].includes(action)) {
+      if (busy || !activeJob || activeJob.status !== 'ready') return;
+      const itemId = Number(button.dataset.itemId || 0);
+      const editor = action === 'save_preview' ? Array.from(root.querySelectorAll('textarea.mut-preview-edit')).find(el => Number(el.dataset.itemId) === itemId) : null;
+      if (action === 'save_preview' && !editor) return;
+      busy = true; setButtons();
+      try {
+        const payload = {job_id:activeJob.id};
+        if (action !== 'retry_unchanged') payload.item_id = itemId;
+        if (editor) payload.text = editor.value;
+        const response = await request(action,payload);
+        renderJob(response.job);
+        await preview();
+        message(action === 'save_preview' ? 'Correction saved.' : action === 'retry_preview' ? 'Translation queued. Click Generate Translation Preview.' : response.selected + ' unchanged translations queued. Click Generate Translation Preview.');
+      } catch (error) { message(error.message || label('connection_error'),true); }
+      finally { busy = false; setButtons(); await preview().catch(() => {}); }
+      return;
+    }
     if (action === 'delete_job') {
         if (busy || !activeJob) return;
         const jobId = Number(activeJob.id);
