@@ -4,6 +4,7 @@
 final class MyUnaTranslatorLibreTerms
 {
     private const TERMS = [
+        '★ - main(original) language, red - outdated or missing translation'=>['ZH-HANT'=>'★ - 主要（原始）語言，紅色 - 翻譯已過時或缺失'],
         'default captcha'=>['ZH-HANT'=>'預設驗證碼'],
         // UNA's English label also exists with Cyrillic capital Es (U+0421).
         "default \u{0421}aptcha"=>['ZH-HANT'=>'預設驗證碼'],
