@@ -40,7 +40,7 @@ final class ReportContract
         foreach($d as $k=>$v) {
             if (in_array($k,['job_id','total','ready','applied','conflicts'],true)) {
                 if (!is_int($v) || $v<0 || $v>2147483647) throw new \InvalidArgumentException('Invalid diagnostic count.');
-            } else self::text($v,in_array($k,['error_message','module_title'],true)?255:255);
+            } else self::text($v,255);
         }
         if (!preg_match('/\A[a-z][a-z0-9_]{1,63}\z/D',$d['module'])) throw new \InvalidArgumentException('Invalid module.');
         foreach(['module_version','una_version','php_version'] as $k) if(!preg_match('/\A[A-Za-z0-9.+_-]{1,64}\z/D',$d[$k])) throw new \InvalidArgumentException('Invalid version.');

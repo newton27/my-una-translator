@@ -33,7 +33,7 @@
       const accepted=flow?.result?.accepted;
       form.hidden=Boolean(accepted);send.disabled=Boolean(flow?.sending||accepted);close.disabled=Boolean(flow?.sending);
       for(const name of fields)form.elements[name].readOnly=Boolean(flow?.locked||flow?.sending);
-      access.hidden=!accepted;newReport.hidden=!(accepted && flow.packet.diagnostics.operation==='support');
+      access.hidden = !accepted;newReport.hidden = !(accepted && flow.packet.diagnostics.operation==='support');
       if(accepted){message.textContent='Saved as ticket #'+flow.result.ticket_id+' — pending support review.'+(flow.result.receipt==='delayed'?' Receipt email may be delayed.':'');access.href='https://myunaworld.com/modules/newton/my_una_tickets/request.php?page=access';}
       else if(flow?.sending)message.textContent='Sending your reviewed report…';
       else if(flow?.result)message.textContent=flow.result.message||'Delivery not confirmed. Retry the same report later.';
