@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources name="en">
+  <string_add name="_my_una_translator_edit_translation"><![CDATA[Edit translation]]></string_add>
+  <string_add name="_my_una_translator_save_translation"><![CDATA[Save translation]]></string_add>
+  <string_add name="_my_una_translator_cancel_edit"><![CDATA[Cancel edit]]></string_add>
+  <string_add name="_my_una_translator_manually_edited"><![CDATA[Manually edited]]></string_add>
+  <string_add name="_my_una_translator_preview_saved"><![CDATA[Preview saved. Apply the reviewed job when you are ready.]]></string_add>
+  <string_add name="_my_una_translator_edit_help"><![CDATA[Save this correction to the preview. Keep placeholders, links and HTML unchanged. Your site changes only when you apply the job.]]></string_add>
+</resources>

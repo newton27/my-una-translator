@@ -1,0 +1,7 @@
+{
+  "name": "my-una-translator-tests",
+  "private": true,
+  "scripts": {"test": "bash tests/run.sh"},
+  "devDependencies": {"jsdom": "26.1.0"}
+}
+
