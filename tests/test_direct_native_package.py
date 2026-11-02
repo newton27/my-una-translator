@@ -1,5 +1,7 @@
 """Checks for the unpublished, complete 0.1.9 native updater artifact."""
 import re
+import hashlib
+import json
 import subprocess
 import sys
 import tempfile
@@ -15,7 +17,9 @@ PREFIX = 'my_una_translator/updates/update_0.1.9_0.1.12/'
 class DirectNativePackage(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.temporary = tempfile.TemporaryDirectory(prefix='translator-native-package-')
+        artifacts = ROOT.parent / 'packages'
+        artifacts.mkdir(parents=True, exist_ok=True)
+        cls.temporary = tempfile.TemporaryDirectory(prefix='translator-native-package-', dir=artifacts)
         cls.addClassCleanup(cls.temporary.cleanup)
         cls.package = Path(cls.temporary.name) / 'candidate.zip'
         subprocess.run([sys.executable, str(ROOT / 'scripts/build_native_019_candidate.py'),
@@ -70,6 +74,45 @@ class DirectNativePackage(unittest.TestCase):
             self.assertEqual(xml.findall('string_upd'), [])
             self.assertEqual(archive.read(PREFIX + 'install/langs/en.xml'),
                              (ROOT / 'updates/update_0.1.10_0.1.11/install/langs/en.xml').read_bytes())
+
+    def test_manifest_explicitly_identifies_file_digests(self):
+        manifest = json.loads(self.package.with_suffix('.json').read_text())
+        self.assertIsInstance(manifest['files'], list)
+        with self.archive() as archive:
+            self.assertEqual(len(manifest['files']), len(archive.namelist()))
+            for entry in manifest['files']:
+                self.assertEqual(set(entry), {'path', 'sha256'})
+                self.assertEqual(entry['sha256'], hashlib.sha256(archive.read(PREFIX + entry['path'])).hexdigest())
+
+
+class DirectNativeBuilderSafety(unittest.TestCase):
+    def invoke(self, path):
+        return subprocess.run([sys.executable, str(ROOT / 'scripts/build_native_019_candidate.py'),
+                               '--output', str(path)], capture_output=True, text=True)
+
+    def test_output_outside_artifact_directory_is_rejected_without_writes(self):
+        with tempfile.TemporaryDirectory(prefix='native-outside-') as directory:
+            output = Path(directory) / 'escaped.zip'
+            result = self.invoke(output)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertEqual(list(Path(directory).iterdir()), [])
+
+    def test_symlink_escape_is_rejected_without_writes(self):
+        artifacts = ROOT.parent / 'packages'
+        artifacts.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=artifacts) as inside, tempfile.TemporaryDirectory() as outside:
+            (Path(inside) / 'escape').symlink_to(outside, target_is_directory=True)
+            result = self.invoke(Path(inside) / 'escape/candidate.zip')
+            self.assertNotEqual(result.returncode, 0)
+            self.assertEqual(list(Path(outside).iterdir()), [])
+
+    def test_non_zip_output_is_rejected_without_writes(self):
+        artifacts = ROOT.parent / 'packages'
+        artifacts.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=artifacts) as directory:
+            result = self.invoke(Path(directory) / 'candidate.json')
+            self.assertNotEqual(result.returncode, 0)
+            self.assertEqual(list(Path(directory).iterdir()), [])
 
 
 if __name__ == '__main__':
