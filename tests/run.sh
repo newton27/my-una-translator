@@ -2,7 +2,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 php_bin="${PHP_BIN:-php}"
-for test in server_languages language_targets libretranslate_quality_gate curl_language_timeout preview_editing preview_migration report_support; do
+for test in server_languages language_targets libretranslate_quality_gate curl_language_timeout preview_editing preview_migration native_019_migration report_support; do
   "$php_bin" "tests/$test.php"
 done
 fixture="$(mktemp)"
