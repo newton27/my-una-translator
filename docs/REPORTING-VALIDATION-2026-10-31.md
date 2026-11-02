@@ -23,8 +23,14 @@ Earlier candidate packages are superseded and retain their original byte identit
 | Translator native 0.1.11 to 0.1.12 update and uninstall | PASS | Preserve package identity |
 | Translator client acceptance | PASS | Retain controlled rollout |
 | Translator SonarCloud at cb08b52 | PASS | Final review |
-| Tickets Composer validation workflow | BLOCKED | Diagnose failing Composer validation |
+| Tickets Composer validation workflow | PASS | Superseded by successful run 41366816640 on 2026-11-02; preserve certified package identities |
 | Translator 0.1.9 upgrade path | NOT TESTED | Validate supported path |
 | Publication | NOT TESTED | Final review and explicit approval |
 
 Detailed operational evidence is retained separately. These results do not authorize client enablement or publication. Both PRs remain draft; no tag, release or release asset was changed.
+
+## CI reconciliation — 2026-11-02
+
+GitHub Actions [run 41366816640](https://github.com/newton27/my-una-tickets/actions/runs/41366816640) was re-inspected: all five jobs completed successfully. The PHP 8.2, 8.3 and 8.4 jobs each passed strict Composer validation, lockfile installation, module checks and native-package validation; the MariaDB regression and aggregate build jobs also passed. Tickets candidate commit is `6f811143d793736bceee84a221d8e90a199925dd`; Actions tested merge ref `08d4ee97389c5d885fa3b13a8fe2d3e5c95e8417`. This supersedes the historical Composer failure, without changing earlier certified packages or claiming a new Studio acceptance run.
+
+Translator 0.1.9 native upgrade acceptance remains NOT TESTED. Reporting stays disabled; both PRs remain draft. No merge, tag, release, Marketplace publication or asset replacement is included.
