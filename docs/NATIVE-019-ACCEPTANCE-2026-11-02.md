@@ -1,83 +1,76 @@
 # Translator 0.1.9 → 0.1.12 native acceptance — November 2, 2026
 
-**Status: BLOCKED at final verification. The Studio update action was submitted; native acceptance is not yet complete.** Reporting rollout and publication remain disabled/unapproved.
+**Native acceptance: PASS for the exact candidate below. Reporting enablement and publication remain BLOCKED.**
 
-## Exact source and package
+## Exact baseline and updater
 
-- Reviewed reporting payload: `cb08b5224a6f555cfcbb64c541cd087727e726bd`; inspected payload snapshot `ed3c314a68149eaf1d5799dc92a6479252505c76`.
-- Direct native updater introduced at `66e81d05908accc49b67ce5656d782173239c9f3`.
-- Additional migration tests: `698f1fa1a6896d47f13b3a7dcacae6e89cd010db`; see [local validation](REPORTING-LOCAL-VALIDATION-2026-11-02.md).
-- Build-tool hardening and explicit checksum records: `1f8c2144d473bd106146347a936ae83624734f9d`. This does not change native ZIP bytes.
+No direct 0.1.9→0.1.12 updater existed initially; only sequential updaters were present. A correctly versioned direct native candidate was prepared without changing published packages or the existing updater directories.
 
-| Artifact | Identity |
+| Item | Exact identity |
 | --- | --- |
-| Direct candidate | `translator-0.1.9-to-0.1.12-candidate.zip` |
-| Size / entries | 66,571 bytes / 40 files |
-| SHA-256 | `53c4ae72bc71692396443f751de72b62a05f651b58c598698f2a5ec059c50a0a` |
-| Archive root | `my_una_translator/updates/update_0.1.9_0.1.12/` |
+| Original package | `my-una-translator-0.1.9-rc.4.zip`, 78,818 bytes |
+| Original SHA-256 | `171f0d328e40cf91275e0ae7d3b60eb4ad518bfba59fe6dce1c1575e3e1993c0` |
+| Original release tree / BUILD runtime | `fd378dd8ee995aa65d6e445c85a264ac137aa30a` / `723e0d9ce05a8ef91e32cb6831a66f8355ffb86f` |
+| Direct updater source | `66e81d05908accc49b67ce5656d782173239c9f3` |
+| Reviewed runtime payload | `cb08b5224a6f555cfcbb64c541cd087727e726bd`, inspected snapshot `ed3c314a68149eaf1d5799dc92a6479252505c76` |
+| Build hardening | `1f8c2144d473bd106146347a936ae83624734f9d`; no ZIP byte change |
+| Candidate ZIP | `translator-0.1.9-to-0.1.12-candidate.zip`, 66,571 bytes, 40 files |
+| Candidate SHA-256 | `53c4ae72bc71692396443f751de72b62a05f651b58c598698f2a5ec059c50a0a` |
+| Native archive root | `my_una_translator/updates/update_0.1.9_0.1.12/` |
 | Staging target | `modules/newton/my_una_translator/updates/update_0.1.9_0.1.12/` |
 
-The package contains 35 exact reviewed runtime files, current uninstall SQL, the native Studio icon and six additive language keys. It conditionally adds the preview edit column and always executes the idempotent reporting-table migration, preserving retry after a partial SQL failure. Existing updater directories and published packages are unchanged. Automatic Marketplace download/unarchive is not certified.
+The updater has version_from 0.1.9, version_to 0.1.12 and UNA 15.0.x compatibility. It carries 35 exact reviewed runtime files, current uninstall SQL, the native icon and six additive language keys. Its conditional preview-column migration preserves replay of the reporting-table migration after a partial failure.
 
-## Genuine original baseline — PASS
+## Authorized isolated installation
 
-The original `v0.1.9-rc.4` tree is `fd378dd8ee995aa65d6e445c85a264ac137aa30a`; BUILD.json identifies runtime checkpoint `723e0d9ce05a8ef91e32cb6831a66f8355ffb86f`. Original installation uses `newton/my_una_translator/`, four module tables and 28 runtime files. Provider credentials reside in the settings table; operator key issuance is external to this module.
+The fixture was cloned from gayjax.life into a separate directory and database, restricted to the operator and loopback. Copied My UNA World lifecycle hooks were disabled only in the clone. The cloned 0.1.11 installation was natively uninstalled; the exact original 0.1.9 ZIP was then installed through Studio Apps → Downloaded. Registration was genuinely 0.1.9 / module ID 39, and all 45 original archived files matched. No compatibility patch or database version edit manufactured the baseline.
 
-The exact published `my-una-translator-0.1.9-rc.4.zip` was downloaded and independently matched to SHA-256 `171f0d328e40cf91275e0ae7d3b60eb4ad518bfba59fe6dce1c1575e3e1993c0` (78,818 bytes).
+Environment observed from the running fixture: UNA 15.0.0-RC3, PHP 8.3.6, MariaDB 10.11.14. The original 0.1.9 manifest retained its original compatibility declaration and still installed natively in this fixture.
 
-A separate UNA fixture was created from the authorized gayjax.life test installation, with its own database and operator/loopback access restriction. Copied My UNA World lifecycle hooks were disabled only in the clone to avoid touching origin backup records. The cloned 0.1.11 module was uninstalled through Studio; the original 0.1.9 package was then staged and installed through Studio Apps → Downloaded. All 45 archived baseline files subsequently matched installed bytes. No compatibility patch or `sys_modules.version` edit was used. Native module ID is 39.
+The nonempty baseline contained one settings row, two jobs, four items, one module language row, four registered UNA keys and seven registered value rows. Batch size was 7 and character ceiling 1,234,567; two encrypted synthetic provider values exercised credential preservation. One job was generated/applied natively on 0.1.9; the second was a constructed saved-preview preservation fixture.
 
-The origin Translator was observed at ID 32 / 0.1.11 / enabled, with zero jobs/items/languages and no provider credentials. No origin module or customer data was modified by this work.
+Provider generation used an authenticated loopback-only LibreTranslate-compatible fixture, not a live translation service or a linguistic-quality assessment. Markup and the `{0}` placeholder survived the original 0.1.9 generation/apply case.
 
-## Nonempty preservation fixtures and rollback — PASS before update
+## Rollback checkpoint
 
-The 0.1.9 fixture has:
+Private operational evidence is retained under `/var/backups/my-una-translator/native-019-20261102/`. No credentials or database contents are committed here.
 
-- One settings row with non-default batch size 7 and character ceiling 1,234,567, plus two encrypted synthetic provider values.
-- Two jobs: one generated/applied through Studio, and one constructed ready preview for preservation testing.
-- Four saved items, four registered UNA language keys, and one module-owned Spanish language record.
-- A successful authenticated round trip to a temporary loopback-only LibreTranslate-compatible fixture. Studio generated and applied Spanish text, preserving `<b>…</b>` markup and `{0}`. This is not live translation-service or linguistic-quality certification.
+| Checkpoint | Bytes | SHA-256 |
+| --- | ---: | --- |
+| `baseline-0.1.9-database.sql` | 158455094 | `d9b8a5fcecad3e7fa631c82f94d1abda5e2fda17e08e26457fb36f3db67fd73a` |
+| `baseline-0.1.9-files.tar.gz` | 12996823443 | `a10ea6446c35243f3aabf626529712a4f90f545e7f4324677eb6040637dc0e1c` |
 
-Before applying the updater, complete module/localization/registration rows and 1,187 core-file digests were captured. Private evidence includes `before-019.json`, `rollback-checkpoint.json`, `baseline-0.1.9-database.sql` and `baseline-0.1.9-files.tar.gz`. The checkpoint records actual paths, sizes and SHA-256 values; the compressed file backup passed its integrity check. A fresh origin database dump was also retained, and existing full backup ID 14 was independently checked against its stored digest and ZIP integrity. Restoration has not yet been tested.
+`before-019.json` contains complete baseline rows, localization/registration and 1,187 core-file digests. `rollback-checkpoint.json` indexes the exact checkpoint paths and digests. The full compressed archive passed integrity validation. A fresh origin database checkpoint and the verified pre-existing full backup ID 14 were also retained.
 
-The fixture's request guard returned the expected disabled-reporting JSON and HTTP 403 for `report_send`, before any report could be sent. The inherited reporting runtime exposes Contact support when its receipt table exists, so this environment hold must remain in place; it is not a default-off module feature flag.
+## Actual native results
 
-## Native Studio action — submitted; final verification BLOCKED
-
-After the checkpoint, the exact 40-file updater was staged with site-account ownership. Studio Apps → Downloaded displayed a local **Updates** section with **My UNA Translator 0.1.9 - 0.1.12** and its native Install control. The observed control called:
+The exact candidate was staged with the site account as owner. The local Updates block at the bottom of Studio Apps → Downloaded displayed My UNA Translator 0.1.9 - 0.1.12. Its observed native control was:
 
 `oBxDolStudioStore.update('newton/my_una_translator/updates/update_0.1.9_0.1.12/', this)`
 
-That control was clicked in the isolated fixture. The local update card disappeared. **Registered target version, SQL/file completion and data preservation have not yet been independently observed after this action.** Chrome then blocked inspection because another extension UI was open. No native-success code is claimed from the vanished card alone.
+That control was applied once. After the earlier browser interruption cleared, independent database/file comparisons established completion; the vanished update card alone was never used as proof.
 
-The separate online Marketplace Updates page reports an expired access token. It was not used to submit this local updater; this remains an online delivery/authorization limitation.
+| Gate | Actual result |
+| --- | --- |
+| Native target and preservation comparison | **27/27 PASS** — registration 0.1.12 / ID 39; unchanged complete settings/jobs/items/language rows; old key/value and language registrations preserved; saved credential decrypted unchanged; new column defaults correct; reporting table exists and is empty; six added keys; all 35 payload files exact; native updater directory removed; Studio/navigation registration preserved; all 1,187 core files unchanged; origin module unchanged. |
+| Post-update functions | **9/9 PASS** — old saved preview opened, applied and rolled back through Studio; a fresh authenticated job generated and applied its expected Spanish result; original translations and settings still exact; no report receipts; no core changes. Jobs ended as #1 applied, #2 rolled_back and #3 applied. |
+| Studio navigation and icon | **PASS** — module page, launcher and dock navigation opened; native SVG loaded completely at 150×150 pixels. |
+| Reporting compatibility and hold | **PASS within stated scope** — direct payload and Tickets source share exact contract blob `c170be3c9bcc21bab9e5ca603d9dcb2a62a1bb2a`; report_send returned disabled JSON / HTTP 403 before and after upgrade; receipt table remained empty. Existing isolated reporting regressions passed. No live diagnostic submission or email delivery is certified. |
+| Native target uninstall | **12/12 PASS** — Studio launcher Uninstall removed all five module tables, registration, Studio pages/widgets/placements and owned language category/keys; owned footer overrides were reset; existing UNA languages and registered translations remained; no core changes. |
+| Checkpoint recovery | **10/10 PASS** — restored the complete cloned database checkpoint plus all 45 byte-verified original module files; genuine 0.1.9 registration, all four prior tables and registered keys/values matched; reporting table absent; core files unchanged. Restored Studio page and icon loaded. Full-site TAR extraction was not exercised. |
+| Disposable fixture cleanup | **PASS independently verified** — cloned directory/database/grant removed, temporary provider stopped and its port closed, recovery files retained; origin Translator remains ID 32 / 0.1.11 / enabled. |
 
-## Current gate table
+The first cleanup helper removed its own loaded cloned application and subsequently emitted a shutdown-autoload error. A separate check without that application bootstrap independently confirmed directory/database/grant absence and the closed provider port. This operational cleanup error is recorded; it was not a native install/update/uninstall failure.
 
-| Gate | Status | Actual evidence / remaining work |
-| --- | --- | --- |
-| Tickets CI | PASS | Run 41366816640: all five jobs successful, including strict Composer validation/install, PHP 8.2–8.4, MariaDB and package checks. |
-| Native original 0.1.9 baseline | PASS | Exact published ZIP, native Studio installation, genuine registration, 45/45 original files. |
-| Pre-update data and rollback checkpoint | PASS | Nonempty fixture, complete private snapshots, SQL/file archives, digests and compression verification. Restore still pending. |
-| Package integrity / repeat build | PASS | 40 files, 35 exact runtime copies, native paths/versions, additive migrations/languages and identical repeat-build digest. |
-| PHP / Node checks | PASS at recorded checkpoints | Server PHP 8.3.6 suite and 21 Node tests passed. The supplement records eight direct migration boundary/failure/retry checks; these are not native acceptance. |
-| Current Python checks | PASS | 18 tests, including outside-path, symlink escape and non-ZIP output rejection; checksum records verified against archive bytes. |
-| Current SonarCloud | PASS | Check for 1f8c214 completed successfully: zero new issues, accepted issues and security hotspots. |
-| Native 0.1.9→0.1.12 completion | BLOCKED | Studio action submitted; independently verify target registration, native SQL and exact installed payload. |
-| Complete settings/key/row preservation | BLOCKED | Run prepared comparison against the pre-update snapshot before changing any fixture data. |
-| Post-update translation functions | NOT TESTED | Verify saved preview use, authenticated provider generation, Apply and rollback in the clone. |
-| Reporting compatibility / hold | BLOCKED | Pre-update HTTP hold verified; recheck after update and compare shared contract with central Tickets without live submission. |
-| Registration / navigation / rendered icons after update | NOT TESTED | Compare native registrations and inspect actual Studio launcher/sidebar. |
-| Native target uninstall / restore | NOT TESTED | Preserve accepted snapshot, uninstall 0.1.12 through Studio, verify five-table/registration cleanup and retained UNA translations/languages, then restore. |
-| Publication / wider reporting rollout | BLOCKED | Complete the above, final review and explicit approval. |
+Private result files: `after-native-update.json`, `after-functions.json`, `after-uninstall.json`, `rollback-verification.json` and `cleanup-verification.json`. The four acceptance comparisons contain 58 passing assertions in total. The original installation and customer data were outside mutation scope; no UNA core file was edited.
 
-## Resume without repeating completed work
+## Automated checks and remaining release gates
 
-Close the blocking Chrome extension panel, then continue in the dedicated isolated fixture tab. The native update action has already been submitted: **do not click it again blindly**.
+- Tickets' former Composer failure is resolved: [run 41366816640](https://github.com/newton27/my-una-tickets/actions/runs/41366816640) passed all five jobs. The later receipt-bootstrap fix at `9a425c6c0512e261c841dfdef86aae914ac3a455` also passed all five jobs in [run 41547883259](https://github.com/newton27/my-una-tickets/actions/runs/41547883259).
+- Translator package repeat-build identity remains unchanged; 18 Python checks pass. The recorded PHP 8.3.6 suite, 21 Node tests and eight adapted migration/retry tests passed; see [local validation](REPORTING-LOCAL-VALIDATION-2026-11-02.md).
+- SonarCloud at `1f8c2144d473bd106146347a936ae83624734f9d` passed with zero new issues/hotspots.
+- Central Tickets' public request page needed template/language initialization before receipt mail. The narrow fix is tested and deployed independently; SMTP credentials on authenticated port 587 were rejected by a connection-only probe. Actual receipt delivery remains unverified.
+- Previously frozen Tickets packages are preserved; the new receipt fix requires deliberate candidate/package reconciliation and acceptance before publication. It is not silently inserted into those artifacts.
+- Online Marketplace download/unarchive remains uncertified; the separate online Updates page reported an expired access token. This does not invalidate the tested local native Studio updater path.
 
-1. Inspect current registration and run the prepared `verify_native_update.php` comparison against `before-019.json`. It checks all four prior tables, credential decryption, registered translation keys/values, language/Studio registration, 1,187 core hashes, all 35 payload files and the origin module.
-2. If those checks pass, test post-update functions and rendered icons while keeping the report guard active.
-3. Save a post-update checkpoint, test native uninstall/cleanup and restoration, and record actual results.
-4. Stop the temporary loopback provider and remove the disposable clone/database after evidence is secured, retaining an organized rollback/evidence checkpoint.
-
-Both PRs remain draft. No main-branch merge, tag, release, Marketplace publication or certified asset replacement is included.
+Both PRs remain **draft**. Client integrated reporting remains **disabled**. Final integrated service/email acceptance, release review and explicit publication approval are still required. No main merge, tag, GitHub release, Marketplace publication or published/certified asset replacement occurred.
