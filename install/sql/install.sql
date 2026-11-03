@@ -37,6 +37,7 @@ CREATE TABLE `my_una_translator_items` (
   `source` mediumtext NOT NULL,
   `before_value` mediumtext NULL,
   `result` mediumtext NULL,
+  `manually_edited` tinyint unsigned NOT NULL DEFAULT 0,
   `state` varchar(24) NOT NULL DEFAULT 'pending',
   `error` varchar(500) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
@@ -61,3 +62,7 @@ INSERT INTO `sys_std_widgets` (`page_id`,`module`,`type`,`url`,`click`,`icon`,`c
 (@iPageId,@sName,'extensions',CONCAT('{url_studio}module.php?name=',@sName),'','my_una_translator@modules/newton/my_una_translator/|std-icon.svg','_my_una_translator_title','','');
 INSERT INTO `sys_std_pages_widgets` (`page_id`,`widget_id`,`order`) VALUES
 (@iParentPageId,LAST_INSERT_ID(),IFNULL(@iOrder,0)+1);
+
+
+-- Integrated support reporting
+CREATE TABLE IF NOT EXISTS `my_una_translator_support_receipts` (`submission_id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL, `payload_hash` char(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL, `incident_hash` char(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL, `ticket_id` bigint unsigned DEFAULT NULL, `created_at` int unsigned NOT NULL, PRIMARY KEY (`submission_id`), KEY `support_incident` (`incident_hash`,`created_at`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

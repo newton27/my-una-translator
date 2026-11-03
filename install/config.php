@@ -5,7 +5,7 @@ $aConfig = [
     'name' => 'my_una_translator',
     'title' => 'My UNA Translator',
     'note' => 'Choose supported languages, review translation previews, and apply or roll back Polyglot text in Studio.',
-    'version' => '0.1.10',
+    'version' => '0.1.12',
     'vendor' => 'My UNA World',
     'help_url' => '',
     'compatible_with' => ['15.0.x'],
@@ -20,3 +20,4 @@ $aConfig = [
     'disable' => ['execute_sql'=>1,'clear_db_cache'=>1,'clear_template_cache'=>1],
     'dependencies' => []
 ];
+
