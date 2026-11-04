@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 import re
+import subprocess
 from pathlib import Path
 import zipfile
 
@@ -13,7 +14,8 @@ PREFIX = 'my_una_translator/updates/' + DIRECTORY + '/'
 ARTIFACT_ROOT = ROOT.parent / 'packages'
 
 
-def build(output):
+def build(output, source_commit=None):
+    source_commit = source_commit or subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
     # CLI callers may choose a name, never a destination outside this workspace's artifacts.
     if ARTIFACT_ROOT.is_symlink():
         raise ValueError('The package artifact directory must not be a symlink')
@@ -43,11 +45,11 @@ def build(output):
         if archive.testzip() is not None:
             raise ValueError('ZIP integrity failed')
     digest = hashlib.sha256(output.read_bytes()).hexdigest()
-    evidence = {'status': 'UNPUBLISHED; native Studio acceptance NOT TESTED',
+    evidence = {'status': 'UNPUBLISHED CORRECTED CANDIDATE; native acceptance NOT TESTED',
                 'module': 'my_una_translator', 'version_from': '0.1.9', 'version_to': '0.1.12',
-                'payload_source_commit': 'cb08b5224a6f555cfcbb64c541cd087727e726bd',
-                'payload_source_snapshot': 'ed3c314a68149eaf1d5799dc92a6479252505c76',
-                'updater_source_commit': '66e81d05908accc49b67ce5656d782173239c9f3',
+                'payload_source_commit': source_commit,
+                'payload_source_base_commit': 'cb08b5224a6f555cfcbb64c541cd087727e726bd',
+                'updater_base_commit': '66e81d05908accc49b67ce5656d782173239c9f3',
                 'package': output.name, 'bytes': output.stat().st_size,
                 'file_count': len(files), 'sha256': digest, 'files': manifest}
     output.with_suffix('.json').write_text(json.dumps(evidence, indent=2) + '\n')
@@ -57,5 +59,7 @@ def build(output):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--output', type=Path, default=ARTIFACT_ROOT / 'translator-0.1.9-to-0.1.12-candidate.zip')
-    build(parser.parse_args().output)
+    parser.add_argument('--output', type=Path, default=ARTIFACT_ROOT / 'translator-preserved-20261104' / 'translator-0.1.9-to-0.1.12-preserved.zip')
+    parser.add_argument("--source-commit", default=None)
+    args = parser.parse_args()
+    build(args.output, args.source_commit)

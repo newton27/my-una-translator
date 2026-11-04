@@ -72,7 +72,7 @@ def write_package(output, filename, prefix, files, source_commit, baseline, targ
     digest = hashlib.sha256(body).hexdigest()
     record = {'filename': filename, 'bytes': len(body), 'files': len(files), 'sha256': digest,
               'native_root': prefix, 'source_commit': source_commit,
-              'runtime_checkpoint': RUNTIME_CHECKPOINT, 'version_from': baseline, 'version_to': target,
+              'runtime_base_commit': RUNTIME_CHECKPOINT, 'version_from': baseline, 'version_to': target,
               'status': 'UNPUBLISHED; explicit-root transport acceptance required',
               'file_manifest': [{'path': name, 'bytes': len(data), 'sha256': hashlib.sha256(data).hexdigest()}
                                 for name, data in sorted(files.items())]}
@@ -92,7 +92,7 @@ def build_packages(output, source_commit):
     full['request.php'] = (ROOT / 'request.php').read_bytes()
     if len(full) != 35:
         raise ValueError('Expected the reviewed 35-file runtime')
-    records = [write_package(output, 'My-UNA-Translator-0.1.12.zip', 'my_una_translator/',
+    records = [write_package(output, 'My-UNA-Translator-0.1.12-preserved.zip', 'my_una_translator/',
                              full, source_commit, None, '0.1.12')]
     for baseline, target, count in [('0.1.9', '0.1.12', 40), ('0.1.10', '0.1.11', 12),
                                     ('0.1.11', '0.1.12', 32)]:
@@ -100,7 +100,7 @@ def build_packages(output, source_commit):
         payload = source_files(ROOT / 'updates' / directory)
         if len(payload) != count:
             raise ValueError('Unexpected native updater inventory: ' + directory)
-        filename = 'My-UNA-Translator-Update-' + baseline + '-to-' + target + '.zip'
+        filename = 'My-UNA-Translator-Update-' + baseline + '-to-' + target + ('-preserved' if target == '0.1.12' else '') + '.zip'
         records.append(write_package(output, filename, directory + '/', payload,
                                      source_commit, baseline, target))
     (output / 'manifest.json').write_text(json.dumps(records, indent=2) + '\n')
@@ -110,7 +110,7 @@ def build_packages(output, source_commit):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--output', type=Path, default=ARTIFACT_ROOT / 'marketplace')
+    parser.add_argument('--output', type=Path, default=ARTIFACT_ROOT / 'translator-preserved-20261104')
     parser.add_argument('--source-commit', default=None)
     args = parser.parse_args()
     commit = args.source_commit or subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()

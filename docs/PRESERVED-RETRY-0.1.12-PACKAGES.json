@@ -1,0 +1,62 @@
+{
+  "status": "UNPUBLISHED corrected0.1.12 candidate; new native acceptance required",
+  "source_base_commit": "ba9c3d9fa3d7129884e5cabb8ec10322fcc6f4fd",
+  "retry_introducing_commit": "cfdc5b89d724b0ceeb8a6878580a7f8243d3b3a2",
+  "reviewed_live_blobs": {
+    "classes/MyUnaTranslatorEngine.php": "7c88611884de6e60785c4def3735c9b0c0ac88ac",
+    "classes/MyUnaTranslatorText.php": "4f42d5cf4476f2192ae571a0c76aad2a9198b93b",
+    "classes/MyUnaTranslatorLibreProvider.php": "5a27b6f5d245acce8be3aaace5935c79d5b48e4e",
+    "template/js/translator.js": "be614f446f08adf16127b124f0b1eb7619283a63"
+  },
+  "corrected_runtime_blobs": {
+    "classes/MyUnaTranslatorEngine.php": "15eacd152da23855368c90e9ccb1f8aeff84f641",
+    "classes/MyUnaTranslatorText.php": "4f42d5cf4476f2192ae571a0c76aad2a9198b93b",
+    "classes/MyUnaTranslatorLibreProvider.php": "5a27b6f5d245acce8be3aaace5935c79d5b48e4e",
+    "template/js/translator.js": "80434f0ffb51f3e117b2eb25919a9e9081046eb4"
+  },
+  "unchanged_native_updater_files": {
+    "updates/update_0.1.9_0.1.12/install/installer.php": "ea35062fb6b34de87c2f2519de4bd0743e76a86d",
+    "updates/update_0.1.9_0.1.12/install/config.php": "61614544a64d4cacc6c9726b3ae5514ce43a9f18",
+    "updates/update_0.1.11_0.1.12/install/installer.php": "889574a28ff118c23538644b43e5e9924c893ebd",
+    "updates/update_0.1.11_0.1.12/install/config.php": "20368d93a54e6f58df96b56504cc7adc62c6aef2"
+  },
+  "unchanged_historical_updater_files": 18,
+  "artifacts": [
+    {
+      "filename": "My-UNA-Translator-0.1.12-preserved.zip",
+      "bytes": 63797,
+      "files": 35,
+      "sha256": "67f35ee2f1cf532566c5f7a98acee6828515418e06bc9ff55391c3f49e0a9a22",
+      "native_root": "my_una_translator/",
+      "version_from": null,
+      "version_to": "0.1.12"
+    },
+    {
+      "filename": "My-UNA-Translator-Update-0.1.9-to-0.1.12-preserved.zip",
+      "bytes": 67421,
+      "files": 40,
+      "sha256": "0f51790a844d542a9df037f7397500d2f7912a1957d990d3d1dbf9dc310a1b8f",
+      "native_root": "update_0.1.9_0.1.12/",
+      "version_from": "0.1.9",
+      "version_to": "0.1.12"
+    },
+    {
+      "filename": "My-UNA-Translator-Update-0.1.10-to-0.1.11.zip",
+      "bytes": 34097,
+      "files": 12,
+      "sha256": "5d63663a35b5314bca25a157eb377f1d8e86842322fbe9ff359dac09b109c0d3",
+      "native_root": "update_0.1.10_0.1.11/",
+      "version_from": "0.1.10",
+      "version_to": "0.1.11"
+    },
+    {
+      "filename": "My-UNA-Translator-Update-0.1.11-to-0.1.12-preserved.zip",
+      "bytes": 63523,
+      "files": 32,
+      "sha256": "d40c87c40f6e6a29f183f5bf6ca6295ff26ace3a919bccf06151bc7a04eef6fe",
+      "native_root": "update_0.1.11_0.1.12/",
+      "version_from": "0.1.11",
+      "version_to": "0.1.12"
+    }
+  ]
+}

@@ -22,7 +22,8 @@ final class MyUnaTranslatorText
         $parts=[]; $segments=[]; $offset=0;
         $append=function($text) use (&$parts,&$segments,$localSeparators) {
             if (!preg_match('/\p{L}/u',$text)) { $parts[]=$text; return; }
-            if ($localSeparators && preg_match('/\A[\s,;:]+/u',$text,$prefix)) {
+            // Keep percentage and parenthesis boundaries out of the model's prose.
+            if ($localSeparators && preg_match('/\A[\s,;:()%]+/u',$text,$prefix)) {
                 $parts[]=$prefix[0]; $text=substr($text,strlen($prefix[0]));
             }
             preg_match('/^(\s*)([\s\S]*?\S)(\s*)$/u',$text,$space);
