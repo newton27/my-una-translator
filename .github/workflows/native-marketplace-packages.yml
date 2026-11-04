@@ -1,0 +1,31 @@
+name: Native Marketplace packages
+on:
+  push:
+    branches:
+      - release/native-marketplace-20261104
+  pull_request:
+    paths:
+      - scripts/build_marketplace_packages.py
+      - tests/test_marketplace_packages.py
+      - .github/workflows/native-marketplace-packages.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  packages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Native package regressions
+        run: python -m unittest discover -s tests -p 'test_*.py'
+      - name: Build immutable explicit-root transport candidates
+        run: python scripts/build_marketplace_packages.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: translator-native-marketplace-${{ github.sha }}
+          path: ../packages/marketplace/
+          if-no-files-found: error
+          retention-days: 30
