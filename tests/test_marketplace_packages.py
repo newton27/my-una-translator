@@ -69,6 +69,56 @@ class MarketplacePackages(unittest.TestCase):
             builder.build_packages(self.output, 'fixture-source')
         self.assertEqual(archive.read_bytes(), b'preserve existing bytes')
 
+    def test_filename_cannot_escape_the_output_directory(self):
+        confined = self.output / 'confined'
+        confined.mkdir()
+        with tempfile.TemporaryDirectory(prefix='marketplace-outside-') as outside:
+            escaped = Path(outside) / 'escaped.zip'
+            for name in (str(escaped), '../escaped.zip', r'..\escaped.zip'):
+                with self.subTest(filename=name), self.assertRaises(ValueError):
+                    builder.write_package(confined, name, 'module/', {'install/config.php': b'fixture'},
+                                          'fixture', None, '0.1.12')
+            self.assertEqual(list(Path(outside).iterdir()), [])
+
+    def test_direct_writer_cannot_use_an_output_outside_artifacts(self):
+        with tempfile.TemporaryDirectory(prefix='marketplace-outside-') as outside:
+            with self.assertRaises(ValueError):
+                builder.write_package(Path(outside), 'candidate.zip', 'module/', {'install/config.php': b'fixture'},
+                                      'fixture', None, '0.1.12')
+            self.assertEqual(list(Path(outside).iterdir()), [])
+
+    def test_sidecar_symlinks_are_rejected_before_any_archive_write(self):
+        for suffix in ('.json', '.zip.sha256'):
+            with self.subTest(suffix=suffix), tempfile.TemporaryDirectory(dir=self.output) as inside, \
+                    tempfile.TemporaryDirectory(prefix='marketplace-outside-') as outside:
+                sentinel = Path(outside) / 'preserved'
+                sentinel.write_bytes(b'preserve existing evidence')
+                archive = Path(inside) / 'candidate.zip'
+                archive.with_suffix(suffix).symlink_to(sentinel)
+                with self.assertRaises(ValueError):
+                    builder.write_package(Path(inside), archive.name, 'module/', {'install/config.php': b'fixture'},
+                                          'fixture', None, '0.1.12')
+                self.assertEqual(sentinel.read_bytes(), b'preserve existing evidence')
+                self.assertFalse(archive.exists())
+
+    def test_unsafe_native_prefix_is_rejected_without_writing_an_archive(self):
+        with self.assertRaises(ValueError):
+            builder.write_package(self.output, 'candidate.zip', '../module/', {'install/config.php': b'fixture'},
+                                  'fixture', None, '0.1.12')
+        self.assertFalse((self.output / 'candidate.zip').exists())
+
+    def test_bundle_manifest_symlinks_are_rejected_before_building_packages(self):
+        for name in ('manifest.json', 'SHA256SUMS'):
+            with self.subTest(name=name), tempfile.TemporaryDirectory(dir=self.output) as inside, \
+                    tempfile.TemporaryDirectory(prefix='marketplace-outside-') as outside:
+                sentinel = Path(outside) / 'preserved'
+                sentinel.write_bytes(b'preserve existing evidence')
+                (Path(inside) / name).symlink_to(sentinel)
+                with self.assertRaises(ValueError):
+                    builder.build_packages(Path(inside), 'fixture')
+                self.assertEqual(sentinel.read_bytes(), b'preserve existing evidence')
+                self.assertEqual(list(Path(inside).glob('*.zip')), [])
+
 
 if __name__ == '__main__':
     unittest.main()

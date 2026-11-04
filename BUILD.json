@@ -1,12 +1,18 @@
 {
   "module": "my_una_translator",
   "version": "0.1.12",
-  "candidate": "integrated-support-reporting",
+  "candidate": "preserved-reviewed-retry-0.1.12",
   "source_commit": null,
-  "status": "UNPUBLISHED DEVELOPMENT; reporting acceptance pending; no release assets changed",
+  "status": "UNPUBLISHED CORRECTED CANDIDATE; native acceptance pending; client reporting disabled; earlier artifacts preserved",
   "supported_update_baselines": [
     "0.1.9",
     "0.1.10",
     "0.1.11"
-  ]
+  ],
+  "reviewed_live_blobs": {
+    "classes/MyUnaTranslatorEngine.php": "7c88611884de6e60785c4def3735c9b0c0ac88ac",
+    "classes/MyUnaTranslatorText.php": "4f42d5cf4476f2192ae571a0c76aad2a9198b93b",
+    "classes/MyUnaTranslatorLibreProvider.php": "5a27b6f5d245acce8be3aaace5935c79d5b48e4e",
+    "template/js/translator.js": "be614f446f08adf16127b124f0b1eb7619283a63"
+  }
 }

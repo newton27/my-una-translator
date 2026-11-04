@@ -218,6 +218,18 @@
       if (action === 'resume') { const r = await request('resume', {job_id:id, character_budget:resumeBudget}); renderJob(r.job); action = 'batch'; }
       while (true) {
         const data = await request(action, {job_id:id, enable_languages:enable}); renderJob(data.job);
+        const retryAfter = Math.max(0, Math.min(300, Number(data.retry_after) || 0));
+        if (retryAfter > 0 && action === 'batch') {
+          for (let remaining = retryAfter; remaining > 0; remaining--) {
+            if (stopRequested) break;
+            const text = label('waiting_libre') + ' - ' + remaining + ' ' + label('seconds');
+            find('mut-status-activity').textContent = text;
+            find('mut-status-activity').hidden = false;
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+          if (stopRequested) { const paused = await request('pause', {job_id:id}); renderJob(paused.job); break; }
+          continue;
+        }
         if (!data.more) break;
         if (stopRequested && action === 'batch') { const paused = await request('pause', {job_id:id}); renderJob(paused.job); break; }
       }

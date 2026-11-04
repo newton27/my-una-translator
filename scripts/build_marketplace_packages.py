@@ -5,6 +5,7 @@ import hashlib
 import io
 import json
 from pathlib import Path, PurePosixPath
+import re
 import subprocess
 import zipfile
 
@@ -51,11 +52,33 @@ def zip_bytes(prefix, files):
     return buffer.getvalue()
 
 
+def artifact_directory(output):
+    output = Path(output).resolve()
+    if ARTIFACT_ROOT.is_symlink() or not output.is_relative_to(ARTIFACT_ROOT.resolve()):
+        raise ValueError('Output must remain inside the package artifact directory')
+    return output
+
+
+def checked_destination(path, directory):
+    if path.is_symlink() or path.resolve().parent != directory:
+        raise ValueError('Artifact destination must be a confined regular file: ' + path.name)
+    if path.exists() and not path.is_file():
+        raise ValueError('Artifact destination must be a regular file: ' + path.name)
+    return path
+
+
 def write_package(output, filename, prefix, files, source_commit, baseline, target):
+    output = artifact_directory(output)
+    if not isinstance(filename, str) or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._-]*\.zip', filename):
+        raise ValueError('Output must have a safe ZIP filename')
+    if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._-]*/', prefix):
+        raise ValueError('Expected one safe native root directory')
+    path = checked_destination(output / filename, output)
+    metadata = checked_destination(path.with_suffix('.json'), output)
+    checksum = checked_destination(path.with_suffix('.zip.sha256'), output)
     body = zip_bytes(prefix, files)
     if body != zip_bytes(prefix, files):
         raise ValueError('Repeat build changed bytes: ' + filename)
-    path = output / filename
     if path.exists() and path.read_bytes() != body:
         raise ValueError('Refusing to replace existing artifact: ' + filename)
     with zipfile.ZipFile(io.BytesIO(body)) as archive:
@@ -68,31 +91,32 @@ def write_package(output, filename, prefix, files, source_commit, baseline, targ
         actual = {name[len(prefix):]: archive.read(name) for name in names if not name.endswith('/')}
         if len(names) != len(set(names)) or actual != files:
             raise ValueError('ZIP source inventory/bytes differ: ' + filename)
-    path.write_bytes(body)
+    if not path.exists():
+        path.write_bytes(body)
     digest = hashlib.sha256(body).hexdigest()
     record = {'filename': filename, 'bytes': len(body), 'files': len(files), 'sha256': digest,
               'native_root': prefix, 'source_commit': source_commit,
-              'runtime_checkpoint': RUNTIME_CHECKPOINT, 'version_from': baseline, 'version_to': target,
+              'runtime_base_commit': RUNTIME_CHECKPOINT, 'version_from': baseline, 'version_to': target,
               'status': 'UNPUBLISHED; explicit-root transport acceptance required',
               'file_manifest': [{'path': name, 'bytes': len(data), 'sha256': hashlib.sha256(data).hexdigest()}
                                 for name, data in sorted(files.items())]}
-    path.with_suffix('.json').write_text(json.dumps(record, indent=2) + '\n')
-    path.with_suffix('.zip.sha256').write_text(digest + '  ' + filename + '\n')
+    metadata.write_text(json.dumps(record, indent=2) + '\n')
+    checksum.write_text(digest + '  ' + filename + '\n')
     return record
 
 
 def build_packages(output, source_commit):
-    output = Path(output).resolve()
-    if ARTIFACT_ROOT.is_symlink() or not output.is_relative_to(ARTIFACT_ROOT.resolve()):
-        raise ValueError('Output must remain inside the package artifact directory')
+    output = artifact_directory(output)
     output.mkdir(parents=True, exist_ok=True)
+    manifest = checked_destination(output / 'manifest.json', output)
+    sums = checked_destination(output / 'SHA256SUMS', output)
     full = {}
     for directory in ('classes', 'install', 'template'):
         full.update({directory + '/' + name: body for name, body in source_files(ROOT / directory).items()})
     full['request.php'] = (ROOT / 'request.php').read_bytes()
     if len(full) != 35:
         raise ValueError('Expected the reviewed 35-file runtime')
-    records = [write_package(output, 'My-UNA-Translator-0.1.12.zip', 'my_una_translator/',
+    records = [write_package(output, 'My-UNA-Translator-0.1.12-preserved-r2.zip', 'my_una_translator/',
                              full, source_commit, None, '0.1.12')]
     for baseline, target, count in [('0.1.9', '0.1.12', 40), ('0.1.10', '0.1.11', 12),
                                     ('0.1.11', '0.1.12', 32)]:
@@ -100,17 +124,17 @@ def build_packages(output, source_commit):
         payload = source_files(ROOT / 'updates' / directory)
         if len(payload) != count:
             raise ValueError('Unexpected native updater inventory: ' + directory)
-        filename = 'My-UNA-Translator-Update-' + baseline + '-to-' + target + '.zip'
+        filename = 'My-UNA-Translator-Update-' + baseline + '-to-' + target + ('-preserved-r2' if target == '0.1.12' else '') + '.zip'
         records.append(write_package(output, filename, directory + '/', payload,
                                      source_commit, baseline, target))
-    (output / 'manifest.json').write_text(json.dumps(records, indent=2) + '\n')
-    (output / 'SHA256SUMS').write_text(''.join(r['sha256'] + '  ' + r['filename'] + '\n' for r in records))
+    manifest.write_text(json.dumps(records, indent=2) + '\n')
+    sums.write_text(''.join(r['sha256'] + '  ' + r['filename'] + '\n' for r in records))
     return records
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--output', type=Path, default=ARTIFACT_ROOT / 'marketplace')
+    parser.add_argument('--output', type=Path, default=ARTIFACT_ROOT / 'translator-preserved-20261104-r2')
     parser.add_argument('--source-commit', default=None)
     args = parser.parse_args()
     commit = args.source_commit or subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
