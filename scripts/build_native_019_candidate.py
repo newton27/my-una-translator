@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Build the unpublished direct updater without changing existing release assets."""
 import argparse
+import errno
 import hashlib
 import io
 import json
+import os
 import re
 import subprocess
 from pathlib import Path
@@ -13,6 +15,31 @@ ROOT = Path(__file__).resolve().parents[1]
 DIRECTORY = 'update_0.1.9_0.1.12'
 PREFIX = 'my_una_translator/updates/' + DIRECTORY + '/'
 ARTIFACT_ROOT = ROOT.parent / 'packages'
+
+
+def write_confined(path, data, artifact_root):
+    """Anchor every component at the approved directory and never follow a late symlink."""
+    relative = path.relative_to(artifact_root)
+    if not relative.parts or '..' in relative.parts:
+        raise ValueError('Output must remain inside the package artifact directory')
+    descriptors = []
+    try:
+        directory = os.open(artifact_root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+        descriptors.append(directory)
+        for component in relative.parent.parts:
+            directory = os.open(component, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=directory)
+            descriptors.append(directory)
+        target = os.open(relative.name, os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_NOFOLLOW,
+                         0o644, dir_fd=directory)
+        with os.fdopen(target, 'wb') as stream:
+            stream.write(data)
+    except OSError as error:
+        if error.errno in (errno.ELOOP, errno.ENOTDIR):
+            raise ValueError('Artifact destination changed into a symlink or non-directory') from error
+        raise
+    finally:
+        for descriptor in reversed(descriptors):
+            os.close(descriptor)
 
 
 def build(output, source_commit=None):
@@ -60,7 +87,7 @@ def build(output, source_commit=None):
     if output.exists() and output.read_bytes() != body:
         raise ValueError('Refusing to replace existing artifact: ' + output.name)
     if not output.exists():
-        output.write_bytes(body)
+        write_confined(output, body, artifact_root)
     digest = hashlib.sha256(body).hexdigest()
     evidence = {'status': 'UNPUBLISHED CORRECTED CANDIDATE; native acceptance NOT TESTED',
                 'module': 'my_una_translator', 'version_from': '0.1.9', 'version_to': '0.1.12',
@@ -69,8 +96,8 @@ def build(output, source_commit=None):
                 'updater_base_commit': '66e81d05908accc49b67ce5656d782173239c9f3',
                 'package': output.name, 'bytes': output.stat().st_size,
                 'file_count': len(files), 'sha256': digest, 'files': manifest}
-    metadata.write_text(json.dumps(evidence, indent=2) + '\n')
-    checksum.write_text(digest + '  ' + output.name + '\n')
+    write_confined(metadata, (json.dumps(evidence, indent=2) + '\n').encode('utf-8'), artifact_root)
+    write_confined(checksum, (digest + '  ' + output.name + '\n').encode('utf-8'), artifact_root)
     print(json.dumps({k: v for k, v in evidence.items() if k != 'files'}))
 
 

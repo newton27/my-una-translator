@@ -1,11 +1,13 @@
 """Checks for the unpublished, complete 0.1.9 native updater artifact."""
 import re
+import importlib.util
 import hashlib
 import json
 import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 import zipfile
 from pathlib import Path
 import xml.etree.ElementTree as ET
@@ -138,6 +140,47 @@ class DirectNativeBuilderSafety(unittest.TestCase):
             result = self.invoke(output)
             self.assertNotEqual(result.returncode, 0)
             self.assertEqual(output.read_bytes(), b'preserve earlier package')
+
+    def test_late_sidecar_symlinks_cannot_redirect_a_write(self):
+        spec = importlib.util.spec_from_file_location('direct_native_builder', ROOT / 'scripts/build_native_019_candidate.py')
+        native = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(native)
+        artifacts = ROOT.parent / 'packages'
+        artifacts.mkdir(parents=True, exist_ok=True)
+        for suffix in ('.json', '.zip.sha256'):
+            with self.subTest(suffix=suffix), tempfile.TemporaryDirectory(dir=artifacts) as inside, \
+                    tempfile.TemporaryDirectory(prefix='native-outside-') as outside:
+                sentinel = Path(outside) / 'preserved'
+                sentinel.write_bytes(b'preserve evidence')
+                output = Path(inside) / 'candidate.zip'
+                serialize = native.json.dumps
+                def add_late_link(value, *args, **kwargs):
+                    if isinstance(value, dict) and value.get('module') == 'my_una_translator' and 'files' in value:
+                        output.with_suffix(suffix).symlink_to(sentinel)
+                    return serialize(value, *args, **kwargs)
+                with mock.patch.object(native.json, 'dumps', side_effect=add_late_link), self.assertRaises(ValueError):
+                    native.build(output, 'fixture')
+                self.assertEqual(sentinel.read_bytes(), b'preserve evidence')
+
+    def test_late_parent_directory_symlink_cannot_redirect_evidence(self):
+        spec = importlib.util.spec_from_file_location('direct_native_builder', ROOT / 'scripts/build_native_019_candidate.py')
+        native = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(native)
+        artifacts = ROOT.parent / 'packages'
+        artifacts.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=artifacts) as inside, tempfile.TemporaryDirectory(prefix='native-outside-') as outside:
+            parent = Path(inside) / 'package'
+            parent.mkdir()
+            output = parent / 'candidate.zip'
+            serialize = native.json.dumps
+            def replace_late_directory(value, *args, **kwargs):
+                if isinstance(value, dict) and value.get('module') == 'my_una_translator' and 'files' in value:
+                    parent.rename(Path(inside) / 'original-package')
+                    parent.symlink_to(outside, target_is_directory=True)
+                return serialize(value, *args, **kwargs)
+            with mock.patch.object(native.json, 'dumps', side_effect=replace_late_directory), self.assertRaises(ValueError):
+                native.build(output, 'fixture')
+            self.assertEqual(list(Path(outside).iterdir()), [])
 
 
 if __name__ == '__main__':
