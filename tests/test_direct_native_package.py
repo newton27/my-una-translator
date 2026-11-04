@@ -114,6 +114,31 @@ class DirectNativeBuilderSafety(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             self.assertEqual(list(Path(directory).iterdir()), [])
 
+    def test_sidecar_symlinks_are_rejected_without_overwriting_other_files(self):
+        artifacts = ROOT.parent / 'packages'
+        artifacts.mkdir(parents=True, exist_ok=True)
+        for suffix in ('.json', '.zip.sha256'):
+            with self.subTest(suffix=suffix), tempfile.TemporaryDirectory(dir=artifacts) as inside, \
+                    tempfile.TemporaryDirectory(prefix='native-outside-') as outside:
+                sentinel = Path(outside) / 'preserved'
+                sentinel.write_bytes(b'preserve existing evidence')
+                output = Path(inside) / 'candidate.zip'
+                output.with_suffix(suffix).symlink_to(sentinel)
+                result = self.invoke(output)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertEqual(sentinel.read_bytes(), b'preserve existing evidence')
+                self.assertFalse(output.exists())
+
+    def test_existing_different_archive_is_preserved(self):
+        artifacts = ROOT.parent / 'packages'
+        artifacts.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=artifacts) as directory:
+            output = Path(directory) / 'candidate.zip'
+            output.write_bytes(b'preserve earlier package')
+            result = self.invoke(output)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertEqual(output.read_bytes(), b'preserve earlier package')
+
 
 if __name__ == '__main__':
     unittest.main()

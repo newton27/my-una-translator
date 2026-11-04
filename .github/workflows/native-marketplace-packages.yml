@@ -20,7 +20,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - uses: shivammathur/setup-php@v2
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2, exact previously validated commit
         with:
           php-version: '8.3'
           extensions: pdo_sqlite, mbstring, simplexml, curl
@@ -38,7 +38,7 @@ jobs:
         id: build
         run: |
           python scripts/build_marketplace_packages.py
-          echo "artifact_path=$(realpath ../packages/translator-preserved-20261104)" >> "$GITHUB_OUTPUT"
+          echo "artifact_path=$(realpath ../packages/translator-preserved-20261104-r2)" >> "$GITHUB_OUTPUT"
       - uses: actions/upload-artifact@v4
         with:
           name: translator-native-preserved-${{ github.sha }}

@@ -220,13 +220,12 @@
         const data = await request(action, {job_id:id, enable_languages:enable}); renderJob(data.job);
         const retryAfter = Math.max(0, Math.min(300, Number(data.retry_after) || 0));
         if (retryAfter > 0 && action === 'batch') {
-          let remaining = retryAfter;
-          while (remaining > 0 && !stopRequested) {
+          for (let remaining = retryAfter; remaining > 0; remaining--) {
+            if (stopRequested) break;
             const text = label('waiting_libre') + ' - ' + remaining + ' ' + label('seconds');
             find('mut-status-activity').textContent = text;
             find('mut-status-activity').hidden = false;
             await new Promise(resolve => setTimeout(resolve, 1000));
-            remaining--;
           }
           if (stopRequested) { const paused = await request('pause', {job_id:id}); renderJob(paused.job); break; }
           continue;
