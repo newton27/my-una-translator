@@ -22,10 +22,13 @@ jobs:
       - name: Native package regressions
         run: python -m unittest discover -s tests -p 'test_*.py'
       - name: Build immutable explicit-root transport candidates
-        run: python scripts/build_marketplace_packages.py
+        id: build
+        run: |
+          python scripts/build_marketplace_packages.py
+          echo "artifact_path=$(realpath ../packages/marketplace)" >> "$GITHUB_OUTPUT"
       - uses: actions/upload-artifact@v4
         with:
           name: translator-native-marketplace-${{ github.sha }}
-          path: ../packages/marketplace/
+          path: ${{ steps.build.outputs.artifact_path }}
           if-no-files-found: error
           retention-days: 30
