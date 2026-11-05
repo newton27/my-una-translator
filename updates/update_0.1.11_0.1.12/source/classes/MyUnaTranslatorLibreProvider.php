@@ -57,7 +57,12 @@ final class MyUnaTranslatorLibreProvider
             if ($this->key!=='') $body['api_key']=$this->key;
             $json=json_encode($body,JSON_UNESCAPED_UNICODE|JSON_THROW_ON_ERROR);
             if (strlen($json)>120000) throw new RuntimeException('LibreTranslate fragment request is too large.');
-            $data=$this->request('POST','/translate',$json);
+            try { $data=$this->request('POST','/translate',$json); }
+            catch (MyUnaTranslatorRateLimitException $e) {
+                if (!$translated) throw $e;
+                // Earlier POSTs already succeeded. Keep the engine's reservation and require an explicit resume.
+                throw new RuntimeException('LibreTranslate rate limited after earlier fragments were accepted. The batch reservation is retained and the job is paused; explicitly resuming may process the same characters again. Check provider usage before resuming.',0,$e);
+            }
             $rows=$data['translatedText']??null;
             if (!is_array($rows) || !array_is_list($rows) || count($rows)!==count($chunk)) throw new RuntimeException('LibreTranslate returned an incomplete fragment batch.');
             foreach($rows as $text) {

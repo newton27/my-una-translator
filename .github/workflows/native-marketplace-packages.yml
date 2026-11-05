@@ -4,6 +4,7 @@ on:
     branches:
       - release/native-marketplace-20261104
       - fix/preserve-reviewed-retry-0.1.12
+      - fix/reconciled-review-20261105-r4
   pull_request:
     paths:
       - scripts/build_marketplace_packages.py
@@ -37,8 +38,10 @@ jobs:
       - name: Build immutable explicit-root transport candidates
         id: build
         run: |
-          python scripts/build_marketplace_packages.py
-          echo "artifact_path=$(realpath ../packages/translator-reconciled-20261105-r3)" >> "$GITHUB_OUTPUT"
+          artifact_dir="../packages/translator-native-${GITHUB_SHA}"
+          python scripts/build_marketplace_packages.py --output "$artifact_dir" --source-commit "$GITHUB_SHA"
+          python scripts/build_native_019_candidate.py --output "$artifact_dir/translator-0.1.9-to-0.1.12-reconciled-r4.zip" --source-commit "$GITHUB_SHA"
+          echo "artifact_path=$(realpath "$artifact_dir")" >> "$GITHUB_OUTPUT"
       - uses: actions/upload-artifact@v4
         with:
           name: translator-native-reconciled-${{ github.sha }}
