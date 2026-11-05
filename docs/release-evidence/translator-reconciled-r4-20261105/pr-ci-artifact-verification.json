@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "run_id": 42117385448,
+  "job_id": 127560535684,
+  "artifact_id": 13457855109,
+  "artifact_sha256": "927eaadb259c447882501e6f153a54954d4867bcd3b626bea33b0ebd025d5825",
+  "artifact_bytes": 301748,
+  "source_commit": "bba3e5762f1a3fa05ddb021f594391acc1baf3f8",
+  "source_tree": "92962fb3516e91ce46c925b7396366cbad2b2ffd",
+  "five_package_hashes_match_canonical_source": true
+}

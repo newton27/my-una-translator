@@ -1,0 +1,698 @@
+[
+  {
+    "filename": "My-UNA-Translator-0.1.12-reconciled-r4.zip",
+    "bytes": 67119,
+    "files": 35,
+    "sha256": "cd88a2451890d61a0be2bf6dd619784fd5c1e5614833885bb842227549d24016",
+    "native_root": "my_una_translator/",
+    "source_commit": "3554da2e84c134e8ccd4ee1a055113a1c5725c36",
+    "runtime_base_commit": "cb08b5224a6f555cfcbb64c541cd087727e726bd",
+    "version_from": null,
+    "version_to": "0.1.12",
+    "status": "UNPUBLISHED; explicit-root transport acceptance required",
+    "file_manifest": [
+      {
+        "path": "classes/MyUnaTranslatorAccess.php",
+        "bytes": 572,
+        "sha256": "d9b013d8193246a935c97bba04f2c36b4c7c4a5b063ad6cb0d8e63ead3bde7b4"
+      },
+      {
+        "path": "classes/MyUnaTranslatorConfig.php",
+        "bytes": 183,
+        "sha256": "3788e5878e15e43b0e21b108af27444e31c7918a33b4da3ac4ca531e0fb846c0"
+      },
+      {
+        "path": "classes/MyUnaTranslatorDb.php",
+        "bytes": 176,
+        "sha256": "942bca0c0feef8406575574003d3b7235e9b43259e8cd264cd23eaf17e6abc15"
+      },
+      {
+        "path": "classes/MyUnaTranslatorEngine.php",
+        "bytes": 23557,
+        "sha256": "6edecdacb25e032e0961a7d12065d4f8c45af019237f168649cace6a9aa575b6"
+      },
+      {
+        "path": "classes/MyUnaTranslatorLanguages.php",
+        "bytes": 4266,
+        "sha256": "6e98b6d4750e62895769e47b899141930fc337e8daa4524417a5574c7fdee399"
+      },
+      {
+        "path": "classes/MyUnaTranslatorLibreProvider.php",
+        "bytes": 10059,
+        "sha256": "90defdb680c437beb06a87f028bc5fb8cee606b73d5e74f62b459c323d969647"
+      },
+      {
+        "path": "classes/MyUnaTranslatorLibreTerms.php",
+        "bytes": 4597,
+        "sha256": "f281f9a41e2e71e47d83ef2815e9808a62bec46cc85a9ec4e6c127c79623ae7f"
+      },
+      {
+        "path": "classes/MyUnaTranslatorMenuSwitchLanguage.php",
+        "bytes": 1593,
+        "sha256": "de0837f20850a45eca91ba0a4211d1e6444f457844f57a334febf47cd08091ab"
+      },
+      {
+        "path": "classes/MyUnaTranslatorModule.php",
+        "bytes": 177,
+        "sha256": "d78d4378dd875563a1bba01a52ad0894248157f5c8984299e03bb9dd2de3fa61"
+      },
+      {
+        "path": "classes/MyUnaTranslatorProvider.php",
+        "bytes": 6477,
+        "sha256": "8c4d991d2c390dc9a164327006020c7e6fa54a1e4d5abc58845c48c3fdcad3d4"
+      },
+      {
+        "path": "classes/MyUnaTranslatorSecret.php",
+        "bytes": 1381,
+        "sha256": "41c9e581b612256ca3ded1cd43b2e7ab048d0a153613b9569dc8126cece77519"
+      },
+      {
+        "path": "classes/MyUnaTranslatorStore.php",
+        "bytes": 16394,
+        "sha256": "5297b4b42bfd16509a345b560ba75beccef6888aaa2d6bb14d3d367a70bf40a2"
+      },
+      {
+        "path": "classes/MyUnaTranslatorStudioPage.php",
+        "bytes": 25651,
+        "sha256": "0b57abb787cafcd424122e487b31d7dcfac6ac423598e9e6416d0099f7294966"
+      },
+      {
+        "path": "classes/MyUnaTranslatorSupport.php",
+        "bytes": 5791,
+        "sha256": "842cebef35ae4325211c95d4b0b1392d132e32e753efed9f17b507e9096ce0ba"
+      },
+      {
+        "path": "classes/MyUnaTranslatorSupportView.php",
+        "bytes": 1690,
+        "sha256": "72d7d6786d8720f12fba6c0bbdc120cced46e058d2b2a7e2c21fb34ef91d4d10"
+      },
+      {
+        "path": "classes/MyUnaTranslatorTemplate.php",
+        "bytes": 195,
+        "sha256": "88384a7d6e78626479b73a791a1869fe7d99b2e3b6fa86a238c56bb5feec57ac"
+      },
+      {
+        "path": "classes/MyUnaTranslatorText.php",
+        "bytes": 10294,
+        "sha256": "f6f6e1438c1e01c686ca4b5b4b7a3b08b0ee3887ad50989755968d9aa0767907"
+      },
+      {
+        "path": "classes/support/ReportClient.php",
+        "bytes": 3074,
+        "sha256": "e3a5b4626ef060fa20e190ee0bf980fc70eab2c40781906161f308e017834776"
+      },
+      {
+        "path": "classes/support/ReportContract.php",
+        "bytes": 5940,
+        "sha256": "0b276225bcfb069eba771ca9b844d1834196c462f4a497edf0a015be2aaa93cf"
+      },
+      {
+        "path": "install/config.php",
+        "bytes": 1007,
+        "sha256": "ddb91731cec675728a729979c91395344d35eb11e3c1baf54b13ee6774cc557e"
+      },
+      {
+        "path": "install/installer.php",
+        "bytes": 189,
+        "sha256": "1f38496e301356b671d1c30944ab39fa5e465026e2e4bd358f1990b7c22dec20"
+      },
+      {
+        "path": "install/langs/en.xml",
+        "bytes": 18569,
+        "sha256": "dec9315ae36c81887174db03b157cc3af0bc7884ec3b2decc872acc7e8b787ec"
+      },
+      {
+        "path": "install/sql/disable.sql",
+        "bytes": 432,
+        "sha256": "2aa666a04d3943d99126c85209366b49edddbf8e0d0f1a25c4fcd98971bfd04b"
+      },
+      {
+        "path": "install/sql/enable.sql",
+        "bytes": 429,
+        "sha256": "f3f01d2a0af6f3e868679d4e0cba92ba4ac8d68f9be6fe17945bb31594145ff8"
+      },
+      {
+        "path": "install/sql/install.sql",
+        "bytes": 3549,
+        "sha256": "634aeabd5d4111b2f0630beb6b5f8857a7926bffda14b562a4affa2e25740790"
+      },
+      {
+        "path": "install/sql/reporting.sql",
+        "bytes": 486,
+        "sha256": "cd6bb8c3018ebc5efdec02078aaa84448b26a072ebb4204c3cdad93cbc4b2229"
+      },
+      {
+        "path": "install/sql/uninstall.sql",
+        "bytes": 1157,
+        "sha256": "7dcfb33ef3f27a849a6067415b53e66421fc44aa5ef53030e602f81384ebb01a"
+      },
+      {
+        "path": "request.php",
+        "bytes": 172,
+        "sha256": "e1c071b940b88c24c4f7cab21e057c0ff76f0a527f2295f00859e55179375d2b"
+      },
+      {
+        "path": "template/css/reporting.css",
+        "bytes": 1772,
+        "sha256": "4eadd719d5bcb5e3d46262d3e14e33682345e164d560ad0080ab5f1291a66d39"
+      },
+      {
+        "path": "template/css/translator.css",
+        "bytes": 10191,
+        "sha256": "b8a33186e316dc24a4b04902000d7d07298870268c6809d35bd3fb923d73afe9"
+      },
+      {
+        "path": "template/images/icons/std-icon.svg",
+        "bytes": 624,
+        "sha256": "2dd4c24af09426be84fd6040f68aa29ca4c4ac28e88575abecd965a4d92a0ad5"
+      },
+      {
+        "path": "template/js/progress.js",
+        "bytes": 1252,
+        "sha256": "7cb15308a9de35663c638a32bcf4b0a5d4bf3c29efd2ec0deed9736f57e50615"
+      },
+      {
+        "path": "template/js/reporting.js",
+        "bytes": 6316,
+        "sha256": "1cddcb61a7a97692ed84e463cdba2be18782e62872b0238188943424923c9ad3"
+      },
+      {
+        "path": "template/js/translator.js",
+        "bytes": 29815,
+        "sha256": "6d5bd4e3920b1f22b083efacd8e5caad912b31808195a3a6ee4e1515ef44ea22"
+      },
+      {
+        "path": "template/js/workflow.js",
+        "bytes": 1400,
+        "sha256": "f4057ab1f220ab77f999891dcae75bff00146aca54e8d3133f4ecbecbe0460b0"
+      }
+    ]
+  },
+  {
+    "filename": "My-UNA-Translator-Update-0.1.9-to-0.1.12-reconciled-r4.zip",
+    "bytes": 71104,
+    "files": 41,
+    "sha256": "75e749544153bea46090a4fd909dce7dddeca38edae97b55af98c62ab5a27fbd",
+    "native_root": "update_0.1.9_0.1.12/",
+    "source_commit": "3554da2e84c134e8ccd4ee1a055113a1c5725c36",
+    "runtime_base_commit": "cb08b5224a6f555cfcbb64c541cd087727e726bd",
+    "version_from": "0.1.9",
+    "version_to": "0.1.12",
+    "status": "UNPUBLISHED; explicit-root transport acceptance required",
+    "file_manifest": [
+      {
+        "path": "install/config.php",
+        "bytes": 813,
+        "sha256": "442d6240b7fedb179dfd2a01ecc43ca985d1247f2f8a2c0253f1d99c0f79639e"
+      },
+      {
+        "path": "install/installer.php",
+        "bytes": 1179,
+        "sha256": "b3b5c592292222eec076ff59f913afe8b3382a1b483e6170b971622e8e16954a"
+      },
+      {
+        "path": "install/langs/en.xml",
+        "bytes": 1192,
+        "sha256": "3e36837295fa9046779202e9d898849b9e7d749a9ca7901ac5a47147831208fe"
+      },
+      {
+        "path": "install/sql/install.sql",
+        "bytes": 486,
+        "sha256": "cd6bb8c3018ebc5efdec02078aaa84448b26a072ebb4204c3cdad93cbc4b2229"
+      },
+      {
+        "path": "install/sql/preview.sql",
+        "bytes": 104,
+        "sha256": "aa2514d9cd4cffe808315aecb21f1f73f38c848f6bc46aa6f6f931b8de2a0fc8"
+      },
+      {
+        "path": "install/sql/review.sql",
+        "bytes": 84,
+        "sha256": "d01f860949514b13a002c1f93c026af2043ced5f0a046453561965146a70bcfb"
+      },
+      {
+        "path": "source/classes/MyUnaTranslatorAccess.php",
+        "bytes": 572,
+        "sha256": "d9b013d8193246a935c97bba04f2c36b4c7c4a5b063ad6cb0d8e63ead3bde7b4"
+      },
+      {
+        "path": "source/classes/MyUnaTranslatorConfig.php",
+        "bytes": 183,
+        "sha256": "3788e5878e15e43b0e21b108af27444e31c7918a33b4da3ac4ca531e0fb846c0"
+      },
+      {
+        "path": "source/classes/MyUnaTranslatorDb.php",
+        "bytes": 176,
+        "sha256": "942bca0c0feef8406575574003d3b7235e9b43259e8cd264cd23eaf17e6abc15"
+      },
+      {
+        "path": "source/classes/MyUnaTranslatorEngine.php",
+        "bytes": 23557,
+        "sha256": "6edecdacb25e032e0961a7d12065d4f8c45af019237f168649cace6a9aa575b6"
+      },
+      {
+        "path": "source/classes/MyUnaTranslatorLanguages.php",
+        "bytes": 4266,
+        "sha256": "6e98b6d4750e62895769e47b899141930fc337e8daa4524417a5574c7fdee399"
+      },
+      {
+        "path": "source/classes/MyUnaTranslatorLibreProvider.php",
+        "bytes": 10059,
+        "sha256": "90defdb680c437beb06a87f028bc5fb8cee606b73d5e74f62b459c323d969647"
+      },
+      {
+        "path": "source/classes/MyUnaTranslatorLibreTerms.php",
+        "bytes": 4597,
+        "sha256": "f281f9a41e2e71e47d83ef2815e9808a62bec46cc85a9ec4e6c127c79623ae7f"
+      },
+      {
+        "path": "source/classes/MyUnaTranslatorMenuSwitchLanguage.php",
+        "bytes": 1593,
+        "sha256": "de0837f20850a45eca91ba0a4211d1e6444f457844f57a334febf47cd08091ab"
+      },
+      {
+        "path": "source/classes/MyUnaTranslatorModule.php",
+        "bytes": 177,
+        "sha256": "d78d4378dd875563a1bba01a52ad0894248157f5c8984299e03bb9dd2de3fa61"
+      },
+      {
+        "path": "source/classes/MyUnaTranslatorProvider.php",
+        "bytes": 6477,
+        "sha256": "8c4d991d2c390dc9a164327006020c7e6fa54a1e4d5abc58845c48c3fdcad3d4"
+      },
+      {
+        "path": "source/classes/MyUnaTranslatorSecret.php",
+        "bytes": 1381,
+        "sha256": "41c9e581b612256ca3ded1cd43b2e7ab048d0a153613b9569dc8126cece77519"
+      },
+      {
+        "path": "source/classes/MyUnaTranslatorStore.php",
+        "bytes": 16394,
+        "sha256": "5297b4b42bfd16509a345b560ba75beccef6888aaa2d6bb14d3d367a70bf40a2"
+      },
+      {
+        "path": "source/classes/MyUnaTranslatorStudioPage.php",
+        "bytes": 25651,
+        "sha256": "0b57abb787cafcd424122e487b31d7dcfac6ac423598e9e6416d0099f7294966"
+      },
+      {
+        "path": "source/classes/MyUnaTranslatorSupport.php",
+        "bytes": 5791,
+        "sha256": "842cebef35ae4325211c95d4b0b1392d132e32e753efed9f17b507e9096ce0ba"
+      },
+      {
+        "path": "source/classes/MyUnaTranslatorSupportView.php",
+        "bytes": 1690,
+        "sha256": "72d7d6786d8720f12fba6c0bbdc120cced46e058d2b2a7e2c21fb34ef91d4d10"
+      },
+      {
+        "path": "source/classes/MyUnaTranslatorTemplate.php",
+        "bytes": 195,
+        "sha256": "88384a7d6e78626479b73a791a1869fe7d99b2e3b6fa86a238c56bb5feec57ac"
+      },
+      {
+        "path": "source/classes/MyUnaTranslatorText.php",
+        "bytes": 10294,
+        "sha256": "f6f6e1438c1e01c686ca4b5b4b7a3b08b0ee3887ad50989755968d9aa0767907"
+      },
+      {
+        "path": "source/classes/support/ReportClient.php",
+        "bytes": 3074,
+        "sha256": "e3a5b4626ef060fa20e190ee0bf980fc70eab2c40781906161f308e017834776"
+      },
+      {
+        "path": "source/classes/support/ReportContract.php",
+        "bytes": 5940,
+        "sha256": "0b276225bcfb069eba771ca9b844d1834196c462f4a497edf0a015be2aaa93cf"
+      },
+      {
+        "path": "source/install/config.php",
+        "bytes": 1007,
+        "sha256": "ddb91731cec675728a729979c91395344d35eb11e3c1baf54b13ee6774cc557e"
+      },
+      {
+        "path": "source/install/installer.php",
+        "bytes": 189,
+        "sha256": "1f38496e301356b671d1c30944ab39fa5e465026e2e4bd358f1990b7c22dec20"
+      },
+      {
+        "path": "source/install/langs/en.xml",
+        "bytes": 18569,
+        "sha256": "dec9315ae36c81887174db03b157cc3af0bc7884ec3b2decc872acc7e8b787ec"
+      },
+      {
+        "path": "source/install/sql/disable.sql",
+        "bytes": 432,
+        "sha256": "2aa666a04d3943d99126c85209366b49edddbf8e0d0f1a25c4fcd98971bfd04b"
+      },
+      {
+        "path": "source/install/sql/enable.sql",
+        "bytes": 429,
+        "sha256": "f3f01d2a0af6f3e868679d4e0cba92ba4ac8d68f9be6fe17945bb31594145ff8"
+      },
+      {
+        "path": "source/install/sql/install.sql",
+        "bytes": 3549,
+        "sha256": "634aeabd5d4111b2f0630beb6b5f8857a7926bffda14b562a4affa2e25740790"
+      },
+      {
+        "path": "source/install/sql/reporting.sql",
+        "bytes": 486,
+        "sha256": "cd6bb8c3018ebc5efdec02078aaa84448b26a072ebb4204c3cdad93cbc4b2229"
+      },
+      {
+        "path": "source/install/sql/uninstall.sql",
+        "bytes": 1157,
+        "sha256": "7dcfb33ef3f27a849a6067415b53e66421fc44aa5ef53030e602f81384ebb01a"
+      },
+      {
+        "path": "source/request.php",
+        "bytes": 172,
+        "sha256": "e1c071b940b88c24c4f7cab21e057c0ff76f0a527f2295f00859e55179375d2b"
+      },
+      {
+        "path": "source/template/css/reporting.css",
+        "bytes": 1772,
+        "sha256": "4eadd719d5bcb5e3d46262d3e14e33682345e164d560ad0080ab5f1291a66d39"
+      },
+      {
+        "path": "source/template/css/translator.css",
+        "bytes": 10191,
+        "sha256": "b8a33186e316dc24a4b04902000d7d07298870268c6809d35bd3fb923d73afe9"
+      },
+      {
+        "path": "source/template/images/icons/std-icon.svg",
+        "bytes": 624,
+        "sha256": "2dd4c24af09426be84fd6040f68aa29ca4c4ac28e88575abecd965a4d92a0ad5"
+      },
+      {
+        "path": "source/template/js/progress.js",
+        "bytes": 1252,
+        "sha256": "7cb15308a9de35663c638a32bcf4b0a5d4bf3c29efd2ec0deed9736f57e50615"
+      },
+      {
+        "path": "source/template/js/reporting.js",
+        "bytes": 6316,
+        "sha256": "1cddcb61a7a97692ed84e463cdba2be18782e62872b0238188943424923c9ad3"
+      },
+      {
+        "path": "source/template/js/translator.js",
+        "bytes": 29815,
+        "sha256": "6d5bd4e3920b1f22b083efacd8e5caad912b31808195a3a6ee4e1515ef44ea22"
+      },
+      {
+        "path": "source/template/js/workflow.js",
+        "bytes": 1400,
+        "sha256": "f4057ab1f220ab77f999891dcae75bff00146aca54e8d3133f4ecbecbe0460b0"
+      }
+    ]
+  },
+  {
+    "filename": "My-UNA-Translator-Update-0.1.10-to-0.1.11.zip",
+    "bytes": 34097,
+    "files": 12,
+    "sha256": "5d63663a35b5314bca25a157eb377f1d8e86842322fbe9ff359dac09b109c0d3",
+    "native_root": "update_0.1.10_0.1.11/",
+    "source_commit": "3554da2e84c134e8ccd4ee1a055113a1c5725c36",
+    "runtime_base_commit": "cb08b5224a6f555cfcbb64c541cd087727e726bd",
+    "version_from": "0.1.10",
+    "version_to": "0.1.11",
+    "status": "UNPUBLISHED; explicit-root transport acceptance required",
+    "file_manifest": [
+      {
+        "path": "install/config.php",
+        "bytes": 807,
+        "sha256": "efd4414d12de82a84cb4667ca1cd52f0c0392a4fbf57dc653f153f9ece608c3a"
+      },
+      {
+        "path": "install/installer.php",
+        "bytes": 529,
+        "sha256": "73061a0700cdb459981cf426988d4234ccafc407dd10cf4001ac50558d75478d"
+      },
+      {
+        "path": "install/langs/en.xml",
+        "bytes": 799,
+        "sha256": "92e2975bcf5c66cc9d5d2c78594f79297acbeb378128410d2104e333c0f2279c"
+      },
+      {
+        "path": "install/sql/install.sql",
+        "bytes": 104,
+        "sha256": "aa2514d9cd4cffe808315aecb21f1f73f38c848f6bc46aa6f6f931b8de2a0fc8"
+      },
+      {
+        "path": "source/classes/MyUnaTranslatorEngine.php",
+        "bytes": 18967,
+        "sha256": "88342b6d9521eb59dd670b4403efb516ac79c01a3f274ad6a189a0b19923fcfb"
+      },
+      {
+        "path": "source/classes/MyUnaTranslatorStore.php",
+        "bytes": 14931,
+        "sha256": "02a7a946d50deb9f44cc9d27b3609e393aa356db5e2ccd417e9e492a9de15b8e"
+      },
+      {
+        "path": "source/classes/MyUnaTranslatorStudioPage.php",
+        "bytes": 23577,
+        "sha256": "e288a9a07a413f757d5f923c62c141fc6f9b0bd8b8a9d62802cae163e5f10ac0"
+      },
+      {
+        "path": "source/install/config.php",
+        "bytes": 1006,
+        "sha256": "1db69aa34b16f68e0e4addbb23ba8ebc2c864f0b12ab8ef30f6f00d18b7b6530"
+      },
+      {
+        "path": "source/install/langs/en.xml",
+        "bytes": 18199,
+        "sha256": "5297dbbe3c7fbbcf5bd3e47514dcd9273443ca7a5c53b6817b38834f64bd0377"
+      },
+      {
+        "path": "source/install/sql/install.sql",
+        "bytes": 2992,
+        "sha256": "f4adcae485915494f05889935e69160defc1e89e20462bb556e8c82b82deeea0"
+      },
+      {
+        "path": "source/template/css/translator.css",
+        "bytes": 10190,
+        "sha256": "b144435604c71fdf1841ec6465712f8205d5b4e094759d8badc7a2cb03d8ab86"
+      },
+      {
+        "path": "source/template/js/translator.js",
+        "bytes": 23805,
+        "sha256": "d139ddf2d02a86cddaa46e01a503b09cbaa0b1a100dae9acf00dd1e5ee3926d0"
+      }
+    ]
+  },
+  {
+    "filename": "My-UNA-Translator-Update-0.1.11-to-0.1.12-reconciled-r4.zip",
+    "bytes": 70636,
+    "files": 40,
+    "sha256": "a5aca2626ad08f4ec00fcae0fb390324dabddcc810f5f8977612ba751b77844f",
+    "native_root": "update_0.1.11_0.1.12/",
+    "source_commit": "3554da2e84c134e8ccd4ee1a055113a1c5725c36",
+    "runtime_base_commit": "cb08b5224a6f555cfcbb64c541cd087727e726bd",
+    "version_from": "0.1.11",
+    "version_to": "0.1.12",
+    "status": "UNPUBLISHED; explicit-root transport acceptance required",
+    "file_manifest": [
+      {
+        "path": "install/config.php",
+        "bytes": 638,
+        "sha256": "95d6009f981cadc8e5aa40a576becfc7f59a19ea72d9b095d6afe90268ee36ba"
+      },
+      {
+        "path": "install/installer.php",
+        "bytes": 659,
+        "sha256": "401b71f61d8ea62c15eb7eabb897b3d1dc896777d7b43f7750aea7ae1222c007"
+      },
+      {
+        "path": "install/langs/en.xml",
+        "bytes": 454,
+        "sha256": "36985caff9804826eb96378a7f56bfcd93b094349c66cd1f1e051f0b053bda0b"
+      },
+      {
+        "path": "install/sql/install.sql",
+        "bytes": 486,
+        "sha256": "cd6bb8c3018ebc5efdec02078aaa84448b26a072ebb4204c3cdad93cbc4b2229"
+      },
+      {
+        "path": "install/sql/review.sql",
+        "bytes": 84,
+        "sha256": "d01f860949514b13a002c1f93c026af2043ced5f0a046453561965146a70bcfb"
+      },
+      {
+        "path": "source/classes/MyUnaTranslatorAccess.php",
+        "bytes": 572,
+        "sha256": "d9b013d8193246a935c97bba04f2c36b4c7c4a5b063ad6cb0d8e63ead3bde7b4"
+      },
+      {
+        "path": "source/classes/MyUnaTranslatorConfig.php",
+        "bytes": 183,
+        "sha256": "3788e5878e15e43b0e21b108af27444e31c7918a33b4da3ac4ca531e0fb846c0"
+      },
+      {
+        "path": "source/classes/MyUnaTranslatorDb.php",
+        "bytes": 176,
+        "sha256": "942bca0c0feef8406575574003d3b7235e9b43259e8cd264cd23eaf17e6abc15"
+      },
+      {
+        "path": "source/classes/MyUnaTranslatorEngine.php",
+        "bytes": 23557,
+        "sha256": "6edecdacb25e032e0961a7d12065d4f8c45af019237f168649cace6a9aa575b6"
+      },
+      {
+        "path": "source/classes/MyUnaTranslatorLanguages.php",
+        "bytes": 4266,
+        "sha256": "6e98b6d4750e62895769e47b899141930fc337e8daa4524417a5574c7fdee399"
+      },
+      {
+        "path": "source/classes/MyUnaTranslatorLibreProvider.php",
+        "bytes": 10059,
+        "sha256": "90defdb680c437beb06a87f028bc5fb8cee606b73d5e74f62b459c323d969647"
+      },
+      {
+        "path": "source/classes/MyUnaTranslatorLibreTerms.php",
+        "bytes": 4597,
+        "sha256": "f281f9a41e2e71e47d83ef2815e9808a62bec46cc85a9ec4e6c127c79623ae7f"
+      },
+      {
+        "path": "source/classes/MyUnaTranslatorMenuSwitchLanguage.php",
+        "bytes": 1593,
+        "sha256": "de0837f20850a45eca91ba0a4211d1e6444f457844f57a334febf47cd08091ab"
+      },
+      {
+        "path": "source/classes/MyUnaTranslatorModule.php",
+        "bytes": 177,
+        "sha256": "d78d4378dd875563a1bba01a52ad0894248157f5c8984299e03bb9dd2de3fa61"
+      },
+      {
+        "path": "source/classes/MyUnaTranslatorProvider.php",
+        "bytes": 6477,
+        "sha256": "8c4d991d2c390dc9a164327006020c7e6fa54a1e4d5abc58845c48c3fdcad3d4"
+      },
+      {
+        "path": "source/classes/MyUnaTranslatorSecret.php",
+        "bytes": 1381,
+        "sha256": "41c9e581b612256ca3ded1cd43b2e7ab048d0a153613b9569dc8126cece77519"
+      },
+      {
+        "path": "source/classes/MyUnaTranslatorStore.php",
+        "bytes": 16394,
+        "sha256": "5297b4b42bfd16509a345b560ba75beccef6888aaa2d6bb14d3d367a70bf40a2"
+      },
+      {
+        "path": "source/classes/MyUnaTranslatorStudioPage.php",
+        "bytes": 25651,
+        "sha256": "0b57abb787cafcd424122e487b31d7dcfac6ac423598e9e6416d0099f7294966"
+      },
+      {
+        "path": "source/classes/MyUnaTranslatorSupport.php",
+        "bytes": 5791,
+        "sha256": "842cebef35ae4325211c95d4b0b1392d132e32e753efed9f17b507e9096ce0ba"
+      },
+      {
+        "path": "source/classes/MyUnaTranslatorSupportView.php",
+        "bytes": 1690,
+        "sha256": "72d7d6786d8720f12fba6c0bbdc120cced46e058d2b2a7e2c21fb34ef91d4d10"
+      },
+      {
+        "path": "source/classes/MyUnaTranslatorTemplate.php",
+        "bytes": 195,
+        "sha256": "88384a7d6e78626479b73a791a1869fe7d99b2e3b6fa86a238c56bb5feec57ac"
+      },
+      {
+        "path": "source/classes/MyUnaTranslatorText.php",
+        "bytes": 10294,
+        "sha256": "f6f6e1438c1e01c686ca4b5b4b7a3b08b0ee3887ad50989755968d9aa0767907"
+      },
+      {
+        "path": "source/classes/support/ReportClient.php",
+        "bytes": 3074,
+        "sha256": "e3a5b4626ef060fa20e190ee0bf980fc70eab2c40781906161f308e017834776"
+      },
+      {
+        "path": "source/classes/support/ReportContract.php",
+        "bytes": 5940,
+        "sha256": "0b276225bcfb069eba771ca9b844d1834196c462f4a497edf0a015be2aaa93cf"
+      },
+      {
+        "path": "source/install/config.php",
+        "bytes": 1007,
+        "sha256": "ddb91731cec675728a729979c91395344d35eb11e3c1baf54b13ee6774cc557e"
+      },
+      {
+        "path": "source/install/installer.php",
+        "bytes": 189,
+        "sha256": "1f38496e301356b671d1c30944ab39fa5e465026e2e4bd358f1990b7c22dec20"
+      },
+      {
+        "path": "source/install/langs/en.xml",
+        "bytes": 18569,
+        "sha256": "dec9315ae36c81887174db03b157cc3af0bc7884ec3b2decc872acc7e8b787ec"
+      },
+      {
+        "path": "source/install/sql/disable.sql",
+        "bytes": 432,
+        "sha256": "2aa666a04d3943d99126c85209366b49edddbf8e0d0f1a25c4fcd98971bfd04b"
+      },
+      {
+        "path": "source/install/sql/enable.sql",
+        "bytes": 429,
+        "sha256": "f3f01d2a0af6f3e868679d4e0cba92ba4ac8d68f9be6fe17945bb31594145ff8"
+      },
+      {
+        "path": "source/install/sql/install.sql",
+        "bytes": 3549,
+        "sha256": "634aeabd5d4111b2f0630beb6b5f8857a7926bffda14b562a4affa2e25740790"
+      },
+      {
+        "path": "source/install/sql/reporting.sql",
+        "bytes": 486,
+        "sha256": "cd6bb8c3018ebc5efdec02078aaa84448b26a072ebb4204c3cdad93cbc4b2229"
+      },
+      {
+        "path": "source/install/sql/uninstall.sql",
+        "bytes": 1157,
+        "sha256": "7dcfb33ef3f27a849a6067415b53e66421fc44aa5ef53030e602f81384ebb01a"
+      },
+      {
+        "path": "source/request.php",
+        "bytes": 172,
+        "sha256": "e1c071b940b88c24c4f7cab21e057c0ff76f0a527f2295f00859e55179375d2b"
+      },
+      {
+        "path": "source/template/css/reporting.css",
+        "bytes": 1772,
+        "sha256": "4eadd719d5bcb5e3d46262d3e14e33682345e164d560ad0080ab5f1291a66d39"
+      },
+      {
+        "path": "source/template/css/translator.css",
+        "bytes": 10191,
+        "sha256": "b8a33186e316dc24a4b04902000d7d07298870268c6809d35bd3fb923d73afe9"
+      },
+      {
+        "path": "source/template/images/icons/std-icon.svg",
+        "bytes": 624,
+        "sha256": "2dd4c24af09426be84fd6040f68aa29ca4c4ac28e88575abecd965a4d92a0ad5"
+      },
+      {
+        "path": "source/template/js/progress.js",
+        "bytes": 1252,
+        "sha256": "7cb15308a9de35663c638a32bcf4b0a5d4bf3c29efd2ec0deed9736f57e50615"
+      },
+      {
+        "path": "source/template/js/reporting.js",
+        "bytes": 6316,
+        "sha256": "1cddcb61a7a97692ed84e463cdba2be18782e62872b0238188943424923c9ad3"
+      },
+      {
+        "path": "source/template/js/translator.js",
+        "bytes": 29815,
+        "sha256": "6d5bd4e3920b1f22b083efacd8e5caad912b31808195a3a6ee4e1515ef44ea22"
+      },
+      {
+        "path": "source/template/js/workflow.js",
+        "bytes": 1400,
+        "sha256": "f4057ab1f220ab77f999891dcae75bff00146aca54e8d3133f4ecbecbe0460b0"
+      }
+    ]
+  }
+]

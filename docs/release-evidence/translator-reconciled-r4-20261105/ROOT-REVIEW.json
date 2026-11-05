@@ -1,0 +1,116 @@
+{
+  "module": "my_una_translator",
+  "version": "0.1.12",
+  "candidate_revision": "reconciled-r4",
+  "status": "REVIEWED UNPUBLISHED CANDIDATE; native acceptance NOT TESTED",
+  "canonical_source_commit": "3554da2e84c134e8ccd4ee1a055113a1c5725c36",
+  "source_tree": "92962fb3516e91ce46c925b7396366cbad2b2ffd",
+  "remote_base_commit": "9acc828e9aa9553baa6c39c4f99de47b025b5720",
+  "local_runtime_fix_commit": "98a7e63683f9b4e112963f4f6d0e5b013327458f",
+  "local_config_only_commit": "ad657cba54da7645c1d038fd54fec4678743a838",
+  "pull_request": "https://github.com/newton27/my-una-translator/pull/11",
+  "independent_root_review": {
+    "runtime_diffs": "ACCEPTED",
+    "partial_rate_limit_tradeoff": "ACCEPTED: retain conservative reservation and processing rows; no automatic resubmission; explicit resume warning",
+    "full_suite_exit_code": 0,
+    "php_scripts": 14,
+    "php_named_pass_lines": 83,
+    "curated_translation_cases": 45,
+    "node_tests": 39,
+    "python_tests": 31,
+    "php_files_linted": 94,
+    "javascript_syntax": "PASS",
+    "whitespace": "PASS",
+    "corrected_runner_log_sha256": "4d4d54a69bcd84e6e425fa2cc75b820b1a863dd9a3f798f49c8fc6f29b647626",
+    "initial_runner_attempt": "ENVIRONMENT FAILURE: existing wrapper omitted mbstring/curl extension paths; corrected runner completed full suite",
+    "initial_runner_log_sha256": "57e1efe711c84eb0f84d56c364fd441a5ce536156bb1865e9217908fe768eb1e"
+  },
+  "red_green": {
+    "baseline_commit": "27fc7f389ba25ec069241e833ba72d7f17b00f6e",
+    "navigation_baseline": {
+      "tests": 8,
+      "pass": 3,
+      "fail": 5,
+      "exit_code": 1
+    },
+    "navigation_fixed": {
+      "tests": 8,
+      "pass": 8,
+      "fail": 0,
+      "exit_code": 0
+    },
+    "partial_rate_limit_baseline": "FAIL: incorrectly returns more=true and automatic retry",
+    "partial_rate_limit_fixed": "PASS: POST sizes20+1;80 accepted characters; previous11+reservation505 retained as516; no retry_after and further batch sends no POST"
+  },
+  "payload_parity": {
+    "runtime_files": 35,
+    "direct_updater": "35/35 identical",
+    "sequential_updater": "35/35 identical"
+  },
+  "ci": {
+    "push": {
+      "status": "PASS",
+      "run_id": 42117299305,
+      "job_id": 127560235134,
+      "artifact_id": 13455863356,
+      "artifact_name": "translator-native-reconciled-3554da2e84c134e8ccd4ee1a055113a1c5725c36",
+      "artifact_bytes": 301746,
+      "artifact_sha256": "f45e6f634c59a611c047618947df487ea6e903efb6df6dbcbfac5febc7d92d46",
+      "artifact_entry_count": 17,
+      "all_artifact_entries_match_canonical_build": true,
+      "canonical_source_commit": "3554da2e84c134e8ccd4ee1a055113a1c5725c36",
+      "source_tree": "92962fb3516e91ce46c925b7396366cbad2b2ffd",
+      "packages": [
+        {
+          "filename": "My-UNA-Translator-0.1.12-reconciled-r4.zip",
+          "bytes": 67119,
+          "sha256": "cd88a2451890d61a0be2bf6dd619784fd5c1e5614833885bb842227549d24016",
+          "matches_frozen_r4": true,
+          "ci_download_byte_parity": "PASS"
+        },
+        {
+          "filename": "My-UNA-Translator-Update-0.1.9-to-0.1.12-reconciled-r4.zip",
+          "bytes": 71104,
+          "sha256": "75e749544153bea46090a4fd909dce7dddeca38edae97b55af98c62ab5a27fbd",
+          "matches_frozen_r4": true,
+          "ci_download_byte_parity": "PASS"
+        },
+        {
+          "filename": "My-UNA-Translator-Update-0.1.10-to-0.1.11.zip",
+          "bytes": 34097,
+          "sha256": "5d63663a35b5314bca25a157eb377f1d8e86842322fbe9ff359dac09b109c0d3",
+          "matches_frozen_r4": true,
+          "ci_download_byte_parity": "PASS"
+        },
+        {
+          "filename": "My-UNA-Translator-Update-0.1.11-to-0.1.12-reconciled-r4.zip",
+          "bytes": 70636,
+          "sha256": "a5aca2626ad08f4ec00fcae0fb390324dabddcc810f5f8977612ba751b77844f",
+          "matches_frozen_r4": true,
+          "ci_download_byte_parity": "PASS"
+        },
+        {
+          "filename": "translator-0.1.9-to-0.1.12-reconciled-r4.zip",
+          "bytes": 71014,
+          "sha256": "c3252cfbc5767610b46671b4f6f84c78768bef7aacc563407a4ea66e14650d4c",
+          "matches_frozen_r4": true,
+          "ci_download_byte_parity": "PASS"
+        }
+      ]
+    },
+    "pull_request": {
+      "status": "PASS",
+      "run_id": 42117385448,
+      "job_id": 127560535684,
+      "artifact_id": 13457855109,
+      "artifact_sha256": "927eaadb259c447882501e6f153a54954d4867bcd3b626bea33b0ebd025d5825",
+      "artifact_bytes": 301748,
+      "source_commit": "bba3e5762f1a3fa05ddb021f594391acc1baf3f8",
+      "source_tree": "92962fb3516e91ce46c925b7396366cbad2b2ffd",
+      "five_package_hashes_match_canonical_source": true
+    }
+  },
+  "native_acceptance": "NOT TESTED for new-byte fresh install or update",
+  "reporting": "SOURCE SEND-CAPABLE; operational rollout hold only; no source feature flag added",
+  "publication": "Draft PR and isolated evidence branch only; no merge, tag, release, Marketplace or deployment"
+}

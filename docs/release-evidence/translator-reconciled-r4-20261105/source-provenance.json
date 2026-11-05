@@ -1,0 +1,41 @@
+{
+  "canonical_remote_commit": "3554da2e84c134e8ccd4ee1a055113a1c5725c36",
+  "canonical_remote_tree": "92962fb3516e91ce46c925b7396366cbad2b2ffd",
+  "remote_parent": "9acc828e9aa9553baa6c39c4f99de47b025b5720",
+  "local_runtime_fix_commit": "98a7e63683f9b4e112963f4f6d0e5b013327458f",
+  "local_config_commit": "ad657cba54da7645c1d038fd54fec4678743a838",
+  "tree_parity": "PASS; remote tree exactly equals local config HEAD tree",
+  "packages": [
+    {
+      "filename": "My-UNA-Translator-0.1.12-reconciled-r4.zip",
+      "bytes": 67119,
+      "sha256": "cd88a2451890d61a0be2bf6dd619784fd5c1e5614833885bb842227549d24016",
+      "matches_frozen_r4": true
+    },
+    {
+      "filename": "My-UNA-Translator-Update-0.1.9-to-0.1.12-reconciled-r4.zip",
+      "bytes": 71104,
+      "sha256": "75e749544153bea46090a4fd909dce7dddeca38edae97b55af98c62ab5a27fbd",
+      "matches_frozen_r4": true
+    },
+    {
+      "filename": "My-UNA-Translator-Update-0.1.10-to-0.1.11.zip",
+      "bytes": 34097,
+      "sha256": "5d63663a35b5314bca25a157eb377f1d8e86842322fbe9ff359dac09b109c0d3",
+      "matches_frozen_r4": true
+    },
+    {
+      "filename": "My-UNA-Translator-Update-0.1.11-to-0.1.12-reconciled-r4.zip",
+      "bytes": 70636,
+      "sha256": "a5aca2626ad08f4ec00fcae0fb390324dabddcc810f5f8977612ba751b77844f",
+      "matches_frozen_r4": true
+    },
+    {
+      "filename": "translator-0.1.9-to-0.1.12-reconciled-r4.zip",
+      "bytes": 71014,
+      "sha256": "c3252cfbc5767610b46671b4f6f84c78768bef7aacc563407a4ea66e14650d4c",
+      "matches_frozen_r4": true
+    }
+  ],
+  "native_acceptance": "NOT TESTED for new bytes"
+}

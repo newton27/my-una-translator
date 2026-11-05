@@ -1,0 +1,74 @@
+{
+  "filename": "My-UNA-Translator-Update-0.1.10-to-0.1.11.zip",
+  "bytes": 34097,
+  "files": 12,
+  "sha256": "5d63663a35b5314bca25a157eb377f1d8e86842322fbe9ff359dac09b109c0d3",
+  "native_root": "update_0.1.10_0.1.11/",
+  "source_commit": "3554da2e84c134e8ccd4ee1a055113a1c5725c36",
+  "runtime_base_commit": "cb08b5224a6f555cfcbb64c541cd087727e726bd",
+  "version_from": "0.1.10",
+  "version_to": "0.1.11",
+  "status": "UNPUBLISHED; explicit-root transport acceptance required",
+  "file_manifest": [
+    {
+      "path": "install/config.php",
+      "bytes": 807,
+      "sha256": "efd4414d12de82a84cb4667ca1cd52f0c0392a4fbf57dc653f153f9ece608c3a"
+    },
+    {
+      "path": "install/installer.php",
+      "bytes": 529,
+      "sha256": "73061a0700cdb459981cf426988d4234ccafc407dd10cf4001ac50558d75478d"
+    },
+    {
+      "path": "install/langs/en.xml",
+      "bytes": 799,
+      "sha256": "92e2975bcf5c66cc9d5d2c78594f79297acbeb378128410d2104e333c0f2279c"
+    },
+    {
+      "path": "install/sql/install.sql",
+      "bytes": 104,
+      "sha256": "aa2514d9cd4cffe808315aecb21f1f73f38c848f6bc46aa6f6f931b8de2a0fc8"
+    },
+    {
+      "path": "source/classes/MyUnaTranslatorEngine.php",
+      "bytes": 18967,
+      "sha256": "88342b6d9521eb59dd670b4403efb516ac79c01a3f274ad6a189a0b19923fcfb"
+    },
+    {
+      "path": "source/classes/MyUnaTranslatorStore.php",
+      "bytes": 14931,
+      "sha256": "02a7a946d50deb9f44cc9d27b3609e393aa356db5e2ccd417e9e492a9de15b8e"
+    },
+    {
+      "path": "source/classes/MyUnaTranslatorStudioPage.php",
+      "bytes": 23577,
+      "sha256": "e288a9a07a413f757d5f923c62c141fc6f9b0bd8b8a9d62802cae163e5f10ac0"
+    },
+    {
+      "path": "source/install/config.php",
+      "bytes": 1006,
+      "sha256": "1db69aa34b16f68e0e4addbb23ba8ebc2c864f0b12ab8ef30f6f00d18b7b6530"
+    },
+    {
+      "path": "source/install/langs/en.xml",
+      "bytes": 18199,
+      "sha256": "5297dbbe3c7fbbcf5bd3e47514dcd9273443ca7a5c53b6817b38834f64bd0377"
+    },
+    {
+      "path": "source/install/sql/install.sql",
+      "bytes": 2992,
+      "sha256": "f4adcae485915494f05889935e69160defc1e89e20462bb556e8c82b82deeea0"
+    },
+    {
+      "path": "source/template/css/translator.css",
+      "bytes": 10190,
+      "sha256": "b144435604c71fdf1841ec6465712f8205d5b4e094759d8badc7a2cb03d8ab86"
+    },
+    {
+      "path": "source/template/js/translator.js",
+      "bytes": 23805,
+      "sha256": "d139ddf2d02a86cddaa46e01a503b09cbaa0b1a100dae9acf00dd1e5ee3926d0"
+    }
+  ]
+}
