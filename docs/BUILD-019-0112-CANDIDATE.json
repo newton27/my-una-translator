@@ -1,0 +1,175 @@
+{
+  "status": "UNPUBLISHED; native Studio acceptance NOT TESTED",
+  "module": "my_una_translator",
+  "version_from": "0.1.9",
+  "version_to": "0.1.12",
+  "payload_source_commit": "cb08b5224a6f555cfcbb64c541cd087727e726bd",
+  "payload_source_snapshot": "ed3c314a68149eaf1d5799dc92a6479252505c76",
+  "updater_source_commit": "66e81d05908accc49b67ce5656d782173239c9f3",
+  "package": "translator-0.1.9-to-0.1.12-candidate.zip",
+  "bytes": 66571,
+  "file_count": 40,
+  "sha256": "53c4ae72bc71692396443f751de72b62a05f651b58c598698f2a5ec059c50a0a",
+  "files": [
+    {
+      "path": "install/config.php",
+      "sha256": "442d6240b7fedb179dfd2a01ecc43ca985d1247f2f8a2c0253f1d99c0f79639e"
+    },
+    {
+      "path": "install/installer.php",
+      "sha256": "62b81a99013472b1d4f1fd29b5caa4d518ee6ecd48459b43f4145a7c9db8a8c3"
+    },
+    {
+      "path": "install/langs/en.xml",
+      "sha256": "92e2975bcf5c66cc9d5d2c78594f79297acbeb378128410d2104e333c0f2279c"
+    },
+    {
+      "path": "install/sql/install.sql",
+      "sha256": "cd6bb8c3018ebc5efdec02078aaa84448b26a072ebb4204c3cdad93cbc4b2229"
+    },
+    {
+      "path": "install/sql/preview.sql",
+      "sha256": "aa2514d9cd4cffe808315aecb21f1f73f38c848f6bc46aa6f6f931b8de2a0fc8"
+    },
+    {
+      "path": "source/classes/MyUnaTranslatorAccess.php",
+      "sha256": "d9b013d8193246a935c97bba04f2c36b4c7c4a5b063ad6cb0d8e63ead3bde7b4"
+    },
+    {
+      "path": "source/classes/MyUnaTranslatorConfig.php",
+      "sha256": "3788e5878e15e43b0e21b108af27444e31c7918a33b4da3ac4ca531e0fb846c0"
+    },
+    {
+      "path": "source/classes/MyUnaTranslatorDb.php",
+      "sha256": "942bca0c0feef8406575574003d3b7235e9b43259e8cd264cd23eaf17e6abc15"
+    },
+    {
+      "path": "source/classes/MyUnaTranslatorEngine.php",
+      "sha256": "21facf7ed6123ddf8cf407db1671e2c0fc319382f27ed70d131b5a92e7362c5c"
+    },
+    {
+      "path": "source/classes/MyUnaTranslatorLanguages.php",
+      "sha256": "6e98b6d4750e62895769e47b899141930fc337e8daa4524417a5574c7fdee399"
+    },
+    {
+      "path": "source/classes/MyUnaTranslatorLibreProvider.php",
+      "sha256": "f65744bb045cda7bf1d3707d155c3587a1d2cd2387bb98502dade0683fa858d2"
+    },
+    {
+      "path": "source/classes/MyUnaTranslatorLibreTerms.php",
+      "sha256": "02379cdff104599dd6fe1348e4aca6ce6b41581d7dd8420fdd8bd0d1ab5b07e8"
+    },
+    {
+      "path": "source/classes/MyUnaTranslatorMenuSwitchLanguage.php",
+      "sha256": "de0837f20850a45eca91ba0a4211d1e6444f457844f57a334febf47cd08091ab"
+    },
+    {
+      "path": "source/classes/MyUnaTranslatorModule.php",
+      "sha256": "d78d4378dd875563a1bba01a52ad0894248157f5c8984299e03bb9dd2de3fa61"
+    },
+    {
+      "path": "source/classes/MyUnaTranslatorProvider.php",
+      "sha256": "8bd9a58a89ce61e879a63a3b655353f9ba17543c5734f75d69ed56be6fe3ed32"
+    },
+    {
+      "path": "source/classes/MyUnaTranslatorSecret.php",
+      "sha256": "41c9e581b612256ca3ded1cd43b2e7ab048d0a153613b9569dc8126cece77519"
+    },
+    {
+      "path": "source/classes/MyUnaTranslatorStore.php",
+      "sha256": "f5fd271221e6140ab37a4ae34abee6068217d9587a78e28e4348ffc890d21e2b"
+    },
+    {
+      "path": "source/classes/MyUnaTranslatorStudioPage.php",
+      "sha256": "035b4d4e3540426c0a8789adf6eb13713f8bf5ee3ea5500922955e64dea5eac0"
+    },
+    {
+      "path": "source/classes/MyUnaTranslatorSupport.php",
+      "sha256": "842cebef35ae4325211c95d4b0b1392d132e32e753efed9f17b507e9096ce0ba"
+    },
+    {
+      "path": "source/classes/MyUnaTranslatorSupportView.php",
+      "sha256": "72d7d6786d8720f12fba6c0bbdc120cced46e058d2b2a7e2c21fb34ef91d4d10"
+    },
+    {
+      "path": "source/classes/MyUnaTranslatorTemplate.php",
+      "sha256": "88384a7d6e78626479b73a791a1869fe7d99b2e3b6fa86a238c56bb5feec57ac"
+    },
+    {
+      "path": "source/classes/MyUnaTranslatorText.php",
+      "sha256": "6e508ed1183a11d83ac087453da5ff55cf5d8458f3b3dbe1c7a4d1b429fcc781"
+    },
+    {
+      "path": "source/classes/support/ReportClient.php",
+      "sha256": "e3a5b4626ef060fa20e190ee0bf980fc70eab2c40781906161f308e017834776"
+    },
+    {
+      "path": "source/classes/support/ReportContract.php",
+      "sha256": "0b276225bcfb069eba771ca9b844d1834196c462f4a497edf0a015be2aaa93cf"
+    },
+    {
+      "path": "source/install/config.php",
+      "sha256": "ddb91731cec675728a729979c91395344d35eb11e3c1baf54b13ee6774cc557e"
+    },
+    {
+      "path": "source/install/installer.php",
+      "sha256": "1f38496e301356b671d1c30944ab39fa5e465026e2e4bd358f1990b7c22dec20"
+    },
+    {
+      "path": "source/install/langs/en.xml",
+      "sha256": "d0399e58825b85ec0d9fda4e6fa273dc6c41a2410c92ecf1e5802a98dbdb4217"
+    },
+    {
+      "path": "source/install/sql/disable.sql",
+      "sha256": "2aa666a04d3943d99126c85209366b49edddbf8e0d0f1a25c4fcd98971bfd04b"
+    },
+    {
+      "path": "source/install/sql/enable.sql",
+      "sha256": "f3f01d2a0af6f3e868679d4e0cba92ba4ac8d68f9be6fe17945bb31594145ff8"
+    },
+    {
+      "path": "source/install/sql/install.sql",
+      "sha256": "a954f7b4d97c633712273a1f68cdd46471fd6231aa200de4cb312c86afe0b821"
+    },
+    {
+      "path": "source/install/sql/reporting.sql",
+      "sha256": "cd6bb8c3018ebc5efdec02078aaa84448b26a072ebb4204c3cdad93cbc4b2229"
+    },
+    {
+      "path": "source/install/sql/uninstall.sql",
+      "sha256": "7dcfb33ef3f27a849a6067415b53e66421fc44aa5ef53030e602f81384ebb01a"
+    },
+    {
+      "path": "source/request.php",
+      "sha256": "e1c071b940b88c24c4f7cab21e057c0ff76f0a527f2295f00859e55179375d2b"
+    },
+    {
+      "path": "source/template/css/reporting.css",
+      "sha256": "4eadd719d5bcb5e3d46262d3e14e33682345e164d560ad0080ab5f1291a66d39"
+    },
+    {
+      "path": "source/template/css/translator.css",
+      "sha256": "b8a33186e316dc24a4b04902000d7d07298870268c6809d35bd3fb923d73afe9"
+    },
+    {
+      "path": "source/template/images/icons/std-icon.svg",
+      "sha256": "2dd4c24af09426be84fd6040f68aa29ca4c4ac28e88575abecd965a4d92a0ad5"
+    },
+    {
+      "path": "source/template/js/progress.js",
+      "sha256": "180853c0b8992e71151d916213695188fedf5df10f7b02083bd8dc374f072687"
+    },
+    {
+      "path": "source/template/js/reporting.js",
+      "sha256": "1cddcb61a7a97692ed84e463cdba2be18782e62872b0238188943424923c9ad3"
+    },
+    {
+      "path": "source/template/js/translator.js",
+      "sha256": "833ff17ab99ffddf9fba6c20f912f0f7008c7e14934466afc6de741c6d854ebf"
+    },
+    {
+      "path": "source/template/js/workflow.js",
+      "sha256": "23d9e4d394513065e357942e2f998d90c41ceffc1b6099b89ad3e61fe7cd8145"
+    }
+  ]
+}

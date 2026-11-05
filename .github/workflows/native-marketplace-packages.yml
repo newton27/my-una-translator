@@ -1,0 +1,47 @@
+name: Native Marketplace packages
+on:
+  push:
+    branches:
+      - release/native-marketplace-20261104
+      - fix/preserve-reviewed-retry-0.1.12
+  pull_request:
+    paths:
+      - scripts/build_marketplace_packages.py
+      - tests/test_marketplace_packages.py
+      - .github/workflows/native-marketplace-packages.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  packages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2, exact previously validated commit
+        with:
+          php-version: '8.3'
+          extensions: pdo_sqlite, mbstring, simplexml, curl
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser-test dependency
+        run: npm install --prefix "$RUNNER_TEMP/translator-node-deps" --no-package-lock --no-save --ignore-scripts jsdom@26.1.0
+      - name: PHP, browser and native package regressions
+        env:
+          NODE_PATH: ${{ runner.temp }}/translator-node-deps/node_modules
+        run: bash tests/run.sh
+      - name: Build immutable explicit-root transport candidates
+        id: build
+        run: |
+          python scripts/build_marketplace_packages.py
+          echo "artifact_path=$(realpath ../packages/translator-reconciled-20261105-r3)" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: translator-native-reconciled-${{ github.sha }}
+          path: ${{ steps.build.outputs.artifact_path }}
+          if-no-files-found: error
+          retention-days: 30

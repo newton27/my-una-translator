@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?><resources>  <string_add name="_my_una_translator_needs_review"><![CDATA[Needs review]]></string_add>
+  <string_add name="_my_una_translator_correction_required"><![CDATA[Correction required]]></string_add>
+  <string_add name="_my_una_translator_next_needs_review"><![CDATA[Generation is complete. Correct the flagged strings in step 2 before applying. Your saved previews are preserved.]]></string_add>
+</resources>

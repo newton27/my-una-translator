@@ -1,0 +1,8 @@
+<?php
+final class MyUnaTranslatorSupportView
+{
+    public static function html(): string
+    {
+        return '<dialog id="mut-report-dialog" class="mut-report-dialog" aria-labelledby="mut-report-title"><header><div><small>MY UNA WORLD</small><h2 id="mut-report-title">Report a problem</h2></div><button id="mut-report-close" type="button">Close</button></header><p id="mut-report-message" role="status" aria-live="polite"></p><form id="mut-report-form"><label>Contact email<input name="email" type="email" maxlength="254" autocomplete="email" required></label><label>Summary<input name="summary" maxlength="255" required></label><label>What happened?<textarea name="description" rows="4" maxlength="12000" required></textarea></label><p>Leave passwords, tokens and private member information out of your description.</p><details><summary>Diagnostics included in this report</summary><pre id="mut-report-diagnostics"></pre></details><label class="mut-report-consent"><input name="consent" type="checkbox" required> I reviewed this report and want to send my contact email, description and these diagnostics to My UNA World.</label><button id="mut-report-send" type="submit">Send report to My UNA World</button></form><button id="mut-report-new" type="button" hidden>Start a new support report</button><p><a id="mut-report-access" href="https://myunaworld.com/modules/newton/my_una_tickets/request.php?page=access" target="_blank" rel="noopener noreferrer" hidden>Access your private ticket and replies</a></p><p><a href="https://myunaworld.com/modules/newton/my_una_tickets/request.php?page=submit" target="_blank" rel="noopener noreferrer">Open the support page</a></p></dialog>';
+    }
+}

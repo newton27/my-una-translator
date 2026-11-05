@@ -54,12 +54,13 @@ final class MyUnaTranslatorEngine
     {
         if ($action==='snapshot') return $this->snapshot();
         if ($action==='status') return ['job'=>$this->store->job($this->id($data))];
-        if ($action==='preview') return ['job'=>$this->store->job($this->id($data)),'items'=>$this->store->preview($this->id($data),$data['offset']??0)];
-        $allowed=['settings','usage','create','batch','pause','resume','apply','rollback','delete_job'];
+        if ($action==='preview') { $id=$this->id($data); return ['job'=>$this->store->job($id)] + $this->store->previewFiltered($id,$data['offset']??0,$data['search']??'',$data['filter']??'all'); }
+        $allowed=['settings','usage','create','batch','pause','resume','apply','rollback','delete_job','save_preview','reset_preview','edit_item'];
         if (!in_array($action,$allowed,true)) throw new RuntimeException('Unknown Translator action.');
         $this->store->lock();
         try {
             switch ($action) {
+                case 'edit_item': return $this->editItem($this->id($data),$data);
                 case 'delete_job': $id=$this->id($data); $this->store->deleteJob($id); return ['deleted'=>true,'job_id'=>$id];
             case 'settings': $this->languagePresets=null; return ['settings'=>$this->store->saveSettings($data)];
                 case 'usage': return ['usage'=>$this->provider()->usage()];
@@ -70,10 +71,35 @@ final class MyUnaTranslatorEngine
                     if (!in_array($j['status'],['planned','running','paused'],true)) throw new RuntimeException('This job is not generating translations.');
                     $this->store->changeJob($id,['status'=>'paused']); return ['job'=>$this->store->job($id),'more'=>false];
                 case 'resume': return $this->resume($this->id($data),$data);
+                case 'save_preview': return $this->savePreview($this->id($data),$data,false);
+                case 'reset_preview': return $this->savePreview($this->id($data),$data,true);
                 case 'apply': return $this->apply($this->id($data),$data);
                 case 'rollback': return $this->rollback($this->id($data));
             }
         } finally { $this->store->unlock(); }
+    }
+
+    private function editItem($jobId,array $data)
+    {
+        $job=$this->store->job($jobId);
+        if (!in_array($job['status'],['ready','paused'],true))
+            throw new RuntimeException('Only ready or paused previews can be edited.');
+        $itemId=filter_var($data['item_id']??0,FILTER_VALIDATE_INT);
+        if (!$itemId || $itemId<1) throw new RuntimeException('Select a valid preview item.');
+        $item=$this->store->item($jobId,$itemId);
+        if (!$item || $item['state']!=='staged' || !is_string($item['result']))
+            throw new RuntimeException('This item is not an editable preview.');
+        $hash=$data['expected_hash']??null;
+        if (!is_string($hash) || !hash_equals(hash('sha256',$item['result']),$hash))
+            throw new RuntimeException('This preview changed in another window. Cancel and refresh before editing again.');
+        $result=$data['result']??null;
+        if (!is_string($result) || strlen($result)>1048576)
+            throw new RuntimeException('Enter translation text of at most 1 MB.');
+        MyUnaTranslatorText::validate($item['source'],$result);
+        // Never change source or before_value: Apply must still detect later Polyglot edits.
+        $this->store->changeItem($itemId,['result'=>$result,'manually_edited'=>1,'error'=>'']);
+        $item=$this->store->previewItem($jobId,$itemId);
+        return ['job'=>$this->store->job($jobId),'item'=>$item];
     }
 
     private function create(array $data)
@@ -121,7 +147,7 @@ final class MyUnaTranslatorEngine
             return ['job'=>$this->store->job($id),'more'=>false];
         }
         $pending=$this->store->items($id,['pending'],(int)$this->store->settings()['batch_size']);
-        if (!$pending) { $this->store->changeJob($id,['status'=>'ready','error'=>'']); return ['job'=>$this->store->job($id),'more'=>false]; }
+        if (!$pending) return $this->finishGeneration($id);
         $rows=[]; $estimated=0; $code=$pending[0]['language'];
         foreach ($pending as $row) {
             if ($row['language']!==$code) break;
@@ -147,13 +173,32 @@ final class MyUnaTranslatorEngine
             foreach ($rows as $row) $this->store->changeItem($row['id'],['state'=>'processing']);
             $reserved=(int)$job['spent']+$estimated;
             $this->store->changeJob($id,['status'=>'running','spent'=>$reserved,'error'=>'']); $this->store->q('COMMIT');
-            $translations=$provider->translate(array_column($rows,'source'),$target);
+            $translations=$provider->translate(array_column($rows,'source'),$target,true);
+            if (!is_array($translations) || !array_is_list($translations) || count($translations)!==count($rows))
+                throw new RuntimeException('Provider returned an incomplete translation batch.');
             $billed=0; $this->store->q('START TRANSACTION');
             foreach ($rows as $i=>$row) {
-                $this->store->changeItem($row['id'],['state'=>'staged','result'=>$translations[$i]['text'],'error'=>'']);
-                $billed+=(int)$translations[$i]['billed'];
+                $translation=$translations[$i];
+                if (!is_array($translation) || !isset($translation['billed']) || !is_numeric($translation['billed']))
+                    throw new RuntimeException('Provider returned an invalid translation row.');
+                $error=$translation['error']??'';
+                if (!is_string($error) || !array_key_exists('text',$translation) || ($error!=='' && $translation['text']!==null))
+                    throw new RuntimeException('Provider returned an invalid translation row.');
+                if ($error==='') {
+                    try { MyUnaTranslatorText::validate($row['source'],$translation['text']); }
+                    catch (RuntimeException $e) { $error=$e->getMessage(); }
+                }
+                if ($error!=='') $this->store->changeItem($row['id'],['state'=>'needs_review','result'=>null,'original_result'=>null,'error'=>mb_substr($error,0,1000)]);
+                else $this->store->changeItem($row['id'],['state'=>'staged','result'=>$translation['text'],'original_result'=>$translation['text'],'error'=>'']);
+                $billed+=max(0,(int)$translation['billed']);
             }
             $this->store->changeJob($id,['spent'=>(int)$job['spent']+$billed]); $this->store->q('COMMIT');
+        } catch (MyUnaTranslatorRateLimitException $e) {
+            $this->store->q('START TRANSACTION');
+            foreach ($rows as $row) $this->store->changeItem($row['id'],['state'=>'pending','error'=>'']);
+            $this->store->changeJob($id,['status'=>'running','spent'=>(int)$job['spent'],'error'=>'LibreTranslate rate limited; automatic retry scheduled.']);
+            $this->store->q('COMMIT');
+            return ['job'=>$this->store->job($id),'more'=>true,'retry_after'=>$e->retryAfter()];
         } catch (Throwable $e) {
             $this->store->q('ROLLBACK');
             $safe=get_class($e)==='RuntimeException' ? $e->getMessage() : 'The translation batch could not be saved. Check provider usage before retrying.';
@@ -161,8 +206,15 @@ final class MyUnaTranslatorEngine
             return ['job'=>$this->store->job($id),'more'=>false];
         }
         $job=$this->store->job($id); $more=$job['counts']['pending']>0;
-        if (!$more) { $this->store->changeJob($id,['status'=>'ready']); $job=$this->store->job($id); }
+        if (!$more) return $this->finishGeneration($id);
         return ['job'=>$job,'more'=>$more];
+    }
+
+    private function finishGeneration($id)
+    {
+        $job=$this->store->job($id); $review=(int)$job['counts']['needs_review'];
+        $this->store->changeJob($id,['status'=>$review?'needs_review':'ready','error'=>$review?'Generation is complete. Correct the strings marked Needs review before applying.':'']);
+        return ['job'=>$this->store->job($id),'more'=>false];
     }
 
     private function recheckPreviews($id)
@@ -193,9 +245,39 @@ final class MyUnaTranslatorEngine
         return ['job'=>$this->store->job($id),'more'=>true];
     }
 
+    /** Save a reviewed translation without changing live UNA language strings. */
+    private function savePreview($id,array $data,$reset=false)
+    {
+        $job=$this->store->job($id);
+        if (!in_array($job['status'],['ready','needs_review','paused'],true)) throw new RuntimeException('Pause or finish generating the preview before editing it.');
+        $itemId=filter_var($data['item_id']??0,FILTER_VALIDATE_INT);
+        if (!$itemId || $itemId<1) throw new RuntimeException('Select a valid preview item.');
+        $text=$data['result']??null;
+        if (!$reset && (!is_string($text) || strlen($text)>1048576 || !mb_check_encoding($text,'UTF-8')))
+            throw new RuntimeException('Enter valid UTF-8 translation text under 1 MB.');
+        $item=$this->store->row('SELECT * FROM my_una_translator_items WHERE id=? AND job_id=?',(int)$itemId,$id);
+        if (!$item || !in_array($item['state'],['staged','needs_review'],true)) throw new RuntimeException('This preview can no longer be edited.');
+        $expected=!empty($data['expected_null'])?null:($data['expected_result']??null);
+        if (!array_key_exists('expected_result',$data) || ($data['expected_state']??null)!==$item['state'] || $expected!==$item['result'])
+            throw new RuntimeException('This preview changed after you opened it. Refresh before saving your correction.');
+        if ($reset) {
+            $text=$item['original_result'];
+            if ($text===null) throw new RuntimeException('Original machine translation is unavailable for this preview.');
+        }
+        $source=$this->store->sourceNow($item['key_id']);
+        if (!$source || $source['source']!==$item['source'] || $source['key_name']!==$item['key_name'])
+            throw new RuntimeException('The English source has changed. Rebuild this preview before editing.');
+        MyUnaTranslatorText::validate($item['source'],$text);
+        $this->store->changeItem((int)$itemId,['state'=>'staged','result'=>$text,'manually_edited'=>$reset?0:1,'error'=>'']);
+        $job=$this->store->job($id);
+        if (!$job['counts']['pending'] && !$job['counts']['processing']) $this->finishGeneration($id);
+        return ['job'=>$this->store->job($id),'saved'=>true];
+    }
+
     private function apply($id,array $data)
     {
         $j=$this->store->job($id);
+        if ($j['counts']['needs_review']) throw new RuntimeException('Correct all strings marked Needs review before applying.');
         if (!in_array($j['status'],['ready','applying','applied','apply_cache_error'],true)) throw new RuntimeException('Finish generating the preview before applying it.');
         if ($j['status']==='ready') {
             if ($this->recheckPreviews($id)) {
