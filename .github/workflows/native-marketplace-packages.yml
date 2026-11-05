@@ -38,10 +38,10 @@ jobs:
         id: build
         run: |
           python scripts/build_marketplace_packages.py
-          echo "artifact_path=$(realpath ../packages/translator-preserved-20261104-r2)" >> "$GITHUB_OUTPUT"
+          echo "artifact_path=$(realpath ../packages/translator-reconciled-20261105-r3)" >> "$GITHUB_OUTPUT"
       - uses: actions/upload-artifact@v4
         with:
-          name: translator-native-preserved-${{ github.sha }}
+          name: translator-native-reconciled-${{ github.sha }}
           path: ${{ steps.build.outputs.artifact_path }}
           if-no-files-found: error
           retention-days: 30
