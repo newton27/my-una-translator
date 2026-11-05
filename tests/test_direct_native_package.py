@@ -71,11 +71,11 @@ class DirectNativePackage(unittest.TestCase):
             self.assertEqual(archive.read(PREFIX + 'install/sql/install.sql'),
                              (ROOT / 'updates/update_0.1.11_0.1.12/install/sql/install.sql').read_bytes())
             xml = ET.fromstring(archive.read(PREFIX + 'install/langs/en.xml'))
-            self.assertEqual(len(xml.findall('string_add')), 6)
+            self.assertEqual(len(xml.findall('string_add')), 9)
             self.assertEqual(xml.findall('string_del'), [])
             self.assertEqual(xml.findall('string_upd'), [])
-            self.assertEqual(archive.read(PREFIX + 'install/langs/en.xml'),
-                             (ROOT / 'updates/update_0.1.10_0.1.11/install/langs/en.xml').read_bytes())
+            self.assertEqual({n.attrib['name'] for n in xml.findall('string_add')}, {n.attrib['name'] for n in ET.fromstring((ROOT / 'updates/update_0.1.10_0.1.11/install/langs/en.xml').read_bytes()).findall('string_add')} | {'_my_una_translator_needs_review','_my_una_translator_correction_required','_my_una_translator_next_needs_review'})
+            self.assertIn(b'original_result', archive.read(PREFIX + 'install/sql/review.sql'))
 
     def test_manifest_explicitly_identifies_file_digests(self):
         manifest = json.loads(self.package.with_suffix('.json').read_text())

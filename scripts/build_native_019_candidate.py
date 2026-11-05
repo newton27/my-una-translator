@@ -65,8 +65,8 @@ def build(output, source_commit=None):
             raise ValueError('Artifact destination must be a regular file')
     source = ROOT / 'updates' / DIRECTORY
     files = sorted(p for p in source.rglob('*') if p.is_file())
-    if len(files) != 40 or any(p.is_symlink() for p in source.rglob('*')):
-        raise ValueError('Expected exactly 40 regular native updater files')
+    if len(files) != 41 or any(p.is_symlink() for p in source.rglob('*')):
+        raise ValueError('Expected exactly 41 regular native updater files')
     output.parent.mkdir(parents=True, exist_ok=True)
     manifest = []
     buffer = io.BytesIO()
@@ -103,7 +103,7 @@ def build(output, source_commit=None):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--output', type=Path, default=ARTIFACT_ROOT / 'translator-preserved-20261104-r2' / 'translator-0.1.9-to-0.1.12-preserved-r2.zip')
+    parser.add_argument('--output', type=Path, default=ARTIFACT_ROOT / 'translator-reconciled-20261105-r3' / 'translator-0.1.9-to-0.1.12-reconciled-r3.zip')
     parser.add_argument("--source-commit", default=None)
     args = parser.parse_args()
     build(args.output, args.source_commit)

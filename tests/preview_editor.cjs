@@ -16,7 +16,7 @@ async function fixture(t) {
  w.fetch=async(url,options)=>{
   const action=options.body.get('mt_action');
   if (action==='preview' && pendingRead) { const wait=pendingRead; pendingRead=null; await wait; }
-  if(action==='edit_item') {
+  if(action==='save_preview') {
    saves.push(Object.fromEntries(options.body));
    if(rejectSave)return {ok:true,json:async()=>({code:1,message:'Translation omitted a placeholder.'})};
    item.result=options.body.get('result');item.manually_edited=true;item.result_hash='saved-hash';
@@ -33,47 +33,47 @@ async function fixture(t) {
  return {w,doc,job,item,saves,action,click,settle,reject:()=>rejectSave=true, delayPreview:()=>{let resolve; pendingRead=new Promise(r=>resolve=r);return resolve;}};
 }
 test('Edit Save persists draft with stale hash and manual label while Apply stays separate',async t=>{
- const f=await fixture(t);await f.click('edit_item');
+ const f=await fixture(t);await f.click('edit_preview');
  const editor=f.doc.querySelector('#mut-preview textarea');assert.ok(editor);editor.value='Verkko-TV';
  assert.equal(f.action('apply').disabled,true);assert.equal(f.doc.getElementById('mut-next').disabled,true);
- await f.click('save_edit');
- assert.equal(f.saves.length,1);assert.equal(f.saves[0].expected_hash,'initial-hash');assert.equal(f.saves[0].result,'Verkko-TV');
+ await f.click('save_preview');
+ assert.equal(f.saves.length,1);assert.equal(f.saves[0].expected_result,'Online TV');assert.equal(f.saves[0].expected_state,'staged');assert.equal(f.saves[0].result,'Verkko-TV');
  assert.match(f.doc.getElementById('mut-preview').textContent,/Manually edited/);
  assert.equal(f.action('apply').disabled,false);
 });
 test('Cancel restores preview and sends no save',async t=>{
- const f=await fixture(t);await f.click('edit_item');f.doc.querySelector('#mut-preview textarea').value='Draft';
- await f.click('cancel_edit');assert.equal(f.saves.length,0);assert.equal(f.doc.querySelector('#mut-preview textarea'),null);
+ const f=await fixture(t);await f.click('edit_preview');f.doc.querySelector('#mut-preview textarea').value='Draft';
+ await f.click('cancel_preview');assert.equal(f.saves.length,0);assert.equal(f.doc.querySelector('#mut-preview textarea'),null);
  assert.match(f.doc.getElementById('mut-preview').textContent,/Online TV/);
 });
 test('Validation failure retains draft and shows inline error',async t=>{
- const f=await fixture(t);f.reject();await f.click('edit_item');
- f.doc.querySelector('#mut-preview textarea').value='Keep this draft';await f.click('save_edit');
+ const f=await fixture(t);f.reject();await f.click('edit_preview');
+ f.doc.querySelector('#mut-preview textarea').value='Keep this draft';await f.click('save_preview');
  assert.equal(f.doc.querySelector('#mut-preview textarea').value,'Keep this draft');
  assert.match(f.doc.querySelector('#mut-preview [role="alert"]').textContent,/omitted a placeholder/);
  assert.equal(f.action('apply').disabled,true);
- assert.equal(f.action('save_edit').disabled,false);
+ assert.equal(f.action('save_preview').disabled,false);
 });
 test('Applied history has manual label but no edit control and escapes markup',async t=>{
  const f=await fixture(t);f.job.status='applied';f.item.state='applied';f.item.manually_edited=true;f.item.result='<img src=x onerror="alert(1)">';
  await f.click('refresh');
  assert.match(f.doc.getElementById('mut-preview').textContent,/Manually edited/);
- assert.equal(f.action('edit_item'),null);assert.equal(f.doc.querySelector('#mut-preview img'),null);
+ assert.equal(f.action('edit_preview'),null);assert.equal(f.doc.querySelector('#mut-preview img'),null);
 });
 
 test('A delayed preview refresh cannot erase a newly opened editor',async t=>{
  const f=await fixture(t);const release=f.delayPreview();
  f.action('refresh').click();await f.settle();
- f.action('edit_item').click();
+ f.action('edit_preview').click();
  const editor=f.doc.querySelector('#mut-preview textarea');
  if(editor)editor.value='Draft must survive';
  release();await f.settle();
  if(editor) {
    assert.equal(f.doc.querySelector('#mut-preview textarea')?.value,'Draft must survive');
-   assert.ok(f.action('cancel_edit'));
+   assert.ok(f.action('cancel_preview'));
  } else {
-   assert.ok(f.action('edit_item'));assert.equal(f.action('edit_item').disabled,false);
-   await f.click('edit_item');assert.ok(f.doc.querySelector('#mut-preview textarea'));
+   assert.ok(f.action('edit_preview'));assert.equal(f.action('edit_preview').disabled,false);
+   await f.click('edit_preview');assert.ok(f.doc.querySelector('#mut-preview textarea'));
  }
 });
 

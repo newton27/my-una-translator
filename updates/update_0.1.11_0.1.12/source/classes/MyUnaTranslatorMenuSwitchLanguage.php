@@ -34,4 +34,3 @@ class MyUnaTranslatorMenuSwitchLanguage extends BxTemplMenuSwitchLanguage
         $this->_aObject['menu_items']=$items;
     }
 }
-

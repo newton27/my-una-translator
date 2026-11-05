@@ -3,4 +3,3 @@ class MyUnaTranslatorTemplate extends BxDolTemplate
 {
     public function __construct(&$oConfig, &$oDb) { parent::__construct($oConfig, $oDb); }
 }
-

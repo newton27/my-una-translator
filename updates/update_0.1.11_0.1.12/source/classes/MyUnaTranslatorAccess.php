@@ -9,4 +9,3 @@ final class MyUnaTranslatorAccess
             throw new RuntimeException('Your session token changed. Refresh Studio and try again.');
     }
 }
-

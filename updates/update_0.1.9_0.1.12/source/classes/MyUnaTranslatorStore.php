@@ -109,7 +109,7 @@ final class MyUnaTranslatorStore
     {
         $r = $this->row('SELECT * FROM my_una_translator_jobs WHERE id=?',(int)$id);
         if (!$r) throw new RuntimeException('Translation job was not found.');
-        $r['targets']=json_decode($r['targets'],true); $r['counts']=array_fill_keys(['pending','processing','staged','applying','applied','rolled_back','conflict','rollback_conflict','rolling_back'],0);
+        $r['targets']=json_decode($r['targets'],true); $r['counts']=array_fill_keys(['pending','processing','staged','needs_review','applying','applied','rolled_back','conflict','rollback_conflict','rolling_back'],0);
         foreach ($this->all('SELECT state,COUNT(*) AS n FROM my_una_translator_items WHERE job_id=? GROUP BY state',(int)$id) as $c) $r['counts'][$c['state']] = (int)$c['n'];
         return $r;
     }
@@ -118,7 +118,7 @@ final class MyUnaTranslatorStore
     {
         $id=(int)$id;
         $job=$this->job($id);
-        if (!in_array($job['status'],['paused','applied','rolled_back','failed','empty_preview'],true)) throw new RuntimeException('Only paused, completed or failed jobs can be removed.');
+        if (!in_array($job['status'],['paused','needs_review','applied','rolled_back','failed','empty_preview'],true)) throw new RuntimeException('Only paused, completed or failed jobs can be removed.');
         $this->q('START TRANSACTION');
         try {
             $this->q('DELETE FROM my_una_translator_items WHERE job_id=?',$id);
@@ -142,7 +142,7 @@ final class MyUnaTranslatorStore
     public function changeItem($id, array $fields)
     {
         $sets=[]; $args=[];
-        foreach ($fields as $key=>$value) { if (!in_array($key,['state','result','error','manually_edited'],true)) throw new RuntimeException('Invalid item update.'); $sets[]='`'.$key.'`=?'; $args[]=$value; }
+        foreach ($fields as $key=>$value) { if (!in_array($key,['state','result','original_result','error','manually_edited'],true)) throw new RuntimeException('Invalid item update.'); $sets[]='`'.$key.'`=?'; $args[]=$value; }
         $args[]=(int)$id; $this->q('UPDATE my_una_translator_items SET '.implode(',',$sets).' WHERE id=?', ...$args);
     }
     public function item($jobId,$itemId)
@@ -160,12 +160,33 @@ final class MyUnaTranslatorStore
         $item['manually_edited']=!empty($item['manually_edited']);
         return $item;
     }
-    public function preview($id,$offset=0)
+    /** Read-only search over the complete job; filtering occurs before pagination. */
+    public function previewFiltered($id,$offset=0,$search='',$filter='all')
     {
         $this->job($id);
-        return array_map([self::class,'previewFields'],$this->all('SELECT id,key_name,language,source,before_value,result,state,error,manually_edited FROM my_una_translator_items WHERE job_id=? ORDER BY id LIMIT 50 OFFSET '.max(0,(int)$offset), (int)$id));
+        if (!is_string($search) || mb_strlen($search,'UTF-8')>200) throw new RuntimeException('Search must be under 200 characters.');
+        if (!is_string($filter) || !in_array($filter,['all','staged','needs_review','conflict','applied','pending'],true))
+            throw new RuntimeException('Invalid preview filter.');
+        $where='job_id=?'; $args=[(int)$id];
+        if ($filter==='conflict') $where.=" AND state IN ('conflict','rollback_conflict','needs_review')";
+        elseif ($filter!=='all') { $where.=' AND state=?'; $args[]=$filter; }
+        $search=trim($search);
+        if ($search!=='') {
+            // Escape user wildcard characters. Only parameterized LIKE operands are used.
+            $escaped=str_replace(['!','%','_'],['!!','!%','!_'],$search);
+            $like='%'.$escaped.'%';
+            $where.=" AND (key_name LIKE ? ESCAPE '!' OR source LIKE ? ESCAPE '!' OR result LIKE ? ESCAPE '!')";
+            array_push($args,$like,$like,$like);
+        }
+        $count=(int)$this->one('SELECT COUNT(*) FROM my_una_translator_items WHERE '.$where,...$args);
+        $offset=max(0,(int)$offset);
+        $rows=$this->all('SELECT id,key_name,language,source,before_value,result,original_result,state,error,manually_edited FROM my_una_translator_items WHERE '.$where.' ORDER BY id LIMIT 50 OFFSET '.$offset,...$args);
+        return ['items'=>array_map([self::class,'previewFields'],$rows),'total'=>$count];
     }
-
+    public function preview($id,$offset=0)
+    {
+        return $this->previewFiltered($id,$offset)['items'];
+    }
     public function sourceNow($keyId) { return $this->row('SELECT k.`Key` AS key_name,e.String AS source FROM sys_localization_keys k JOIN sys_localization_strings e ON e.IDKey=k.ID AND e.IDLanguage=? WHERE k.ID=?',$this->englishId(),(int)$keyId); }
     public function valueNow($keyId,$languageId) { $r=$this->row('SELECT String AS value FROM sys_localization_strings WHERE IDKey=? AND IDLanguage=?',(int)$keyId,(int)$languageId); return $r ? $r['value'] : null; }
     public function ensureLanguage($code, array $preset, $jobId)
@@ -200,4 +221,3 @@ final class MyUnaTranslatorStore
         $this->q('UPDATE sys_localization_languages l JOIN my_una_translator_languages m ON m.language_id=l.ID AND BINARY m.language=BINARY l.Name SET l.Enabled=0 WHERE m.job_id=? AND NOT EXISTS (SELECT 1 FROM sys_localization_strings s WHERE s.IDLanguage=l.ID)',(int)$jobId);
     }
 }
-

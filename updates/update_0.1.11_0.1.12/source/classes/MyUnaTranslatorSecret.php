@@ -28,4 +28,3 @@ final class MyUnaTranslatorSecret
         return $plain;
     }
 }
-

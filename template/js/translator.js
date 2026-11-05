@@ -9,11 +9,22 @@
   const label = key => cfg.labels[key] || key;
   const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const number = value => Number(value || 0).toLocaleString();
-  let previewItems = [], editingId = null;
   let activeJob = null, busy = false, stopRequested = false, offset = 0, operation = '';
+  let previewTotal = 0, previewSearch = '', previewFilter = 'all', previewSequence = 0;
+  let previewRows = new Map(), draft = null;
+  let viewSequence = 0, selectionLoading = false;
+  const invalidateReads = () => { ++viewSequence; ++previewSequence; };
   let notice = '', noticeError = false, requestStarted = 0, activity = '';
   let snapshot = cfg.snapshot;
   const dialog = find('mut-status-dialog');
+  // Search lives above the existing preview grid. The server searches the entire job.
+  const previewControls = document.createElement('div');
+  previewControls.className = 'mut-fields mut-preview-filters';
+  previewControls.innerHTML = '<label>Search translation keys or text<input id="mut-preview-search" type="search" maxlength="200" placeholder="Key, English or translated text" autocomplete="off"></label>' +
+    '<label>Status<select id="mut-preview-filter"><option value="all">All</option><option value="staged">Preview Ready</option><option value="needs_review">Needs review</option><option value="conflict">Conflicts / Needs Review</option><option value="applied">Applied</option><option value="pending">Pending</option></select></label>' +
+    '<button type="button" id="mut-review-flagged" class="mut-secondary">Review flagged strings</button>' +
+    '<button type="button" id="mut-show-conflicts" class="mut-secondary">Show Conflicts</button>';
+  find('mut-preview').parentNode.insertBefore(previewControls,find('mut-preview'));
   function showStatus() {
     renderStatus();
     if (!dialog.open) dialog.showModal();
@@ -26,7 +37,7 @@
     bar.hidden = !p;
     if (p) bar.value = p.percent;
     find('mut-status-count').textContent = p ? label(p.phase === 'generation' ? 'preview_progress' : p.phase === 'apply' ? 'apply_progress' : 'rollback_progress') + ': ' + number(p.done) + ' / ' + number(p.total) + ' · ' + p.percent + '%' : '';
-    find('mut-status-totals').textContent = p ? number(p.staged) + ' ' + label('staged') + ' · ' + number(p.applied) + ' ' + label('applied') + ' · ' + number(p.conflicts) + ' ' + label('conflicts') : '';
+    find('mut-status-totals').textContent = p ? number(p.staged) + ' ' + label('staged') + ' · ' + number(p.needsReview) + ' ' + label('needs_review') + ' · ' + number(p.applied) + ' ' + label('applied') + ' · ' + number(p.conflicts) + ' ' + label('conflicts') : '';
     find('mut-status-characters').textContent = activeJob ? label('used_reserved') + ': ' + number(activeJob.spent) : '';
     const elapsed = requestStarted ? Math.floor((Date.now() - requestStarted) / 1000) : 0;
     find('mut-status-activity').textContent = requestStarted ? label(activity) + ' · ' + elapsed + ' ' + label('seconds') + (elapsed >= 60 ? ' · ' + label('slow_request') : '') : '';
@@ -67,8 +78,8 @@
   }
   const stateLabel = state => label(state);
   function setButtons() {
-    const blocked = busy || editingId !== null;
-    root.querySelectorAll('button, input, select, textarea').forEach(control => { if (!control.classList.contains('mut-status-control')) control.disabled = control.classList.contains('mut-edit-control') ? busy : blocked; });
+    root.querySelectorAll('button, input, select').forEach(control => { if (!control.classList.contains('mut-status-control')) control.disabled = busy; });
+    if (selectionLoading && !draft) find('mut-job-select').disabled=false;
     const action = name => root.querySelector('[data-mut-action="' + name + '"]');
     const workflow=MyUnaTranslatorWorkflow(activeJob);
     const generating=busy && operation==='batch';
@@ -87,9 +98,9 @@
     });
     const selected=Array.from(find('mut-targets').querySelectorAll('input:checked')).map(input=>snapshot.languages.find(l=>l.code===input.value)?.name || input.value);
     find('mut-selection-note').textContent=selected.length?label('selected_languages')+': '+selected.join(', '):'';
-    find('mut-create').querySelector('button[type="submit"]').disabled=blocked || selected.length<1 || selected.length>5 || Boolean(snapshot.language_error);
-    find('mut-targets').querySelectorAll('input:not(:checked)').forEach(input=>{input.disabled=blocked || selected.length>=5;});
-    if (blocked) return;
+    find('mut-create').querySelector('button[type="submit"]').disabled=busy || selected.length<1 || selected.length>5 || Boolean(snapshot.language_error);
+    find('mut-targets').querySelectorAll('input:not(:checked)').forEach(input=>{input.disabled=busy || selected.length>=5;});
+    if (busy) return;
     const state = activeJob?.status || '';
     const ready = snapshot.settings.provider_ready ?? snapshot.settings.has_key;
     action('batch').disabled = !ready || !workflow.generate;
@@ -99,7 +110,12 @@
     action('rollback').disabled = !workflow.rollback;
     find('mut-enable-languages').disabled=!workflow.apply;
     find('mut-prev').disabled = !activeJob || offset === 0;
-    find('mut-next').disabled = !activeJob || offset + 50 >= Number(activeJob.total);
+    find('mut-next').disabled = !activeJob || offset + 50 >= previewTotal;
+    find('mut-review-flagged').disabled = busy || Boolean(draft) || !Number(activeJob?.counts?.needs_review || 0);
+    if (draft) {
+      ['mut-job-select','mut-prev','mut-next','mut-preview-search','mut-preview-filter','mut-show-conflicts'].forEach(id=>{find(id).disabled=true;});
+      root.querySelectorAll('form input, form select, form button, [data-mut-action="apply"], [data-mut-action="batch"], [data-mut-action="resume"], [data-mut-action="refresh"], [data-mut-action="rollback"], [data-mut-action="delete_job"]').forEach(control=>{control.disabled=true;});
+    }
     renderStatus();
   }
   function renderSnapshot(selected = null) {
@@ -130,10 +146,10 @@
     find('mut-progress').value = progress.percent;
     find('mut-resume-budget').value = job.budget;
     const estimate = number(job.estimated) + ' / ' + number(job.budget) + ' ' + label('characters');
-    const details = [stateLabel(job.status), number(counts.staged) + ' ' + label('staged'), number(counts.applied) + ' ' + label('applied'), number(Number(counts.conflict || 0) + Number(counts.rollback_conflict || 0)) + ' ' + label('conflicts')];
+    const details = [stateLabel(job.status), number(counts.staged) + ' ' + label('staged'), number(counts.needs_review) + ' ' + label('needs_review'), number(counts.applied) + ' ' + label('applied'), number(Number(counts.conflict || 0) + Number(counts.rollback_conflict || 0)) + ' ' + label('conflicts')];
     const names=job.targets.map(code=>snapshot.languages.find(l=>l.code===code)?.name || snapshot.site_languages?.find(l=>l.code===code)?.native || code);
     find('mut-job-details').innerHTML = '<p class="mut-job-targets">'+esc(label('job_languages'))+': <strong>'+esc(names.join(', '))+'</strong></p><div class="mut-stat-row">' + details.map(d => '<span class="mut-pill">' + esc(d) + '</span>').join('') + '</div><p>' + esc(estimate) + '</p><p class="mut-note">' + esc(label('used_reserved')) + ': ' + number(job.spent) + '</p>' + (Number(job.estimated) > Number(job.budget) ? '<p class="mut-warning">' + esc(label('ceiling_warning')) + '</p>' : '') + (job.error ? '<p class="mut-warning">' + esc(job.error) + '</p>' : '');
-    if (['paused', 'applied','rolled_back','failed','empty_preview'].includes(String(job.status))) {
+    if (['paused','needs_review','applied','rolled_back','failed','empty_preview'].includes(String(job.status))) {
         const removeButton = document.createElement('button');
         removeButton.type = 'button';
         removeButton.className = 'mut-secondary';
@@ -148,66 +164,42 @@
     setButtons();
     renderStatus();
   }
-  function previewRow(i) {
-    const editable = ['ready','paused'].includes(activeJob?.status) && i.state === 'staged' && typeof i.result === 'string';
-    const manual = i.manually_edited ? '<small class="mut-manual">' + esc(label('manually_edited')) + '</small>' : '';
-    const controls = editable ? '<button type="button" class="mut-secondary" data-mut-action="edit_item" data-item-id="' + Number(i.id) + '">' + esc(label('edit_translation')) + '</button>' : '';
-    return '<tr data-preview-id="' + Number(i.id) + '"><td><strong>' + esc(i.key_name) + '</strong><small>' + esc(i.language) + ' · ' + esc(stateLabel(i.state)) + '</small>' + manual + (i.error ? '<small class="mut-warning">' + esc(i.error) + '</small>' : '') + '</td><td><pre>' + esc(i.source) + '</pre></td><td class="mut-translation-cell"><pre>' + esc(i.result ?? label('no_translation')) + '</pre>' + controls + '</td></tr>';
-  }
-  function renderPreview() {
-    find('mut-preview').innerHTML = previewItems.some(i=>i.result!==null) ? '<table class="mut-preview-table"><thead><tr><th>' + esc(label('key')) + '</th><th>' + esc(label('source')) + '</th><th>' + esc(label('translation')) + '</th></tr></thead><tbody>' + previewItems.map(previewRow).join('') + '</tbody></table>' : '<p class="mut-note">' + esc(label('no_preview_yet')) + '</p>';
-    setButtons();
-  }
-  function startEdit(itemId) {
-    if (busy || editingId !== null) return;
-    const item = previewItems.find(i=>Number(i.id)===itemId);
-    if (!item || item.state !== 'staged' || !['ready','paused'].includes(activeJob?.status)) return;
-    editingId = itemId;
-    const cell = find('mut-preview').querySelector('[data-preview-id="' + itemId + '"] .mut-translation-cell');
-    const editorId = 'mut-edit-' + itemId;
-    cell.innerHTML = '<label for="' + editorId + '">' + esc(label('edit_translation')) + ': ' + esc(item.key_name) + ' (' + esc(item.language) + ')</label><textarea id="' + editorId + '" class="mut-edit-control" rows="5" dir="auto"></textarea><p class="mut-note">' + esc(label('edit_help')) + '</p><p class="mut-warning" role="alert" hidden></p><div class="mut-buttons"><button type="button" class="mut-edit-control" data-mut-action="save_edit">' + esc(label('save_translation')) + '</button><button type="button" class="mut-secondary mut-edit-control" data-mut-action="cancel_edit">' + esc(label('cancel_edit')) + '</button></div>';
-    cell.querySelector('textarea').value = item.result;
-    setButtons();
-    cell.querySelector('textarea').focus();
-  }
-  async function saveEdit() {
-    if (busy || editingId === null) return;
-    const item = previewItems.find(i=>Number(i.id)===editingId);
-    const cell = find('mut-preview').querySelector('[data-preview-id="' + editingId + '"] .mut-translation-cell');
-    const result = cell.querySelector('textarea').value;
-    const errorBox = cell.querySelector('[role="alert"]');
-    errorBox.hidden = true;
-    busy = true; setButtons();
-    try {
-      const data = await request('edit_item', {job_id:activeJob.id, item_id:item.id, result, expected_hash:item.result_hash});
-      previewItems = previewItems.map(i=>Number(i.id)===Number(data.item.id) ? data.item : i);
-      editingId = null; renderJob(data.job); renderPreview();
-      message(label('preview_saved'), false, false);
-    } catch (error) {
-      errorBox.textContent = error.message || label('connection_error'); errorBox.hidden = false;
-    } finally { busy = false; setButtons(); }
+  function previewRow(item) {
+    const editable=['staged','needs_review'].includes(item.state) && ['ready','needs_review','paused'].includes(activeJob?.status);
+    const manual=item.manually_edited?'<small class="mut-manual">'+esc(label('manually_edited'))+'</small>':'';
+    const text=item.state==='needs_review'?label('correction_required'):item.result??label('no_translation');
+    const controls=editable?'<button type="button" class="mut-secondary" data-mut-action="edit_preview" data-item-id="'+Number(item.id)+'">'+(item.state==='needs_review'?'Correct':'Edit')+'</button>'+
+      (item.original_result!==null && item.result!==item.original_result?'<button type="button" class="mut-secondary" data-mut-action="reset_preview" data-item-id="'+Number(item.id)+'">Reset</button>':''):'';
+    return '<tr data-item-id="'+Number(item.id)+'"><td><strong>'+esc(item.key_name)+'</strong><small>'+esc(item.language)+' · '+esc(stateLabel(item.state))+'</small>'+manual+
+      (item.error?'<small class="mut-warning">'+esc(item.error)+'</small>':'')+'</td><td><pre>'+esc(item.source)+'</pre></td><td><pre>'+esc(text)+'</pre>'+controls+'</td></tr>';
   }
   async function preview() {
-    if (!activeJob || editingId !== null) return;
-    const previousBusy = busy; busy = true; setButtons();
-    try {
-      const data = await request('preview', {job_id:activeJob.id, offset});
-      renderJob(data.job);
-      previewItems = data.items; renderPreview();
-      find('mut-page-info').textContent = label('preview_page') + ' ' + (Math.floor(offset / 50) + 1);
-    } finally { busy = previousBusy; setButtons(); }
+    if (!activeJob) return;
+    const sequence = ++previewSequence, view = viewSequence;
+    const data = await request('preview', {job_id:activeJob.id, offset, search:previewSearch, filter:previewFilter});
+    if (view !== viewSequence || sequence !== previewSequence || !activeJob || Number(data.job.id) !== Number(activeJob.id)) return;
+    previewTotal = Number(data.total || 0);
+    if (draft) return;
+    renderJob(data.job);
+    previewRows = new Map(data.items.map(item=>[Number(item.id),item]));
+    find('mut-preview').innerHTML = data.items.length ? '<table class="mut-preview-table"><thead><tr><th>' + esc(label('key')) + '</th><th>' + esc(label('source')) + '</th><th>' + esc(label('translation')) + '</th></tr></thead><tbody>' + data.items.map(previewRow).join('') + '</tbody></table>' : '<p class="mut-note">' + esc(label('no_preview_yet')) + '</p>';
+    find('mut-page-info').textContent = label('preview_page') + ' ' + (Math.floor(offset / 50) + 1) + ' · ' + number(previewTotal) + ' matching';
+    setButtons();
   }
   async function refresh() {
-    if (editingId !== null) return;
-    const previousBusy = busy; busy = true; setButtons();
+    if (draft) return;
+    const id = activeJob?.id || find('mut-job-select').value;
+    invalidateReads(); const view=viewSequence;
+    const previousBusy=busy; busy=true; selectionLoading=true; setButtons();
     try {
-      const id = activeJob?.id || find('mut-job-select').value;
-      snapshot = await request('snapshot'); renderSnapshot(id);
-      if (id) { const data = await request('status', {job_id:id}); renderJob(data.job); await preview(); }
-    } finally { busy = previousBusy; setButtons(); }
+      const nextSnapshot=await request('snapshot'); if(view!==viewSequence)return;
+      snapshot=nextSnapshot; renderSnapshot(id);
+      if (id) { const data=await request('status',{job_id:id}); if(view!==viewSequence)return; renderJob(data.job); await preview(); }
+    } finally { if(view===viewSequence){busy=previousBusy;selectionLoading=false;setButtons();} }
   }
   async function run(action) {
-    if (!activeJob || busy) return;
+    if (!activeJob || busy || draft) return;
+    invalidateReads(); selectionLoading=false;
     busy = true; operation = action === 'resume' ? 'batch' : action; stopRequested = false;
     const id = activeJob.id;
     const resumeBudget = find('mut-resume-budget').value;
@@ -255,7 +247,7 @@
   });
   find('mut-job-lookup').addEventListener('submit', async event => {
     event.preventDefault(); if (busy) return;
-    const id = new FormData(event.currentTarget).get('job_id'); busy = true; setButtons();
+    invalidateReads(); const id = new FormData(event.currentTarget).get('job_id'); busy = true; setButtons();
     try { const data = await request('status', {job_id:id}); offset = 0; renderJob(data.job); renderSnapshot(data.job.id); await preview(); }
     catch (error) { message(error.message,true); }
     finally { busy = false; setButtons(); }
@@ -263,15 +255,59 @@
   root.addEventListener('click', async event => {
     const button = event.target.closest('button[data-mut-action]'); if (!button) return;
     const action = button.dataset.mutAction;
-    if (action === 'edit_item') { startEdit(Number(button.dataset.itemId)); return; }
-    if (action === 'save_edit') { await saveEdit(); return; }
-    if (action === 'cancel_edit') { if (!busy) { editingId = null; renderPreview(); } return; }
-    if (editingId !== null) return;
+    if (draft && !['save_preview','cancel_preview'].includes(action)) return;
+    if (action === 'edit_preview') {
+      if (busy || !['ready','needs_review','paused'].includes(activeJob?.status)) return;
+      const item=previewRows.get(Number(button.dataset.itemId));
+      if (!item || !['staged','needs_review'].includes(item.state)) return;
+      draft={jobId:activeJob.id,itemId:item.id,expectedResult:item.result,expectedState:item.state};
+      const cell = button.closest('td');
+      const original = item.result ?? '';
+      cell.dataset.original = original;
+      cell.innerHTML = '<label>Review translation<textarea class="mut-preview-editor" rows="4" maxlength="1048576"></textarea></label><p class="mut-warning" role="alert" hidden></p><div class="mut-buttons"><button type="button" data-mut-action="save_preview" data-item-id="' + Number(button.dataset.itemId) + '">Save correction</button><button type="button" class="mut-secondary" data-mut-action="cancel_preview">Cancel</button></div>';
+      cell.querySelector('textarea').value = original;
+      cell.querySelector('textarea').focus();
+      setButtons();
+      return;
+    }
+    if (action === 'cancel_preview') {
+      const row=button.closest('tr');
+      const item=previewRows.get(Number(draft?.itemId));
+      draft=null;
+      if (row && item) row.outerHTML=previewRow(item);
+      setButtons();
+      return;
+    }
+    if (action === 'reset_preview') {
+      if (busy || !['ready','needs_review','paused'].includes(activeJob?.status)) return;
+      const item=previewRows.get(Number(button.dataset.itemId));
+      if (!item) return;
+      if (!window.confirm('Restore the original machine translation for this preview?')) return;
+      invalidateReads(); busy=true; setButtons();
+      try { await request('reset_preview',{job_id:activeJob.id,item_id:item.id,expected_state:item.state,expected_result:item.result??'',expected_null:item.result===null?'1':''}); await preview(); message('Original machine translation restored.'); }
+      catch(error) { message(error.message || label('connection_error'),true); }
+      finally { busy=false; setButtons(); }
+      return;
+    }
+    if (action === 'save_preview') {
+      if (busy || !draft || !['ready','needs_review','paused'].includes(activeJob?.status)) return;
+      const value = button.closest('td')?.querySelector('textarea')?.value;
+      if (typeof value !== 'string') return;
+      invalidateReads(); busy = true; setButtons();
+      try {
+        await request('save_preview',{job_id:draft.jobId,item_id:draft.itemId,result:value,expected_state:draft.expectedState,expected_result:draft.expectedResult??'',expected_null:draft.expectedResult===null?'1':''});
+        draft=null;
+        await preview();
+        message('Reviewed translation saved. Apply will use your correction.');
+      } catch (error) { const inline=find('mut-preview').querySelector('[role="alert"]'); if(inline){inline.textContent=error.message || label('connection_error');inline.hidden=false;} message(error.message || label('connection_error'),true); }
+      finally { busy=false; setButtons(); }
+      return;
+    }
     if (action === 'delete_job') {
         if (busy || !activeJob) return;
         const jobId = Number(activeJob.id);
         if (!window.confirm('Remove saved job #' + jobId + ' and its preview history? Any translations already applied on the site will remain.')) return;
-        busy = true; setButtons();
+        invalidateReads(); busy = true; setButtons();
         try {
             await request('delete_job', {job_id:jobId});
             activeJob = null; offset = 0;
@@ -298,15 +334,37 @@
     finally { if (action === 'usage') busy = false; setButtons(); }
   });
   find('mut-job-select').addEventListener('change', async event => {
-    if (busy || editingId !== null) return;
-    notice = ''; noticeError = false;
-    if (!event.target.value) { activeJob = null; find('mut-preview').innerHTML = ''; find('mut-job-details').textContent = ''; find('mut-progress').value = 0; setButtons(); return; }
-    offset = 0; busy = true; setButtons();
-    try { const data = await request('status', {job_id:event.target.value}); renderJob(data.job); await preview(); }
-    catch (error) { message(error.message,true); }
-    finally { busy = false; setButtons(); }
+    if(draft || (busy && !selectionLoading))return;
+    const id=event.target.value;
+    invalidateReads(); const view=viewSequence;
+    notice=''; noticeError=false; offset=0;
+    if(!id){activeJob=null;busy=false;selectionLoading=false;find('mut-preview').innerHTML='';find('mut-job-details').textContent='';find('mut-progress').value=0;setButtons();renderStatus();return;}
+    busy=true;selectionLoading=true;setButtons();
+    try { const data=await request('status',{job_id:id}); if(view!==viewSequence || find('mut-job-select').value!==id)return; renderJob(data.job); await preview(); }
+    catch(error){if(view===viewSequence)message(error.message,true);}
+    finally{if(view===viewSequence){busy=false;selectionLoading=false;setButtons();}}
   });
-  [['mut-prev',-50],['mut-next',50]].forEach(([id, step]) => find(id).addEventListener('click', async () => { if (busy || editingId !== null) return; offset = Math.max(0,offset + step); try { await preview(); } catch (error) { message(error.message,true); } }));
+  [['mut-prev',-50],['mut-next',50]].forEach(([id, step]) => find(id).addEventListener('click', async () => { offset = Math.max(0,offset + step); try { await preview(); } catch (error) { message(error.message,true); } }));
+  let searchTimer = null;
+  find('mut-preview-search').addEventListener('input', event => {
+    previewSearch = event.target.value.trim(); offset = 0;
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => { if (activeJob && !busy) preview().catch(error => message(error.message,true)); }, 350);
+  });
+  find('mut-preview-filter').addEventListener('change', event => {
+    previewFilter = event.target.value; offset = 0;
+    if (activeJob && !busy) preview().catch(error => message(error.message,true));
+  });
+  find('mut-show-conflicts').addEventListener('click', () => {
+    previewFilter='conflict'; offset=0; find('mut-preview-filter').value='conflict';
+    if (activeJob && !busy) preview().catch(error => message(error.message,true));
+  });
+  find('mut-review-flagged').addEventListener('click', () => {
+    if (busy || draft || !activeJob) return;
+    previewFilter='needs_review'; offset=0; find('mut-preview-filter').value='needs_review';
+    preview().catch(error=>message(error.message,true));
+  });
+  window.addEventListener('beforeunload',event=>{if(draft){event.preventDefault();event.returnValue='';}});
   find('mut-show-status').addEventListener('click', showStatus);
   find('mut-hide-status').addEventListener('click', () => dialog.close());
   const providerSelect = find('mut-settings').elements.provider;
@@ -320,9 +378,7 @@
   }
   find('mut-language-search').addEventListener('input', filterLanguages);
   find('mut-targets').addEventListener('change',setButtons);
-  window.addEventListener('beforeunload', event => { if (editingId !== null) { event.preventDefault(); event.returnValue = ''; } });
   // A heartbeat describes waiting time only; saved counts change after server responses.
   setInterval(() => { if (dialog.open && requestStarted) renderStatus(); }, 1000);
   renderSnapshot();
 })();
-

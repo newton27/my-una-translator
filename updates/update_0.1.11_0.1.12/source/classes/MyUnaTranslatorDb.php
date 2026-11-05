@@ -3,4 +3,3 @@ class MyUnaTranslatorDb extends BxDolModuleDb
 {
     public function __construct(&$oConfig) { parent::__construct($oConfig); }
 }
-

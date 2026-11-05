@@ -11,7 +11,7 @@ final class PreviewTestDb {
             CREATE TABLE my_una_translator_languages (language TEXT,language_id INTEGER,job_id INTEGER);
             CREATE TABLE my_una_translator_settings (id INTEGER,provider TEXT,libre_url TEXT,libre_key TEXT,api_key TEXT,plan TEXT,batch_size INTEGER,character_budget INTEGER);
             CREATE TABLE my_una_translator_jobs (id INTEGER PRIMARY KEY AUTOINCREMENT,created_at INTEGER,operator_id INTEGER,targets TEXT,category_id INTEGER,include_english INTEGER,budget INTEGER,status TEXT DEFAULT 'planned',total INTEGER DEFAULT 0,estimated INTEGER DEFAULT 0,spent INTEGER DEFAULT 0,error TEXT DEFAULT '',enable_languages INTEGER DEFAULT 0);
-            CREATE TABLE my_una_translator_items (id INTEGER PRIMARY KEY AUTOINCREMENT,job_id INTEGER,key_id INTEGER,key_name TEXT,language TEXT,source TEXT,before_value TEXT,result TEXT,state TEXT DEFAULT 'pending',error TEXT DEFAULT '',manually_edited INTEGER DEFAULT 0);
+            CREATE TABLE my_una_translator_items (id INTEGER PRIMARY KEY AUTOINCREMENT,job_id INTEGER,key_id INTEGER,key_name TEXT,language TEXT,source TEXT,before_value TEXT,result TEXT,original_result TEXT,state TEXT DEFAULT 'pending',error TEXT DEFAULT '',manually_edited INTEGER DEFAULT 0);
             INSERT INTO sys_localization_languages VALUES (1,'en','gb','English','LTR','en_US',1);
             INSERT INTO sys_localization_categories VALUES (1,'Interface');
             INSERT INTO sys_localization_keys VALUES (1,'_welcome',1);

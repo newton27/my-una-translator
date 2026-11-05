@@ -28,7 +28,7 @@ class MarketplacePackages(unittest.TestCase):
         self.assertEqual(len(records), 4)
         roots = ['my_una_translator/', 'update_0.1.9_0.1.12/',
                  'update_0.1.10_0.1.11/', 'update_0.1.11_0.1.12/']
-        self.assertEqual([r['files'] for r in records], [35, 40, 12, 32])
+        self.assertEqual([r['files'] for r in records], [35, 41, 12, 40])
         for record, prefix in zip(records, roots):
             with self.subTest(root=prefix), zipfile.ZipFile(self.output / record['filename']) as archive:
                 self.assertIsNone(archive.testzip())
@@ -54,6 +54,14 @@ class MarketplacePackages(unittest.TestCase):
                 if prefix in ('my_una_translator/', 'update_0.1.9_0.1.12/'):
                     icon = ('source/' if prefix.startswith('update_') else '') + 'template/images/icons/std-icon.svg'
                     self.assertEqual(actual[icon], (ROOT / 'template/images/icons/std-icon.svg').read_bytes())
+
+    def test_both_target_updates_register_review_language_keys_in_module_category(self):
+        import xml.etree.ElementTree as ET
+        for baseline in ('0.1.9', '0.1.11'):
+            directory = ROOT / ('updates/update_' + baseline + '_0.1.12')
+            self.assertRegex((directory / 'install/config.php').read_text(), r"'language_category'\s*=>\s*'My UNA Translator'")
+            names = {node.attrib['name'] for node in ET.fromstring((directory / 'install/langs/en.xml').read_bytes()).findall('string_add')}
+            self.assertTrue({'_my_una_translator_needs_review', '_my_una_translator_correction_required', '_my_una_translator_next_needs_review'} <= names)
 
     def test_repeat_build_is_identical(self):
         records = builder.build_packages(self.output, 'fixture-source')

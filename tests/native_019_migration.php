@@ -63,6 +63,7 @@ function fixture019(): Native019Database
     $fixture = new PreviewTestDb();
     $pdo = $fixture->pdo;
     $pdo->exec('ALTER TABLE my_una_translator_items DROP COLUMN manually_edited');
+    $pdo->exec('ALTER TABLE my_una_translator_items DROP COLUMN original_result');
     $pdo->exec("UPDATE my_una_translator_settings SET api_key='synthetic-encrypted-key',libre_key='synthetic-encrypted-libre-key';
         INSERT INTO my_una_translator_jobs (id,created_at,operator_id,targets,budget,status,total,spent) VALUES (7,123,9,'[\"fr\"]',1000,'ready',1,12);
         INSERT INTO my_una_translator_items (job_id,key_id,key_name,language,source,before_value,result,state) VALUES (7,1,'_welcome','fr','Welcome {0}','Before','After','staged');
@@ -76,7 +77,7 @@ function preservedRows019(Native019Database $db): array
     foreach (['settings', 'jobs', 'items', 'languages'] as $table) {
         $rows = $db->pdo->query('SELECT * FROM my_una_translator_' . $table . ' ORDER BY rowid')->fetchAll(PDO::FETCH_ASSOC);
         if ($table === 'items') {
-            foreach ($rows as &$row) unset($row['manually_edited']);
+            foreach ($rows as &$row) unset($row['manually_edited'],$row['original_result']);
             unset($row);
         }
         $snapshot[$table] = $rows;
@@ -104,7 +105,8 @@ function check019(bool $ok, string $name): void
 $db = fixture019();
 $before = preservedRows019($db);
 check019(run019($db)['code'] === BX_DOL_STUDIO_INSTALLER_SUCCESS, 'direct updater executes both additive migrations');
-check019($db->files === ['preview.sql', 'install.sql'] && (int) $db->pdo->query('SELECT manually_edited FROM my_una_translator_items')->fetchColumn() === 0, 'original items receive the edit flag before support schema creation');
+check019($db->files === ['preview.sql', 'review.sql', 'install.sql'] && (int) $db->pdo->query('SELECT manually_edited FROM my_una_translator_items')->fetchColumn() === 0, 'original items receive the edit flag before support schema creation');
+check019((int)$db->pdo->query("SELECT COUNT(*) FROM pragma_table_info('my_una_translator_items') WHERE name='original_result'")->fetchColumn() === 1, 'review baseline column is installed on genuine 0.1.9');
 check019(preservedRows019($db) === $before, 'provider ciphertext and complete saved fixture rows survive direct migration');
 $db->pdo->exec("INSERT INTO my_una_translator_support_receipts VALUES ('123e4567-e89b-42d3-a456-426614174000','payload','incident',321,123)");
 $receipts = $db->pdo->query('SELECT * FROM my_una_translator_support_receipts')->fetchAll(PDO::FETCH_ASSOC);

@@ -12,6 +12,8 @@ class MyUnaTranslatorStudioPage extends BxTemplStudioModule
         'next_generate'=>'Your plan is saved. Generate the preview, then review the translated text before applying.',
         'next_resume'=>'This job is paused. Read its message, adjust the limit if needed, then resume the saved preview.',
         'next_review'=>'Your preview is ready. Review the translated text below, then apply it in step 3.',
+        'needs_review'=>'Needs review', 'correction_required'=>'Correction required',
+        'next_needs_review'=>'Generation is complete. Correct the flagged strings in step 2 before applying. Your saved previews are preserved.',
         'next_retry_apply'=>'Translations are saved. Retry Apply to finish preparing the language for your site.',
         'next_done'=>'Translations have been applied. Use the site-language links below to check the result.',
         'next_finish_apply'=>'Applying has started. Continue Apply in step 3 to finish this saved job.',
@@ -118,7 +120,7 @@ class MyUnaTranslatorStudioPage extends BxTemplStudioModule
         foreach($snapshot['site_languages'] as $language) if($language['code']===$default) $defaultName=$language['native'];
         $supportReady=class_exists('BxDolDb') && (bool)BxDolDb::getInstance()->getOne("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name='my_una_translator_support_receipts'");
         $config=['support_enabled'=>$supportReady,'endpoint'=>$endpoint,'token'=>$this->token(),'snapshot'=>$snapshot,'labels'=>$labels,'site_url'=>BX_DOL_URL_ROOT,'default_language'=>$default];
-        $html='<link rel="stylesheet" href="'.self::h($base.'template/css/translator.css?v=0.1.12-report1').'">';
+        $html='<link rel="stylesheet" href="'.self::h($base.'template/css/translator.css?v=0.1.12-reconciled3').'">';
         $html.='<section id="my-una-translator" class="mut" aria-label="'.self::label('title').'">';
         $html.='<header class="mut-hero"><div class="mut-mark" aria-hidden="true">A<span>文</span></div><div><div class="mut-brand">My UNA World</div><h2>'.self::label('title').'</h2><p>'.self::label('workflow_intro').'</p></div></header>';
         // Read-only dashboard: derive everything from the existing snapshot.
@@ -191,7 +193,7 @@ class MyUnaTranslatorStudioPage extends BxTemplStudioModule
         $html.='<section class="mut-card" aria-labelledby="mut-site-title"><h3 id="mut-site-title">'.self::label('site_languages').'</h3><p class="mut-note">'.self::label('site_languages_help').'</p><div id="mut-site-languages" class="mut-site-languages"></div><p class="mut-note">'.self::label('default_note').' <strong><bdi>'.self::h($defaultName).'</bdi></strong>. '.self::label('default_help').'</p><a class="mut-settings-link" href="'.self::h(BX_DOL_URL_STUDIO.'polyglot.php').'">'.self::label('default_settings').'</a></section>';
         $html.='<details class="mut-card"><summary>'.self::label('language_coverage').'</summary><div class="mut-table-wrap mut-coverage-wrap"><table><thead><tr><th>'.self::label('language').'</th><th>'.self::label('translated').'</th><th>'.self::label('missing').'</th><th>'.self::label('english_copies').'</th><th>'.self::label('availability').'</th></tr></thead><tbody id="mut-coverage"></tbody></table></div></details>';
         $html.='<footer class="mut-footer">'.self::label('footer_note').'</footer></section>';
-        $html.='<script type="application/json" id="mut-config">'.json_encode($config,JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_UNESCAPED_UNICODE).'</script><script src="'.self::h($base.'template/js/progress.js?v=0.1.8').'"></script><script src="'.self::h($base.'template/js/workflow.js?v=0.1.9-flow1').'"></script><script src="'.self::h($base.'template/js/translator.js?v=0.1.12-report1').'"></script>';
+        $html.='<script type="application/json" id="mut-config">'.json_encode($config,JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_UNESCAPED_UNICODE).'</script><script src="'.self::h($base.'template/js/progress.js?v=0.1.12-reconciled3').'"></script><script src="'.self::h($base.'template/js/workflow.js?v=0.1.12-reconciled3').'"></script><script src="'.self::h($base.'template/js/translator.js?v=0.1.12-reconciled3').'"></script>';
         if($supportReady) {
             require_once __DIR__.'/MyUnaTranslatorSupportView.php';
             $html.='<link rel="stylesheet" href="'.self::h($base.'template/css/reporting.css?v=1').'">'.MyUnaTranslatorSupportView::html().'<script src="'.self::h($base.'template/js/reporting.js?v=1').'"></script>';
