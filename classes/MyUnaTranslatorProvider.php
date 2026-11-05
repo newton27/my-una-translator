@@ -16,7 +16,7 @@ final class MyUnaTranslatorProvider
         $this->transport = $transport;
     }
 
-    public function translate(array $sources, $target)
+    public function translate(array $sources, $target, $allowReview=false)
     {
         if (!in_array($target, ['ES', 'FR', 'DE', 'PT-BR', 'ZH-HANS', 'AR'], true))
             throw new RuntimeException('Unsupported target language.');
@@ -41,8 +41,14 @@ final class MyUnaTranslatorProvider
             if (!is_array($row) || !isset($row['text']) || !is_string($row['text']))
                 throw new RuntimeException('Provider returned an invalid translation row.');
             $index=$indices[$i];
-            $result[$index] = ['text' => MyUnaTranslatorText::decodeFragments($row['text'], $packets[$index]),
-                'billed' => isset($row['billed_characters']) ? max(0, (int)$row['billed_characters']) : $packets[$index]['characters']];
+            $billed=isset($row['billed_characters']) ? max(0,(int)$row['billed_characters']) : $packets[$index]['characters'];
+            try {
+                if (trim($row['text'])==='') throw new RuntimeException('Translation returned an empty text fragment.');
+                $result[$index]=['text'=>MyUnaTranslatorText::decodeFragments($row['text'],$packets[$index]),'billed'=>$billed];
+            } catch (RuntimeException $e) {
+                if (!$allowReview) throw $e;
+                $result[$index]=['text'=>null,'error'=>$e->getMessage(),'billed'=>$billed];
+            }
         }
         return $result;
     }

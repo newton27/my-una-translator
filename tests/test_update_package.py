@@ -1,11 +1,12 @@
 import re
+import hashlib
 import unittest
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 UP = ROOT / 'updates/update_0.1.9_0.1.10'
 
 class NativeUpdaterPackage(unittest.TestCase):
-    def test_exact_runtime_source_copy(self):
+    def test_historical_updater_payload_is_preserved(self):
         expected={
             'classes/MyUnaTranslatorStudioPage.php',
             'template/css/translator.css',
@@ -14,9 +15,15 @@ class NativeUpdaterPackage(unittest.TestCase):
         }
         found={p.relative_to(UP/'source').as_posix() for p in (UP/'source').rglob('*') if p.is_file()}
         self.assertEqual(found,expected)
+        frozen={
+            'classes/MyUnaTranslatorStudioPage.php':'620cc3e9f45e5529a4d8e15c99616208ab5a44b1ab520bd3f41d76ccbde96ca2',
+            'template/css/translator.css':'740ed809d2210edad3375da2eb761869f7c73e9d2a9211585e877555ffacdb2a',
+            'template/js/translator.js':'d9949482482ba3737c8bb1af6b934a03d7304d9c5a82639ca545b12df73a7300',
+            'install/config.php':'bf79abc9a2c24256a6b9c02c164b195d6a7a1b1b2bb6b93fa086172a69fa29fe',
+        }
         for rel in expected:
             with self.subTest(rel=rel):
-                self.assertEqual((UP/'source'/rel).read_bytes(),(ROOT/rel).read_bytes())
+                self.assertEqual(hashlib.sha256((UP/'source'/rel).read_bytes()).hexdigest(),frozen[rel])
     def test_native_version_transition_and_no_database_sql(self):
         data=(UP/'install/config.php').read_text()
         self.assertIn("'version_from' => '0.1.9'",data)
@@ -27,7 +34,7 @@ class NativeUpdaterPackage(unittest.TestCase):
         self.assertFalse(list(UP.rglob('*.sql')))
         self.assertIn("'version' => '0.1.10'",(ROOT/'install/config.php').read_text())
     def test_update_clears_browser_cache_and_preserves_desktop_workflow(self):
-        src=(ROOT/'classes/MyUnaTranslatorStudioPage.php').read_text()
+        src=(UP/'source/classes/MyUnaTranslatorStudioPage.php').read_text()
         self.assertIn('translator.css?v=0.1.10-rc1',src)
         self.assertIn('translator.js?v=0.1.10-rc1',src)
         self.assertIn('mut-summary-grid',src)
