@@ -4,6 +4,9 @@
 final class MyUnaTranslatorLibreTerms
 {
     private const TERMS = [
+        'cannot update list'=>['SQ'=>'Nuk mund të përditësohet lista'],
+        'cannot process image:'=>['SQ'=>'Nuk mund të përpunohet imazhi:'],
+        'cannot remove icon image:'=>['SQ'=>'Nuk mund të hiqet imazhi i ikonës:'],
         'sign in'=>['ES'=>'Iniciar sesión','FR'=>'Se connecter','DE'=>'Anmelden','PT-BR'=>'Entrar','ZH-HANS'=>'登录'],
         'sign out'=>['ES'=>'Cerrar sesión','FR'=>'Se déconnecter','DE'=>'Abmelden','PT-BR'=>'Sair','ZH-HANS'=>'退出登录'],
         'send message'=>['ES'=>'Enviar mensaje','FR'=>'Envoyer un message','DE'=>'Nachricht senden','PT-BR'=>'Enviar mensagem','ZH-HANS'=>'发送消息'],
