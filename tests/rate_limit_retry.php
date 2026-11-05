@@ -10,7 +10,7 @@ function check($name, callable $run) {
     catch(Throwable $error) { ++$failed; echo "FAIL $name: ".$error->getMessage()."\n"; }
 }
 function same($actual,$expected) { if($actual!==$expected)throw new RuntimeException('Expected '.json_encode($expected).' got '.json_encode($actual)); }
-function fixture($firstStatus=429) {
+function fixture($firstStatus=429,$firstSource='Welcome {0}') {
     $db=new PreviewTestDb();
     // MySQL permits ROLLBACK after a committed provider reservation; SQLite rejects that no-op.
     $adapter=new class($db) {
@@ -27,7 +27,7 @@ function fixture($firstStatus=429) {
     $store=new MyUnaTranslatorStore($adapter);$requests=[];
     $id=$store->create(['targets'=>['ar'],'category_id'=>1,'include_english'=>1,'budget'=>10000]);
     $store->insertItems($id,[
-        ['key_id'=>1,'key_name'=>'_welcome','language'=>'ar','source'=>'Welcome {0}','before_value'=>null],
+        ['key_id'=>1,'key_name'=>'_welcome','language'=>'ar','source'=>$firstSource,'before_value'=>null],
         ['key_id'=>2,'key_name'=>'_another','language'=>'ar','source'=>'Another {1}','before_value'=>null],
         ['key_id'=>3,'key_name'=>'_kept','language'=>'ar','source'=>'Kept {2}','before_value'=>null],
     ]);
@@ -55,6 +55,25 @@ check('a later explicit batch retries the same unprocessed fragments and stages 
     $calls=$requests();same(count($calls),2);same($calls[0],$calls[1]);same($result['more'],false);same($result['job']['status'],'ready');same((int)$result['job']['spent'],25);
     same($store->item($id,$rows[0]['id'])['result'],'Translated Welcome {0}');same($store->item($id,$rows[1]['id'])['result'],'Translated Another {1}');
     same($store->item($id,$rows[2]['id'])['result'],'Saved {2}');same((int)$store->item($id,$rows[2]['id'])['manually_edited'],1);same($store->valueNow(1,1),'Welcome {0}');
+});
+check('a later-chunk 429 retains the reservation and pauses without automatically submitting accepted fragments again',function(){
+    [$db,$store,,$id,$rows]=fixture(429,implode(' ',array_fill(0,21,'<b>Word</b>')));
+    $store->changeItem($rows[1]['id'],['state'=>'staged','result'=>'Saved sibling {1}','original_result'=>'Saved sibling {1}']);
+    $saved=$store->item($id,$rows[2]['id']);$polyglot=$db->getAll('SELECT * FROM sys_localization_strings');$posts=[];$acceptedCharacters=0;
+    $provider=new MyUnaTranslatorLibreProvider('http://127.0.0.1:5001','',function($method,$url,$headers,$body)use(&$posts,&$acceptedCharacters){
+        if($method==='GET')return ['status'=>200,'body'=>'[{"code":"en","name":"English","targets":["ar"]},{"code":"ar","name":"Arabic"}]'];
+        $fragments=json_decode($body,true,512,JSON_THROW_ON_ERROR)['q'];$posts[]=count($fragments);
+        if(count($posts)===2)return ['status'=>429,'headers'=>['Retry-After'=>'1'],'body'=>'{}'];
+        $acceptedCharacters+=array_sum(array_map(fn($text)=>mb_strlen($text,'UTF-8'),$fragments));
+        return ['status'=>200,'body'=>json_encode(['translatedText'=>array_map(fn($text)=>'Translated '.$text,$fragments)])];
+    },false);
+    $engine=new MyUnaTranslatorEngine($store,fn()=>$provider,fn()=>true);$result=$engine->dispatch('batch',['job_id'=>$id]);
+    same($posts,[20,1]);same($acceptedCharacters,80);same($result['more'],false);same(isset($result['retry_after']),false);same($result['job']['status'],'paused');
+    // 11 existing characters + 505 XML reservation for 21 Word fragments.
+    same((int)$result['job']['spent'],516);same($result['job']['counts']['processing'],1);same($result['job']['counts']['pending'],0);
+    if(!str_contains($result['job']['error'],'may process the same characters again'))throw new RuntimeException('Missing partial-work retry warning');
+    $again=$engine->dispatch('batch',['job_id'=>$id]);same($again['more'],false);same($posts,[20,1]);same((int)$again['job']['spent'],516);
+    same($store->item($id,$rows[2]['id']),$saved);same($db->getAll('SELECT * FROM sys_localization_strings'),$polyglot);
 });
 check('non-429 provider rejection remains paused and never schedules an automatic retry',function(){
     [$db,$store,$engine,$id]=fixture(403);$result=$engine->dispatch('batch',['job_id'=>$id]);

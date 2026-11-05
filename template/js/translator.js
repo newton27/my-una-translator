@@ -139,6 +139,11 @@
     if (jobs.some(j => String(j.id) === String(wanted))) select.value = String(wanted);
     setButtons();
   }
+  function clearJobView() {
+    activeJob=null; previewRows=new Map(); previewTotal=0;
+    find('mut-preview').innerHTML=''; find('mut-job-details').textContent='';
+    find('mut-page-info').textContent=''; find('mut-progress').value=0;
+  }
   function renderJob(job) {
     activeJob = job;
     const counts = job.counts;
@@ -174,17 +179,18 @@
       (item.error?'<small class="mut-warning">'+esc(item.error)+'</small>':'')+'</td><td><pre>'+esc(item.source)+'</pre></td><td><pre>'+esc(text)+'</pre>'+controls+'</td></tr>';
   }
   async function preview() {
-    if (!activeJob) return;
+    if (!activeJob) return false;
     const sequence = ++previewSequence, view = viewSequence;
     const data = await request('preview', {job_id:activeJob.id, offset, search:previewSearch, filter:previewFilter});
-    if (view !== viewSequence || sequence !== previewSequence || !activeJob || Number(data.job.id) !== Number(activeJob.id)) return;
+    if (view !== viewSequence || sequence !== previewSequence || !activeJob || Number(data.job.id) !== Number(activeJob.id)) return false;
     previewTotal = Number(data.total || 0);
-    if (draft) return;
+    if (draft) return false;
     renderJob(data.job);
     previewRows = new Map(data.items.map(item=>[Number(item.id),item]));
     find('mut-preview').innerHTML = data.items.length ? '<table class="mut-preview-table"><thead><tr><th>' + esc(label('key')) + '</th><th>' + esc(label('source')) + '</th><th>' + esc(label('translation')) + '</th></tr></thead><tbody>' + data.items.map(previewRow).join('') + '</tbody></table>' : '<p class="mut-note">' + esc(label('no_preview_yet')) + '</p>';
     find('mut-page-info').textContent = label('preview_page') + ' ' + (Math.floor(offset / 50) + 1) + ' · ' + number(previewTotal) + ' matching';
     setButtons();
+    return true;
   }
   async function refresh() {
     if (draft) return;
@@ -194,7 +200,8 @@
     try {
       const nextSnapshot=await request('snapshot'); if(view!==viewSequence)return;
       snapshot=nextSnapshot; renderSnapshot(id);
-      if (id) { const data=await request('status',{job_id:id}); if(view!==viewSequence)return; renderJob(data.job); await preview(); }
+      if (id) { const data=await request('status',{job_id:id}); if(view!==viewSequence)return; if(Number(data.job.id)!==Number(id))throw new Error(label('connection_error')); renderJob(data.job); if(!await preview() && view===viewSequence)throw new Error(label('connection_error')); }
+    } catch(error) { if(view===viewSequence)clearJobView(); throw error;
     } finally { if(view===viewSequence){busy=previousBusy;selectionLoading=false;setButtons();} }
   }
   async function run(action) {
@@ -247,9 +254,9 @@
   });
   find('mut-job-lookup').addEventListener('submit', async event => {
     event.preventDefault(); if (busy) return;
-    invalidateReads(); const id = new FormData(event.currentTarget).get('job_id'); busy = true; setButtons();
-    try { const data = await request('status', {job_id:id}); offset = 0; renderJob(data.job); renderSnapshot(data.job.id); await preview(); }
-    catch (error) { message(error.message,true); }
+    invalidateReads(); clearJobView(); const id = new FormData(event.currentTarget).get('job_id'); busy = true; setButtons();
+    try { const data = await request('status', {job_id:id}); if(Number(data.job.id)!==Number(id))throw new Error(label('connection_error')); offset = 0; renderJob(data.job); renderSnapshot(data.job.id); if(!await preview())throw new Error(label('connection_error')); }
+    catch (error) { clearJobView(); message(error.message,true); }
     finally { busy = false; setButtons(); }
   });
   root.addEventListener('click', async event => {
@@ -338,10 +345,11 @@
     const id=event.target.value;
     invalidateReads(); const view=viewSequence;
     notice=''; noticeError=false; offset=0;
-    if(!id){activeJob=null;busy=false;selectionLoading=false;find('mut-preview').innerHTML='';find('mut-job-details').textContent='';find('mut-progress').value=0;setButtons();renderStatus();return;}
+    clearJobView();
+    if(!id){busy=false;selectionLoading=false;setButtons();renderStatus();return;}
     busy=true;selectionLoading=true;setButtons();
-    try { const data=await request('status',{job_id:id}); if(view!==viewSequence || find('mut-job-select').value!==id)return; renderJob(data.job); await preview(); }
-    catch(error){if(view===viewSequence)message(error.message,true);}
+    try { const data=await request('status',{job_id:id}); if(view!==viewSequence || find('mut-job-select').value!==id)return; if(Number(data.job.id)!==Number(id))throw new Error(label('connection_error')); renderJob(data.job); if(!await preview() && view===viewSequence)throw new Error(label('connection_error')); }
+    catch(error){if(view===viewSequence){clearJobView();message(error.message,true);}}
     finally{if(view===viewSequence){busy=false;selectionLoading=false;setButtons();}}
   });
   [['mut-prev',-50],['mut-next',50]].forEach(([id, step]) => find(id).addEventListener('click', async () => { offset = Math.max(0,offset + step); try { await preview(); } catch (error) { message(error.message,true); } }));

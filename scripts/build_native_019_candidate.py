@@ -103,7 +103,7 @@ def build(output, source_commit=None):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--output', type=Path, default=ARTIFACT_ROOT / 'translator-reconciled-20261105-r3' / 'translator-0.1.9-to-0.1.12-reconciled-r3.zip')
+    parser.add_argument('--output', type=Path, default=ARTIFACT_ROOT / 'translator-reconciled-20261105-r4' / 'translator-0.1.9-to-0.1.12-reconciled-r4.zip')
     parser.add_argument("--source-commit", default=None)
     args = parser.parse_args()
     build(args.output, args.source_commit)

@@ -116,7 +116,7 @@ def build_packages(output, source_commit):
     full['request.php'] = (ROOT / 'request.php').read_bytes()
     if len(full) != 35:
         raise ValueError('Expected the reviewed 35-file runtime')
-    records = [write_package(output, 'My-UNA-Translator-0.1.12-reconciled-r3.zip', 'my_una_translator/',
+    records = [write_package(output, 'My-UNA-Translator-0.1.12-reconciled-r4.zip', 'my_una_translator/',
                              full, source_commit, None, '0.1.12')]
     for baseline, target, count in [('0.1.9', '0.1.12', 41), ('0.1.10', '0.1.11', 12),
                                     ('0.1.11', '0.1.12', 40)]:
@@ -124,7 +124,7 @@ def build_packages(output, source_commit):
         payload = source_files(ROOT / 'updates' / directory)
         if len(payload) != count:
             raise ValueError('Unexpected native updater inventory: ' + directory)
-        filename = 'My-UNA-Translator-Update-' + baseline + '-to-' + target + ('-reconciled-r3' if target == '0.1.12' else '') + '.zip'
+        filename = 'My-UNA-Translator-Update-' + baseline + '-to-' + target + ('-reconciled-r4' if target == '0.1.12' else '') + '.zip'
         records.append(write_package(output, filename, directory + '/', payload,
                                      source_commit, baseline, target))
     manifest.write_text(json.dumps(records, indent=2) + '\n')
@@ -134,7 +134,7 @@ def build_packages(output, source_commit):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--output', type=Path, default=ARTIFACT_ROOT / 'translator-reconciled-20261105-r3')
+    parser.add_argument('--output', type=Path, default=ARTIFACT_ROOT / 'translator-reconciled-20261105-r4')
     parser.add_argument('--source-commit', default=None)
     args = parser.parse_args()
     commit = args.source_commit or subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
