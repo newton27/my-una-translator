@@ -29,7 +29,7 @@ final class MyUnaTranslatorLibreProvider
         if (!is_string($key) || strlen($key)>512 || preg_match('/[\r\n\x00]/',$key)) throw new RuntimeException('The LibreTranslate API key is invalid.');
         $this->key=trim($key); $this->transport=$transport; $this->useTerminology=(bool)$useTerminology;
     }
-    public function translate(array $sources,$target)
+    public function translate(array $sources,$target,$allowReview=false)
     {
         $libreTarget=MyUnaTranslatorLanguages::libreTarget($target);
         if (!$sources || count($sources)>20) throw new RuntimeException('Use 1–20 keys per LibreTranslate batch.');
@@ -54,7 +54,7 @@ final class MyUnaTranslatorLibreProvider
             $rows=$data['translatedText']??null;
             if (!is_array($rows) || !array_is_list($rows) || count($rows)!==count($chunk)) throw new RuntimeException('LibreTranslate returned an incomplete fragment batch.');
             foreach($rows as $text) {
-                if (!is_string($text) || trim($text)==='' || strlen($text)>1048576 || !mb_check_encoding($text,'UTF-8'))
+                if (!is_string($text) || strlen($text)>1048576 || !mb_check_encoding($text,'UTF-8'))
                     throw new RuntimeException('LibreTranslate returned an invalid text fragment.');
                 $translated[]=$text;
             }
@@ -64,7 +64,13 @@ final class MyUnaTranslatorLibreProvider
             $xml='<doc>';
             foreach($rows as $id=>$text) $xml.='<seg id="'.$id.'">'.htmlspecialchars($text,ENT_QUOTES|ENT_XML1,'UTF-8').'</seg>';
             $origin=$termCounts[$i]===0?'libre':($termCounts[$i]===count($packets[$i]['segments'])?'terminology':'mixed');
-            $result[$i]=['text'=>MyUnaTranslatorText::decodeFragments($xml.'</doc>',$packets[$i]),'billed'=>$packets[$i]['characters'],'origin'=>$origin,'terminology_fragments'=>$termCounts[$i]];
+            try {
+                $result[$i]=['text'=>MyUnaTranslatorText::decodeFragments($xml.'</doc>',$packets[$i]),'billed'=>$packets[$i]['characters'],'origin'=>$origin,'terminology_fragments'=>$termCounts[$i]];
+            } catch (RuntimeException $e) {
+                if (!$allowReview) throw $e;
+                // Never expose the unsafe result as an applicable translation.
+                $result[$i]=['text'=>null,'error'=>$e->getMessage(),'billed'=>$packets[$i]['characters']];
+            }
         }
         return $result;
     }

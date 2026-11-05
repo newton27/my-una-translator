@@ -16,5 +16,5 @@ function MyUnaTranslatorProgress(job, operation = '') {
   done = Math.min(total, Math.max(0, done));
   return {phase, done, total, percent:total ? Math.floor(done * 100 / total) : 100,
     conflicts:count('conflict') + count('rollback_conflict'),
-    staged:count('staged'), applied:count('applied'), rolled_back:count('rolled_back')};
+    staged:count('staged'), needsReview:count('needs_review'), applied:count('applied'), rolled_back:count('rolled_back')};
 }

@@ -47,7 +47,7 @@ final class LanguageTestDb {
             CREATE TABLE my_una_translator_languages (language TEXT,language_id INTEGER,job_id INTEGER);
             CREATE TABLE my_una_translator_settings (id INTEGER,provider TEXT,libre_url TEXT,libre_key TEXT,api_key TEXT,plan TEXT,batch_size INTEGER,character_budget INTEGER);
             CREATE TABLE my_una_translator_jobs (id INTEGER PRIMARY KEY AUTOINCREMENT,created_at INTEGER,operator_id INTEGER,targets TEXT,category_id INTEGER,include_english INTEGER,budget INTEGER,status TEXT DEFAULT 'planned',total INTEGER DEFAULT 0,estimated INTEGER DEFAULT 0,spent INTEGER DEFAULT 0,error TEXT DEFAULT '',enable_languages INTEGER DEFAULT 0);
-            CREATE TABLE my_una_translator_items (id INTEGER PRIMARY KEY AUTOINCREMENT,job_id INTEGER,key_id INTEGER,key_name TEXT,language TEXT,source TEXT,before_value TEXT,result TEXT,state TEXT DEFAULT 'pending',error TEXT DEFAULT '');
+            CREATE TABLE my_una_translator_items (id INTEGER PRIMARY KEY AUTOINCREMENT,job_id INTEGER,key_id INTEGER,key_name TEXT,language TEXT,source TEXT,before_value TEXT,result TEXT,original_result TEXT,state TEXT DEFAULT 'pending',error TEXT DEFAULT '');
             INSERT INTO sys_localization_languages VALUES (1,'en','gb','English','LTR','en_US',1);
             INSERT INTO sys_localization_categories VALUES (1,'Interface');
             INSERT INTO sys_localization_keys VALUES (1,'_welcome',1);
@@ -102,6 +102,7 @@ check('Studio renders all server targets and permits choosing Arabic alone', fun
     $page=(new ReflectionClass(MyUnaTranslatorStudioPage::class))->newInstanceWithoutConstructor();
     (new ReflectionProperty($page,'translator'))->setValue($page,$engine);
     $html=(new ReflectionMethod($page,'getTranslator'))->invoke($page);
+    if ($fixture=getenv('MUT_RENDER_FIXTURE')) file_put_contents($fixture,$html);
     $doc=new DOMDocument(); @$doc->loadHTML('<?xml encoding="UTF-8">'.$html); $x=new DOMXPath($doc);
     return $x->query('//input[@name="targets[]"]')->length===49 && $x->query('//input[@name="targets[]" and @value="ar"]')->length===1 && $x->query('//input[@name="targets[]" and @checked]')->length===0 && $x->query('//input[@id="mut-language-search"]')->length===1;
 });
@@ -141,7 +142,7 @@ check('Studio dashboard renders six read-only cards and keeps translation workfl
         && str_contains($html,'2,206')
         && $x->query('//article[span[@class="mut-summary-label" and normalize-space(.)="Recent jobs"]]/strong[normalize-space(.)="2"]')->length===1
         && str_contains($html,'0 active · 1 paused · 1 ready/applied')
-        && str_contains($html,'translator.css?v=0.1.10-rc1')
+        && $x->query('//link[contains(@href,"/template/css/translator.css?v=")]')->length===1
         && $x->query('//*[@id="mut-create"]')->length===1
         && $x->query('//*[@id="mut-job-select"]')->length===1
         && $x->query('//*[@id="mut-status-dialog"]')->length===1
