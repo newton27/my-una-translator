@@ -4,6 +4,16 @@ bx_import('BxTemplMenuSwitchLanguage');
 /** Add native language records created by Translator to UNA's switcher. */
 class MyUnaTranslatorMenuSwitchLanguage extends BxTemplMenuSwitchLanguage
 {
+    // Popup requests may omit Referer (privacy settings, direct links, or CLI).
+    protected function getBaseUrlPopup()
+    {
+        $referrer = $_SERVER['HTTP_REFERER'] ?? '';
+        if (!is_string($referrer) || trim($referrer) === '')
+            return bx_get_base_url(BX_DOL_URL_ROOT);
+
+        return parent::getBaseUrlPopup();
+    }
+
     protected function loadData()
     {
         parent::loadData();
