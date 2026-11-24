@@ -1,6 +1,6 @@
 <?php defined('BX_DOL') or die('hack attempt');
 
-foreach (['Text','Secret','Provider','LibreProvider','Access','Store','Engine'] as $part)
+foreach (['Text','Secret','Provider','LibreProvider','Access','Store','Engine','EditingRuntime'] as $part)
     require_once __DIR__ . '/MyUnaTranslator' . $part . '.php';
 
 class MyUnaTranslatorStudioPage extends BxTemplStudioModule
@@ -12,6 +12,8 @@ class MyUnaTranslatorStudioPage extends BxTemplStudioModule
         'next_generate'=>'Your plan is saved. Generate the preview, then review the translated text before applying.',
         'next_resume'=>'This job is paused. Read its message, adjust the limit if needed, then resume the saved preview.',
         'next_review'=>'Your preview is ready. Review the translated text below, then apply it in step 3.',
+        'needs_review'=>'Needs review', 'correction_required'=>'Correction required',
+        'next_needs_review'=>'Generation is complete. Correct the flagged strings in step 2 before applying. Your saved previews are preserved.',
         'next_retry_apply'=>'Translations are saved. Retry Apply to finish preparing the language for your site.',
         'next_done'=>'Translations have been applied. Use the site-language links below to check the result.',
         'next_finish_apply'=>'Applying has started. Continue Apply in step 3 to finish this saved job.',
@@ -31,7 +33,31 @@ class MyUnaTranslatorStudioPage extends BxTemplStudioModule
         'apply_continue'=>'Apply reviewed translations', 'recovery_tools'=>'Recovery tools', 'site_languages'=>'Languages on your site',
         'site_languages_help'=>'These languages exist in UNA. Available languages appear in the visitor selector; other translation targets become site languages after you apply their previews.',
         'available_visitors'=>'Available to visitors', 'unavailable_visitors'=>'Hidden from visitors', 'site_default'=>'Site default',
+        'edit_translation'=>'Edit translation', 'save_translation'=>'Save translation', 'cancel_edit'=>'Cancel edit',
+        'manually_edited'=>'Manually edited', 'preview_saved'=>'Preview saved. Apply the reviewed job when you are ready.',
+        'edit_help'=>'Save this correction to the preview. Keep placeholders, links and HTML unchanged. Your site changes only when you apply the job.',
         'job_languages'=>'This job translates', 'no_preview_yet'=>'Your translation preview will appear here after generation starts.',
+        'editing_title'=>'Edit pages in English',
+        'editing_intro'=>'Pause the other languages together, save your page or block in English, then restore the previous language settings.',
+        'editing_start'=>'Start English-only editing', 'editing_finish'=>'Finish editing and restore languages',
+        'editing_retry'=>'Retry restoration', 'editing_pages'=>'Open Pages', 'editing_refresh'=>'Refresh editing status',
+        'editing_ready'=>'Ready for English editing', 'editing_paused'=>'{0} other languages are paused.',
+        'editing_paused_help'=>'Other languages are temporarily hidden from visitors. Existing translations are saved. Finish here after saving your page or block.',
+        'editing_conflicts'=>'{0} translation conflicts need attention. Saved originals are retained. Retry restoration after resolving the changes.',
+        'editing_restoring'=>'Restoration needs to finish.', 'editing_conflict_state'=>'Restoration needs attention.',
+        'editing_finished'=>'{0} English keys were created or changed. Previous language settings have been restored.',
+        'editing_no_changes'=>'Previous language settings have been restored. No English page or block text changed.',
+        'editing_plan_help'=>'Create one plan for the affected keys across all supported languages that were previously enabled. Generate and review its preview before applying.',
+        'editing_plan'=>'Create plan for affected keys', 'editing_plan_saved'=>'A translation plan is saved for the affected keys. Open it to generate and review the preview.',
+        'editing_open_plan'=>'Open saved plan', 'editing_pending'=>'Create or skip this translation plan before starting another editing session.',
+        'editing_dismiss'=>'Skip this translation plan',
+        'editing_dismiss_help'=>'Skipping keeps the saved English and existing translations, and allows another editing session without generating a translation preview.',
+        'editing_dismissed'=>'Translation plan skipped. Saved English and existing translations are retained.',
+        'editing_wait'=>'Finish English editing and restore languages before creating, generating, applying or rolling back translation jobs.',
+        'editing_default_required'=>'English-only editing is available when English is the site default.',
+        'editing_no_languages'=>'Install another site language before using English-only editing.',
+        'editing_unsupported'=>'The provider cannot translate these restored languages: {0}. Their existing text is preserved.',
+        'editing_start_done'=>'English-only editing is active. Open Pages and save your changes, then return here to restore the languages.',
     ];
     private $translator;
     protected $sPageDefault = 'translator';
@@ -52,7 +78,9 @@ class MyUnaTranslatorStudioPage extends BxTemplStudioModule
                 if (($settings['provider']??'deepl')==='libre') return new MyUnaTranslatorLibreProvider($settings['libre_url'],($settings['libre_key']??'')===''?'':MyUnaTranslatorSecret::open($settings['libre_key'],BX_DOL_SECRET));
                 return new MyUnaTranslatorProvider(MyUnaTranslatorSecret::open($settings['api_key'],BX_DOL_SECRET),$settings['plan']);
             },
-            function ($code) { return BxDolStudioLanguagesUtils::getInstance()->compileLanguage($code,true); });
+            function ($code) { return BxDolStudioLanguagesUtils::getInstance()->compileLanguage($code,true); },
+            MyUnaTranslatorEditingRuntime::create(),
+            function() use($store) { return (int)$store->one("SELECT enabled FROM sys_modules WHERE name='my_una_translator'")===1; });
     }
     private function token()
     {
@@ -72,6 +100,18 @@ class MyUnaTranslatorStudioPage extends BxTemplStudioModule
             if (!is_string($action)) throw new RuntimeException('Invalid Translator action.');
             $input=$_POST; unset($input['csrf_token'],$input['mt_action']);
             $input['operator_id']=getLoggedId();
+            if(in_array($action,['report_prepare','report_send'],true)) {
+                require_once __DIR__.'/MyUnaTranslatorSupport.php';
+                $session=BxDolSession::getInstance();
+                $support=new MyUnaTranslatorSupport(new MyUnaTranslatorStore(BxDolDb::getInstance()),[
+                    'module_version'=>(string)($this->aModule['version']??'unknown'),
+                    'una_version'=>defined('BX_DOL_VERSION')?(string)BX_DOL_VERSION:'unknown',
+                    'php_version'=>PHP_VERSION,'site_url'=>BX_DOL_URL_ROOT
+                ],new MyUnaSupportV1\ReportClient(),
+                    static function()use($session){$d=$session->getValue('my_una_support_drafts');return is_array($d)?$d:[];},
+                    static function($d)use($session){$session->setValue('my_una_support_drafts',$d);});
+                return ['code'=>0,'data'=>$support->dispatch($action,$input)];
+            }
             return ['code'=>0,'data'=>$this->translator->dispatch($action,$input)];
         } catch (Throwable $e) {
             return ['code'=>1,'message'=>get_class($e)==='RuntimeException' ? $e->getMessage() : 'Translator could not complete the request. Check its installation and try again.'];
@@ -101,10 +141,15 @@ class MyUnaTranslatorStudioPage extends BxTemplStudioModule
         $default=function_exists('getParam')?(string)getParam('lang_default'):'en';
         $defaultName=$default;
         foreach($snapshot['site_languages'] as $language) if($language['code']===$default) $defaultName=$language['native'];
-        $config=['endpoint'=>$endpoint,'token'=>$this->token(),'snapshot'=>$snapshot,'labels'=>$labels,'site_url'=>BX_DOL_URL_ROOT,'default_language'=>$default];
-        $html='<link rel="stylesheet" href="'.self::h($base.'template/css/translator.css?v=0.1.10-rc1').'">';
+        $supportReady=class_exists('BxDolDb') && (bool)BxDolDb::getInstance()->getOne("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema=DATABASE() AND table_name='my_una_translator_support_receipts'");
+        $config=['support_enabled'=>$supportReady,'endpoint'=>$endpoint,'token'=>$this->token(),'snapshot'=>$snapshot,'labels'=>$labels,'site_url'=>BX_DOL_URL_ROOT,'default_language'=>$default];
+        $html='<link rel="stylesheet" href="'.self::h($base.'template/css/translator.css?v=0.1.13').'">';
         $html.='<section id="my-una-translator" class="mut" aria-label="'.self::label('title').'">';
         $html.='<header class="mut-hero"><div class="mut-mark" aria-hidden="true">A<span>文</span></div><div><div class="mut-brand">My UNA World</div><h2>'.self::label('title').'</h2><p>'.self::label('workflow_intro').'</p></div></header>';
+        $html.='<section id="mut-editing" class="mut-card mut-editing" aria-labelledby="mut-editing-title"><h3 id="mut-editing-title">'.self::label('editing_title').'</h3><p class="mut-note">'.self::label('editing_intro').'</p>';
+        $html.='<p id="mut-editing-state" class="mut-editing-state" role="status" aria-live="polite">'.self::label('editing_ready').'</p><p id="mut-editing-detail" class="mut-note"></p>';
+        $html.='<div id="mut-editing-plan-fields" class="mut-fields" hidden><label>'.self::label('job_ceiling').'<input id="mut-editing-budget" type="number" min="1" max="100000000" value="'.(int)$snapshot['settings']['character_budget'].'" required></label></div>';
+        $html.='<div class="mut-buttons"><button id="mut-editing-start" type="button" data-mut-action="editing_start">'.self::label('editing_start').'</button><a id="mut-editing-pages" class="mut-button-link" href="'.self::h(BX_DOL_URL_STUDIO.'builder_page.php').'" target="_blank" rel="noopener" hidden>'.self::label('editing_pages').'</a><button id="mut-editing-finish" type="button" data-mut-action="editing_finish" hidden>'.self::label('editing_finish').'</button><button id="mut-editing-plan" type="button" data-mut-action="editing_plan" hidden>'.self::label('editing_plan').'</button><button id="mut-editing-dismiss" type="button" data-mut-action="editing_dismiss" class="mut-secondary" hidden>'.self::label('editing_dismiss').'</button><button id="mut-editing-open-plan" type="button" data-mut-action="editing_open_plan" hidden>'.self::label('editing_open_plan').'</button><button type="button" data-mut-action="editing_refresh" class="mut-secondary">'.self::label('editing_refresh').'</button></div></section>';
         // Read-only dashboard: derive everything from the existing snapshot.
         $jobs=$snapshot['jobs']??[];
         $siteLanguages=$snapshot['site_languages']??[];
@@ -146,7 +191,8 @@ class MyUnaTranslatorStudioPage extends BxTemplStudioModule
         $html.='<div class="mut-status-launch"><button id="mut-show-status" type="button" class="mut-status-control">'.self::label('show_status').'</button></div>';
         $html.='<dialog id="mut-status-dialog" class="mut-status-dialog" aria-labelledby="mut-status-title"><div class="mut-status-heading"><div><div class="mut-brand">My UNA World</div><h3 id="mut-status-title">'.self::label('translation_status').'</h3></div><button id="mut-hide-status" type="button" class="mut-secondary mut-status-control" autofocus>'.self::label('hide_status').'</button></div>';
         $html.='<p id="mut-status-job" class="mut-note"></p><div id="mut-status-state" class="mut-status-state" role="status" aria-live="polite"></div><p id="mut-status-count" class="mut-status-count"></p><progress id="mut-status-progress" value="0" max="100" aria-label="'.self::label('job_progress').'"></progress>';
-        $html.='<p id="mut-status-totals" class="mut-note"></p><p id="mut-status-characters" class="mut-note"></p><p id="mut-status-activity" class="mut-status-activity" hidden></p><p id="mut-status-error" class="mut-warning" role="alert" hidden></p><p id="mut-status-note" class="mut-note"></p><div class="mut-buttons"><button id="mut-status-pause" type="button" class="mut-status-control" data-mut-action="pause" hidden>'.self::label('pause').'</button></div><p class="mut-note">'.self::label('keep_page_open').'</p></dialog>';
+        $html.='<p id="mut-status-totals" class="mut-note"></p><p id="mut-status-characters" class="mut-note"></p><p id="mut-status-activity" class="mut-status-activity" hidden></p><p id="mut-status-error" class="mut-warning" role="alert" hidden></p><button id="mut-report-error" class="mut-secondary mut-status-control" type="button" data-mut-report="incident" hidden>Report this problem</button><p id="mut-status-note" class="mut-note"></p><div class="mut-buttons"><button id="mut-status-pause" type="button" class="mut-status-control" data-mut-action="pause" hidden>'.self::label('pause').'</button></div><p class="mut-note">'.self::label('keep_page_open').'</p></dialog>';
+        if($supportReady)$html.='<p><button type="button" class="mut-secondary mut-status-control" data-mut-report="general">Contact support</button></p>';
         $html.='<details class="mut-card"'.($snapshot['settings']['provider_ready']?'':' open').'><summary>'.self::label('provider_settings').'</summary><form id="mut-settings" class="mut-fields">';
         $html.='<label>'.self::label('provider').'<select name="provider"><option value="libre"'.($snapshot['settings']['provider']==='libre'?' selected':'').'>LibreTranslate</option><option value="deepl"'.($snapshot['settings']['provider']==='deepl'?' selected':'').'>DeepL</option></select></label>';
         $html.='<label data-mut-provider="libre">'.self::label('libre_url').'<input type="url" name="libre_url" value="'.self::h($snapshot['settings']['libre_url']??'').'" maxlength="500" placeholder="https://translate.example.org"></label>';
@@ -154,7 +200,7 @@ class MyUnaTranslatorStudioPage extends BxTemplStudioModule
         $html.='<label data-mut-provider="libre"><input type="checkbox" name="clear_libre_key" value="1"> '.self::label('clear_libre_key').'</label>';
         $html.='<label data-mut-provider="deepl">'.self::label('api_account').'<select name="plan"><option value="free"'.($snapshot['settings']['plan']==='free'?' selected':'').'>DeepL free endpoint</option><option value="pro"'.($snapshot['settings']['plan']==='pro'?' selected':'').'>DeepL paid endpoint</option></select></label>';
         $html.='<label data-mut-provider="deepl">'.self::label('api_key').'<input type="password" name="api_key" autocomplete="new-password" value="" placeholder="'.self::label($snapshot['settings']['has_key']?'key_saved':'key_needed').'" maxlength="512"></label>';
-        $html.='<label>'.self::label('batch_size').'<input type="number" name="batch_size" min="1" max="20" value="'.(int)$snapshot['settings']['batch_size'].'" required></label>';
+        $html.='<label>'.self::label('batch_size').'<input type="number" name="batch_size" min="1" max="40" value="'.(int)$snapshot['settings']['batch_size'].'" required></label>';
         $html.='<label>'.self::label('default_ceiling').'<input type="number" name="character_budget" min="1" max="100000000" value="'.(int)$snapshot['settings']['character_budget'].'" required></label>';
         $html.='<div class="mut-buttons"><button type="submit">'.self::label('save_settings').'</button><button type="button" data-mut-action="usage" class="mut-secondary">'.self::label('check_usage').'</button></div><p class="mut-note">'.self::label('provider_note').'</p></form></details>';
         $html.='<section id="mut-step-1" class="mut-card mut-step" aria-labelledby="mut-choose-title"><h3 id="mut-choose-title"><span class="mut-step-number">1</span>'.self::label('step_choose').'</h3><form id="mut-create"><p class="mut-note">'.self::label('target_hint').'</p><div class="mut-fields"><label>'.self::label('find_language').'<input id="mut-language-search" type="search" autocomplete="off"></label></div><p id="mut-language-error" class="mut-warning"'.(empty($snapshot['language_error'])?' hidden':'').'>'.self::h($snapshot['language_error']??'').'</p><div id="mut-targets" class="mut-targets" role="group" aria-label="'.self::label('target_languages').'">';
@@ -174,7 +220,12 @@ class MyUnaTranslatorStudioPage extends BxTemplStudioModule
         $html.='<section class="mut-card" aria-labelledby="mut-site-title"><h3 id="mut-site-title">'.self::label('site_languages').'</h3><p class="mut-note">'.self::label('site_languages_help').'</p><div id="mut-site-languages" class="mut-site-languages"></div><p class="mut-note">'.self::label('default_note').' <strong><bdi>'.self::h($defaultName).'</bdi></strong>. '.self::label('default_help').'</p><a class="mut-settings-link" href="'.self::h(BX_DOL_URL_STUDIO.'polyglot.php').'">'.self::label('default_settings').'</a></section>';
         $html.='<details class="mut-card"><summary>'.self::label('language_coverage').'</summary><div class="mut-table-wrap mut-coverage-wrap"><table><thead><tr><th>'.self::label('language').'</th><th>'.self::label('translated').'</th><th>'.self::label('missing').'</th><th>'.self::label('english_copies').'</th><th>'.self::label('availability').'</th></tr></thead><tbody id="mut-coverage"></tbody></table></div></details>';
         $html.='<footer class="mut-footer">'.self::label('footer_note').'</footer></section>';
-        $html.='<script type="application/json" id="mut-config">'.json_encode($config,JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_UNESCAPED_UNICODE).'</script><script src="'.self::h($base.'template/js/progress.js?v=0.1.8').'"></script><script src="'.self::h($base.'template/js/workflow.js?v=0.1.9-flow1').'"></script><script src="'.self::h($base.'template/js/translator.js?v=0.1.10-rc1').'"></script>';
+        $html.='<script type="application/json" id="mut-config">'.json_encode($config,JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_UNESCAPED_UNICODE).'</script><script src="'.self::h($base.'template/js/progress.js?v=0.1.13').'"></script><script src="'.self::h($base.'template/js/workflow.js?v=0.1.13').'"></script><script src="'.self::h($base.'template/js/translator.js?v=0.1.13').'"></script>';
+        if($supportReady) {
+            require_once __DIR__.'/MyUnaTranslatorSupportView.php';
+            $html.='<link rel="stylesheet" href="'.self::h($base.'template/css/reporting.css?v=1').'">'.MyUnaTranslatorSupportView::html().'<script src="'.self::h($base.'template/js/reporting.js?v=1').'"></script>';
+        }
         return $html;
     }
 }
+

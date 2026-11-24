@@ -37,6 +37,8 @@ CREATE TABLE `my_una_translator_items` (
   `source` mediumtext NOT NULL,
   `before_value` mediumtext NULL,
   `result` mediumtext NULL,
+  `manually_edited` tinyint unsigned NOT NULL DEFAULT 0,
+  `original_result` mediumtext NULL,
   `state` varchar(24) NOT NULL DEFAULT 'pending',
   `error` varchar(500) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
@@ -61,3 +63,60 @@ INSERT INTO `sys_std_widgets` (`page_id`,`module`,`type`,`url`,`click`,`icon`,`c
 (@iPageId,@sName,'extensions',CONCAT('{url_studio}module.php?name=',@sName),'','my_una_translator@modules/newton/my_una_translator/|std-icon.svg','_my_una_translator_title','','');
 INSERT INTO `sys_std_pages_widgets` (`page_id`,`widget_id`,`order`) VALUES
 (@iParentPageId,LAST_INSERT_ID(),IFNULL(@iOrder,0)+1);
+
+
+-- Integrated support reporting
+CREATE TABLE IF NOT EXISTS `my_una_translator_support_receipts` (`submission_id` char(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL, `payload_hash` char(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL, `incident_hash` char(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL, `ticket_id` bigint unsigned DEFAULT NULL, `created_at` int unsigned NOT NULL, PRIMARY KEY (`submission_id`), KEY `support_incident` (`incident_hash`,`created_at`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Bulk English editing preservation.
+-- Durable English editing sessions. Native language rows are never removed.
+CREATE TABLE IF NOT EXISTS `my_una_translator_editing_sessions` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `created_at` int unsigned NOT NULL,
+  `finished_at` int unsigned NOT NULL DEFAULT 0,
+  `operator_id` int unsigned NOT NULL DEFAULT 0,
+  `default_language` varchar(5) NOT NULL DEFAULT 'en',
+  `status` varchar(16) NOT NULL DEFAULT 'active',
+  `languages` mediumtext NOT NULL,
+  `changed_keys` int unsigned NOT NULL DEFAULT 0,
+  `restored_languages` int unsigned NOT NULL DEFAULT 0,
+  `restore_complete` tinyint unsigned NOT NULL DEFAULT 0,
+  `conflicts` int unsigned NOT NULL DEFAULT 0,
+  `job_id` int unsigned NOT NULL DEFAULT 0,
+  `unsupported_languages` text NOT NULL,
+  `compile_pending` text NOT NULL,
+  `error` text NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `editing_status` (`status`,`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `my_una_translator_editing_keys` (
+  `session_id` int unsigned NOT NULL,
+  `key_id` int unsigned NOT NULL,
+  `key_name` varchar(255) NOT NULL,
+  `source_before` mediumtext NULL,
+  `at_start` tinyint unsigned NOT NULL DEFAULT 0,
+  `source_after` mediumtext NULL,
+  `changed` tinyint unsigned NOT NULL DEFAULT 0,
+  PRIMARY KEY (`session_id`,`key_id`),
+  KEY `editing_changed` (`session_id`,`changed`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `my_una_translator_editing_values` (
+  `session_id` int unsigned NOT NULL,
+  `key_id` int unsigned NOT NULL,
+  `language_id` int unsigned NOT NULL,
+  `language` varchar(5) NOT NULL,
+  `original_value` mediumtext NULL,
+  `restored` tinyint unsigned NOT NULL DEFAULT 0,
+  `conflict` varchar(255) NOT NULL DEFAULT '',
+  PRIMARY KEY (`session_id`,`key_id`,`language_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `my_una_translator_editing_expected` (
+  `session_id` int unsigned NOT NULL,
+  `key_id` int unsigned NOT NULL,
+  `language_id` int unsigned NOT NULL,
+  `value_hash` char(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  PRIMARY KEY (`session_id`,`key_id`,`language_id`,`value_hash`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
