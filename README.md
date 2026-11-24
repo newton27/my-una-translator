@@ -1,58 +1,34 @@
-# My UNA Translator 0.1.10 RC 1
+# My UNA Translator 0.1.15
 
-Native UNA 15 Studio module by My UNA World. Translates English interface language keys using a configured LibreTranslate service or DeepL API Free/Pro. Version 0.1.10 retains the server-language picker, guided workflow and Arabic support. Server-side key issuance is managed separately by the service operator. The native manifest is 0.1.10; this is an unpublished release candidate.
+Native UNA 15 Studio module by My UNA World. Translate English interface language keys through LibreTranslate or DeepL, review saved previews, then apply reviewed text through UNA.
 
-## Install and package scope
+## English-only Page Builder editing
 
-Extract `my-una-translator-0.1.10-rc.1.zip` into `modules/newton/`. Its single root folder is `my_una_translator/`; the manifest must be at `modules/newton/my_una_translator/install/config.php`. Open **Studio → App Store → Downloaded**, then install and enable **My UNA Translator**. A hosting ZIP uploader may place the folder for you; Module Doctor's reference upload audits a package and does not deploy its files.
+1. Open **Studio → My UNA Translator → Edit pages in English** and click **Start English-only editing**. The module saves original language flags and existing Page Builder translations, then pauses enabled non-English languages. English remains the default; paused languages are temporarily hidden from visitors.
+2. Click **Open Pages**, reopen the native page/block editor and save your English changes. Keep the Translator page available. Native permissions, validation and CSRF remain active.
+3. Return and click **Finish editing and restore languages**. Wait until restoration and language compilation finish. If restoration needs attention, keep the archive and use **Retry restoration**; do not overwrite translations manually.
+4. If English keys changed, optionally **Create plan for affected keys**, generate previews, review and apply them as separate actions. **Skip this translation plan** keeps saved English and preserved translations and allows another editing session without provider usage.
 
-Requires PHP 8.1 or newer with cURL, DOM, mbstring and OpenSSL, MySQL/MariaDB advisory locks, writable UNA language caches and connectivity to the selected provider. LibreTranslate accepts an HTTPS base URL or exact loopback HTTP at `127.0.0.1`.
+English must be the enabled default and another language must be installed. Originally disabled languages remain disabled. Conflicting changes are retained for review. Disabling/uninstalling first attempts to restore an active editing session and refuses while restoration conflicts remain. This feature uses owned native form hooks and does not patch UNA or NEO core.
 
-This is an unpublished full installer candidate and a separate native 0.1.9-to-0.1.10 updater candidate. A native Studio fresh install of the 0.1.9 dashboard prototype passed on Man of Teal; a native Studio 0.1.9-to-0.1.10 upgrade also passed on Man of Teal, preserving its saved job and settings. Publication remains separately approval-gated. The update replaces only the Studio dashboard, its stylesheet, the popup JavaScript and the version manifest; it deliberately leaves provider settings, saved jobs, translations and the other module source files intact. Do not uninstall an existing Translator to apply the update. Retain a normal site backup before testing.
+## Install or update
 
-## Native update from 0.1.9
+Back up the site first. The full ZIP has one root, `my_una_translator/`: place it in `modules/newton/`, then install and enable it through **Studio → Apps → Downloaded**. The manifest belongs at `modules/newton/my_una_translator/install/config.php`.
 
-Use the separately versioned `my-una-translator-update-0.1.9-to-0.1.10-rc.1.zip` to stage `my_una_translator/updates/update_0.1.9_0.1.10/` under the already installed module. On tested UNA 15.0.0-RC2, the **Apps → Updates** listing shows Marketplace updates only: the manually staged package was discoverable through UNA's installer API but was not offered as an on-screen update button. The tested upgrade was run through UNA's authenticated native Studio update action. Until a supported one-click updater is provided or Marketplace distribution is verified, clients should request administrator deployment help rather than attempt a manual database update. The installed 0.1.9 package should match the RC4 runtime or be reviewed for tracked checksum drift first. This updater is NOT a complete reinstall and has no database schema or job-data migration.
+Existing 0.1.11 or 0.1.12 sites use the matching `My-UNA-Translator-Update-VERSION-to-0.1.15.zip` through Marketplace/native Studio updating. For administrator-assisted staging, its `my_una_translator/updates/update_VERSION_0.1.15/` directory belongs under `modules/newton/`; invoke UNA's native Studio updater. Do not uninstall or overlay the full installer to update. Other predecessor versions require a separately verified updater.
 
-The status popup shows **No job selected** on an empty installation rather than incorrectly reporting **Working...**. Actual running, ready and paused jobs retain their status display. The six-card dashboard remains read-only.
+The update adds editing archives and absent preview-review schema, preserving provider settings/keys, saved jobs, preview values and native languages. Older previews without a recorded original machine result retain their saved text but cannot offer a machine-result reset.
 
-## Translate
+## Provider settings and translation
 
-Configure the provider once in **Provider settings**. For LibreTranslate, enter the service base URL and any required API key. For DeepL, choose its API Free or Pro endpoint and enter the API key; a normal DeepL website subscription is separate. Existing saved provider settings are preserved.
+Configure a verified LibreTranslate HTTPS service and site-specific key, or DeepL API Free/Pro credentials. New installations require provider configuration; module purchase does not provision a provider account or include provider usage. Blank saved-key inputs retain existing keys; keys are encrypted with the site secret and omitted from dashboard snapshots.
 
-1. **Choose languages.** Search by native name, English name or code. LibreTranslate shows installed destinations reachable from English (49 on the checked server). DeepL retains six presets, including Arabic. Select one to five languages and create a plan. Scope and character limits are available in the expandable controls.
-2. **Generate and review.** Generate the preview, or explicitly open a saved job and resume it. Review English and translated text side by side. Progress opens while work runs; hiding it keeps the work running while the Studio page stays open. Saved pause reasons remain beside the recovery action. Generation does not apply translations.
-3. **Apply to your site.** Apply the completed, reviewed preview. Newly created native language records become available after their caches compile when the availability checkbox is selected. Check the resulting language links in **Languages on your site**.
+Choose one to five supported destinations, scope and character ceiling. Create a plan, generate previews, review source/target text, then apply the reviewed job. Generation does not change live translations. Protected markup/placeholders/links are validated. Machine translations require human review; later destination edits become conflicts. Saved rollback restores only unchanged text applied by that job. Translation does not change the site default.
 
-The site-language panel and visitor selector use UNA's native records. Translating another language does not change the site default. Visitors can choose an enabled language in the footer; changing the default is an optional native Polyglot action. Existing native language-module visibility rules are retained.
+Requires UNA 15.0.x, PHP 8.1+ with cURL, DOM, mbstring and OpenSSL, MySQL/MariaDB advisory locks and writable language caches. Provider connectivity is needed for translation; English editing does not generate provider translations. Member posts, messages, uploads and hardcoded theme text are outside the module's scope.
 
-Missing or blank destination text is eligible. Existing English copies are eligible when selected in plan options. Existing non-English text is preserved. Member posts, messages, uploaded files, hardcoded theme text and external services are outside the scope. Coverage measures text different from English, not linguistic quality.
+## Source and checks
 
-Placeholders, HTML, links, email addresses and supported product names stay local and are validated after reconstruction. Generation runs in small sequential batches. Pause takes effect after the current request; limits are checked before each request. Apply and rollback use saved data. Later manual edits survive rollback and appear as conflicts. Removing saved job history keeps applied text and native language registration.
+The 40 implementation files match the tested November 10–12 0.1.15 checkpoint. README/build metadata are updated for this distribution. See `docs/ENGLISH-EDITING-RELEASE.md` for exact package identities, current acceptance and remaining gates. Historical acceptance is scoped to its original site and bytes.
 
-## Connecting to the shared service
-
-For the My UNA World LibreTranslate service, request a site-specific key from the service operator. Save that key with the HTTPS base URL in Provider settings. Issuing, rotating and revoking service keys is performed in the operator’s separate administrator page; those tools are not part of this customer module.
-
-## Credentials and data
-
-Provider keys are encrypted with UNA's site secret and never returned by snapshots. Blank key inputs retain saved keys; their removal controls clear them. Back up the site secret with the database when restoring settings.
-
-Disabling retains module data and restores the standard selector. Uninstall removes module-owned tables and Studio registration, while keeping native languages and generated translations. Roll back wanted jobs before uninstalling to restore their previous text.
-
-## Validation
-
-See [RELEASE.md](docs/RELEASE.md) for 0.1.10 RC 1 provenance and gates, and [server-language support](docs/SERVER-LANGUAGES.md) for discovery, aliases, RTL handling and timeout behavior.
-
-```sh
-php tests/server_languages.php
-php tests/language_targets.php
-php tests/libretranslate_quality_gate.php
-php tests/curl_language_timeout.php
-node --test tests/workflow.cjs tests/status_popup.cjs
-python3 -m unittest discover -s tests -p test_release_boundary.py
-```
-
-The server-language suite uses an isolated SQLite fixture. The timeout test uses an ephemeral loopback server and requires cURL and proc_open.
-
-The curated quality test verifies 45 exact local terminology outputs in five languages. It does not certify general model output, all 49 language models, or a stable provider default. Historical model samples and earlier baseline checks remain in [VALIDATION.md](docs/VALIDATION.md); they are separate from the RC 4 checks. A native 0.1.9-to-0.1.10 upgrade passed on Man of Teal without data changes. Wider human linguistic review, a fresh native 0.1.10 install and a client-facing on-screen update path remain unverified.
+Run `bash tests/run.sh`. Build with `python3 scripts/build.py`. Historical migration fixtures under `tests/fixtures/legacy-updates` are not installable packages. Service key issuance and operator consoles are separate from this customer module.

@@ -33,3 +33,20 @@
 /* Accessible title contrast on UNA's dark Studio theme. */
 .mut .mut-summary-heading h3{color:#e8f2f9}
 .mut .mut-summary-heading p{color:#b9cdd9}
+
+/* Explicit preview corrections, saved independently of Apply. */
+.mut .mut-translation-cell textarea { display:block; width:100%; min-width:12rem; min-height:7rem; box-sizing:border-box; resize:vertical; padding:.65rem; font:inherit; line-height:1.5; }
+.mut .mut-translation-cell label { display:block; margin-bottom:.4rem; font-weight:600; }
+.mut .mut-manual { display:block; color:#23754b; font-weight:600; }
+.mut .mut-translation-cell .mut-buttons { flex-wrap:wrap; }
+
+/* One saved editing session controls all non-default site languages. */
+.mut .mut-editing{border-left:4px solid var(--mut-accent)}
+.mut .mut-editing h3{margin-bottom:8px}
+.mut .mut-editing-state{font-size:17px;font-weight:700;margin:14px 0 8px}
+.mut .mut-editing .mut-note{margin:8px 0}
+.mut .mut-editing .mut-fields{max-width:420px;grid-template-columns:1fr;margin:14px 0}
+.mut .mut-button-link{display:inline-flex;align-items:center;min-height:44px;padding:10px 16px;border:1px solid #ccdde5;border-radius:8px;background:#edf4f7;color:#17394b;text-decoration:none;font-weight:600}
+.mut .mut-button-link:hover{border-color:var(--mut-accent);background:#e5f0f3}
+@media(max-width:600px){.mut .mut-editing .mut-buttons>*{width:100%;justify-content:center;text-align:center}}
+

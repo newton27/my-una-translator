@@ -1,0 +1,205 @@
+{
+  "version": "0.1.15",
+  "file_manifest": [
+    {
+      "bytes": 572,
+      "path": "source/classes/MyUnaTranslatorAccess.php",
+      "sha256": "d9b013d8193246a935c97bba04f2c36b4c7c4a5b063ad6cb0d8e63ead3bde7b4"
+    },
+    {
+      "bytes": 183,
+      "path": "source/classes/MyUnaTranslatorConfig.php",
+      "sha256": "3788e5878e15e43b0e21b108af27444e31c7918a33b4da3ac4ca531e0fb846c0"
+    },
+    {
+      "bytes": 176,
+      "path": "source/classes/MyUnaTranslatorDb.php",
+      "sha256": "942bca0c0feef8406575574003d3b7235e9b43259e8cd264cd23eaf17e6abc15"
+    },
+    {
+      "bytes": 24611,
+      "path": "source/classes/MyUnaTranslatorEditing.php",
+      "sha256": "4f395063d534cff0b157849c89d6fc0962391c9ff84df61108bb2ea133201d52"
+    },
+    {
+      "bytes": 12669,
+      "path": "source/classes/MyUnaTranslatorEditingAlertsResponse.php",
+      "sha256": "72159007b40ebd68587ea60a35d28cd00afe36feb4b3b9c3ff4ac43a95bd7788"
+    },
+    {
+      "bytes": 1107,
+      "path": "source/classes/MyUnaTranslatorEditingRuntime.php",
+      "sha256": "4478ec03d88e2ea0cf93f746fd36a9fb73c98a51504e2c9945800054aace9013"
+    },
+    {
+      "bytes": 29280,
+      "path": "source/classes/MyUnaTranslatorEngine.php",
+      "sha256": "6a9c01dd8aa436b0ce3aa9dbb1a59170742d7d6866b32261b46d510fb62f166e"
+    },
+    {
+      "bytes": 4266,
+      "path": "source/classes/MyUnaTranslatorLanguages.php",
+      "sha256": "6e98b6d4750e62895769e47b899141930fc337e8daa4524417a5574c7fdee399"
+    },
+    {
+      "bytes": 10059,
+      "path": "source/classes/MyUnaTranslatorLibreProvider.php",
+      "sha256": "3a4d70766010c0a578d62ff4fb2549ab3ab7ea8afaa7003d680c163bd5edb38a"
+    },
+    {
+      "bytes": 4597,
+      "path": "source/classes/MyUnaTranslatorLibreTerms.php",
+      "sha256": "f281f9a41e2e71e47d83ef2815e9808a62bec46cc85a9ec4e6c127c79623ae7f"
+    },
+    {
+      "bytes": 1593,
+      "path": "source/classes/MyUnaTranslatorMenuSwitchLanguage.php",
+      "sha256": "de0837f20850a45eca91ba0a4211d1e6444f457844f57a334febf47cd08091ab"
+    },
+    {
+      "bytes": 177,
+      "path": "source/classes/MyUnaTranslatorModule.php",
+      "sha256": "d78d4378dd875563a1bba01a52ad0894248157f5c8984299e03bb9dd2de3fa61"
+    },
+    {
+      "bytes": 6477,
+      "path": "source/classes/MyUnaTranslatorProvider.php",
+      "sha256": "8c4d991d2c390dc9a164327006020c7e6fa54a1e4d5abc58845c48c3fdcad3d4"
+    },
+    {
+      "bytes": 1381,
+      "path": "source/classes/MyUnaTranslatorSecret.php",
+      "sha256": "41c9e581b612256ca3ded1cd43b2e7ab048d0a153613b9569dc8126cece77519"
+    },
+    {
+      "bytes": 16467,
+      "path": "source/classes/MyUnaTranslatorStore.php",
+      "sha256": "a941ec723f4df640a35a11bae85cc02b6816dc5e1a145c9afb719813f78daf77"
+    },
+    {
+      "bytes": 30193,
+      "path": "source/classes/MyUnaTranslatorStudioPage.php",
+      "sha256": "032fb52340c292d74172243d7ec39d051960ceeebb2b28d16b919e4b0d9a0186"
+    },
+    {
+      "bytes": 5791,
+      "path": "source/classes/MyUnaTranslatorSupport.php",
+      "sha256": "842cebef35ae4325211c95d4b0b1392d132e32e753efed9f17b507e9096ce0ba"
+    },
+    {
+      "bytes": 1690,
+      "path": "source/classes/MyUnaTranslatorSupportView.php",
+      "sha256": "72d7d6786d8720f12fba6c0bbdc120cced46e058d2b2a7e2c21fb34ef91d4d10"
+    },
+    {
+      "bytes": 195,
+      "path": "source/classes/MyUnaTranslatorTemplate.php",
+      "sha256": "88384a7d6e78626479b73a791a1869fe7d99b2e3b6fa86a238c56bb5feec57ac"
+    },
+    {
+      "bytes": 10294,
+      "path": "source/classes/MyUnaTranslatorText.php",
+      "sha256": "f6f6e1438c1e01c686ca4b5b4b7a3b08b0ee3887ad50989755968d9aa0767907"
+    },
+    {
+      "bytes": 3074,
+      "path": "source/classes/support/ReportClient.php",
+      "sha256": "e3a5b4626ef060fa20e190ee0bf980fc70eab2c40781906161f308e017834776"
+    },
+    {
+      "bytes": 5940,
+      "path": "source/classes/support/ReportContract.php",
+      "sha256": "0b276225bcfb069eba771ca9b844d1834196c462f4a497edf0a015be2aaa93cf"
+    },
+    {
+      "bytes": 1007,
+      "path": "source/install/config.php",
+      "sha256": "592a5074737a20d2ce62c9f415e7a7281ae124f33a44517017823d719cce14b3"
+    },
+    {
+      "bytes": 2010,
+      "path": "source/install/installer.php",
+      "sha256": "086bb91fed177162e4361170a3981317bb0a9e41bf42fefc7ed2e94a2c2c4277"
+    },
+    {
+      "bytes": 22509,
+      "path": "source/install/langs/en.xml",
+      "sha256": "ca99d2b4b6e3676d4fcd5753bd321340d0fff952068cd923168a1b8bdee816e8"
+    },
+    {
+      "bytes": 716,
+      "path": "source/install/sql/disable.sql",
+      "sha256": "6ccb654642e14dc9cdfa6e4c701cd96973354f662809c6554c515f2e6cbba50d"
+    },
+    {
+      "bytes": 2182,
+      "path": "source/install/sql/editing.sql",
+      "sha256": "5f48f85d0b2b043ae38d8f30d5c317dec8e462f21b71b6bb5a6a5ae11fbdb195"
+    },
+    {
+      "bytes": 1183,
+      "path": "source/install/sql/enable.sql",
+      "sha256": "c04a18e47d7c33b98127b506a0473dd8f81e7ecb111afa31cef45f2f80bfaae5"
+    },
+    {
+      "bytes": 5770,
+      "path": "source/install/sql/install.sql",
+      "sha256": "d32eef0459ea54507664706b742499507eae8ac36975953a5236da9c25492687"
+    },
+    {
+      "bytes": 486,
+      "path": "source/install/sql/reporting.sql",
+      "sha256": "cd6bb8c3018ebc5efdec02078aaa84448b26a072ebb4204c3cdad93cbc4b2229"
+    },
+    {
+      "bytes": 1669,
+      "path": "source/install/sql/uninstall.sql",
+      "sha256": "85dac8cef1e620c5566f8618757d07b63dfc64c00637fdae5c44797e156dfba3"
+    },
+    {
+      "bytes": 172,
+      "path": "source/request.php",
+      "sha256": "e1c071b940b88c24c4f7cab21e057c0ff76f0a527f2295f00859e55179375d2b"
+    },
+    {
+      "bytes": 1772,
+      "path": "source/template/css/reporting.css",
+      "sha256": "4eadd719d5bcb5e3d46262d3e14e33682345e164d560ad0080ab5f1291a66d39"
+    },
+    {
+      "bytes": 10966,
+      "path": "source/template/css/translator.css",
+      "sha256": "524e529846f44949441c4255c15efa1da227318479cfa36764cde7e92521bbaf"
+    },
+    {
+      "bytes": 624,
+      "path": "source/template/images/icons/std-icon.svg",
+      "sha256": "2dd4c24af09426be84fd6040f68aa29ca4c4ac28e88575abecd965a4d92a0ad5"
+    },
+    {
+      "bytes": 7454,
+      "path": "source/template/js/editing-form.js",
+      "sha256": "d2637be342ab2c849e087b9706d5231b0f687efd303a6024268e613ed671cf1e"
+    },
+    {
+      "bytes": 1252,
+      "path": "source/template/js/progress.js",
+      "sha256": "7cb15308a9de35663c638a32bcf4b0a5d4bf3c29efd2ec0deed9736f57e50615"
+    },
+    {
+      "bytes": 6316,
+      "path": "source/template/js/reporting.js",
+      "sha256": "1cddcb61a7a97692ed84e463cdba2be18782e62872b0238188943424923c9ad3"
+    },
+    {
+      "bytes": 36446,
+      "path": "source/template/js/translator.js",
+      "sha256": "66176c70764f43eb1edd3c6e27dc9d5f597ca4089866d46074f9a2c43f169898"
+    },
+    {
+      "bytes": 1400,
+      "path": "source/template/js/workflow.js",
+      "sha256": "f4057ab1f220ab77f999891dcae75bff00146aca54e8d3133f4ecbecbe0460b0"
+    }
+  ]
+}

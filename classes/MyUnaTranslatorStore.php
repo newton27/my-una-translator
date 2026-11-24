@@ -41,8 +41,8 @@ final class MyUnaTranslatorStore
         $plan = $input['plan'] ?? $old['plan'];
         $batch = filter_var($input['batch_size'] ?? $old['batch_size'], FILTER_VALIDATE_INT);
         $budget = filter_var($input['character_budget'] ?? $old['character_budget'], FILTER_VALIDATE_INT);
-        if (!in_array($plan, ['free','pro'], true) || $batch < 1 || $batch > 20 || $budget < 1 || $budget > 100000000)
-            throw new RuntimeException('Use a Free/Pro account, 1–20 keys per batch, and a character ceiling of 1–100,000,000.');
+        if (!in_array($plan, ['free','pro'], true) || $batch < 1 || $batch > 40 || $budget < 1 || $budget > 100000000)
+            throw new RuntimeException('Use a Free/Pro account, 1–40 keys per batch, and a character ceiling of 1–100,000,000.');
         $sealed = $old['api_key'];
         if (isset($input['api_key']) && trim((string)$input['api_key']) !== '') {
             $key = trim((string)$input['api_key']);
@@ -109,20 +109,21 @@ final class MyUnaTranslatorStore
     {
         $r = $this->row('SELECT * FROM my_una_translator_jobs WHERE id=?',(int)$id);
         if (!$r) throw new RuntimeException('Translation job was not found.');
-        $r['targets']=json_decode($r['targets'],true); $r['counts']=array_fill_keys(['pending','processing','staged','applying','applied','rolled_back','conflict','rollback_conflict','rolling_back'],0);
+        $r['targets']=json_decode($r['targets'],true); $r['counts']=array_fill_keys(['pending','processing','staged','needs_review','applying','applied','rolled_back','conflict','rollback_conflict','rolling_back'],0);
         foreach ($this->all('SELECT state,COUNT(*) AS n FROM my_una_translator_items WHERE job_id=? GROUP BY state',(int)$id) as $c) $r['counts'][$c['state']] = (int)$c['n'];
         return $r;
     }
     public function jobs() { return $this->all('SELECT id,created_at,status,targets,total,estimated,budget,spent,error FROM my_una_translator_jobs ORDER BY id DESC LIMIT 20'); }
-    public function deleteJob($id)
+    public function deleteJob($id,$onDelete=null)
     {
         $id=(int)$id;
         $job=$this->job($id);
-        if (!in_array($job['status'],['paused','applied','rolled_back','failed','empty_preview'],true)) throw new RuntimeException('Only paused, completed or failed jobs can be removed.');
+        if (!in_array($job['status'],['paused','needs_review','applied','rolled_back','failed','empty_preview'],true)) throw new RuntimeException('Only paused, completed or failed jobs can be removed.');
         $this->q('START TRANSACTION');
         try {
             $this->q('DELETE FROM my_una_translator_items WHERE job_id=?',$id);
             $this->q('DELETE FROM my_una_translator_jobs WHERE id=?',$id);
+            if ($onDelete) call_user_func($onDelete,$id);
             $this->q('COMMIT');
         } catch (Throwable $e) {
             $this->q('ROLLBACK');
@@ -142,15 +143,51 @@ final class MyUnaTranslatorStore
     public function changeItem($id, array $fields)
     {
         $sets=[]; $args=[];
-        foreach ($fields as $key=>$value) { if (!in_array($key,['state','result','error'],true)) throw new RuntimeException('Invalid item update.'); $sets[]='`'.$key.'`=?'; $args[]=$value; }
+        foreach ($fields as $key=>$value) { if (!in_array($key,['state','result','original_result','error','manually_edited'],true)) throw new RuntimeException('Invalid item update.'); $sets[]='`'.$key.'`=?'; $args[]=$value; }
         $args[]=(int)$id; $this->q('UPDATE my_una_translator_items SET '.implode(',',$sets).' WHERE id=?', ...$args);
+    }
+    public function item($jobId,$itemId)
+    {
+        return $this->row('SELECT * FROM my_una_translator_items WHERE job_id=? AND id=?',(int)$jobId,(int)$itemId);
+    }
+    public function previewItem($jobId,$itemId)
+    {
+        $rows=$this->all('SELECT id,key_name,language,source,before_value,result,state,error,manually_edited FROM my_una_translator_items WHERE job_id=? AND id=?',(int)$jobId,(int)$itemId);
+        return $rows ? self::previewFields($rows[0]) : [];
+    }
+    private static function previewFields(array $item)
+    {
+        $item['result_hash']=is_string($item['result']) ? hash('sha256',$item['result']) : null;
+        $item['manually_edited']=!empty($item['manually_edited']);
+        return $item;
+    }
+    /** Read-only search over the complete job; filtering occurs before pagination. */
+    public function previewFiltered($id,$offset=0,$search='',$filter='all')
+    {
+        $this->job($id);
+        if (!is_string($search) || mb_strlen($search,'UTF-8')>200) throw new RuntimeException('Search must be under 200 characters.');
+        if (!is_string($filter) || !in_array($filter,['all','staged','needs_review','conflict','applied','pending'],true))
+            throw new RuntimeException('Invalid preview filter.');
+        $where='job_id=?'; $args=[(int)$id];
+        if ($filter==='conflict') $where.=" AND state IN ('conflict','rollback_conflict','needs_review')";
+        elseif ($filter!=='all') { $where.=' AND state=?'; $args[]=$filter; }
+        $search=trim($search);
+        if ($search!=='') {
+            // Escape user wildcard characters. Only parameterized LIKE operands are used.
+            $escaped=str_replace(['!','%','_'],['!!','!%','!_'],$search);
+            $like='%'.$escaped.'%';
+            $where.=" AND (key_name LIKE ? ESCAPE '!' OR source LIKE ? ESCAPE '!' OR result LIKE ? ESCAPE '!')";
+            array_push($args,$like,$like,$like);
+        }
+        $count=(int)$this->one('SELECT COUNT(*) FROM my_una_translator_items WHERE '.$where,...$args);
+        $offset=max(0,(int)$offset);
+        $rows=$this->all('SELECT id,key_name,language,source,before_value,result,original_result,state,error,manually_edited FROM my_una_translator_items WHERE '.$where.' ORDER BY id LIMIT 50 OFFSET '.$offset,...$args);
+        return ['items'=>array_map([self::class,'previewFields'],$rows),'total'=>$count];
     }
     public function preview($id,$offset=0)
     {
-        $this->job($id);
-        return $this->all('SELECT id,key_name,language,source,before_value,result,state,error FROM my_una_translator_items WHERE job_id=? ORDER BY id LIMIT 50 OFFSET '.max(0,(int)$offset), (int)$id);
+        return $this->previewFiltered($id,$offset)['items'];
     }
-
     public function sourceNow($keyId) { return $this->row('SELECT k.`Key` AS key_name,e.String AS source FROM sys_localization_keys k JOIN sys_localization_strings e ON e.IDKey=k.ID AND e.IDLanguage=? WHERE k.ID=?',$this->englishId(),(int)$keyId); }
     public function valueNow($keyId,$languageId) { $r=$this->row('SELECT String AS value FROM sys_localization_strings WHERE IDKey=? AND IDLanguage=?',(int)$keyId,(int)$languageId); return $r ? $r['value'] : null; }
     public function ensureLanguage($code, array $preset, $jobId)
